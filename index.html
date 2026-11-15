@@ -269,7 +269,7 @@ function isNewProject(p) {
       if (filtered.length === 0) { empty.classList.remove('hidden'); return; }
       empty.classList.add('hidden');
       // pork 는 항상 마지막, 나머지는 생성일(created_at) 기준 내림차순 정렬
-      const isPork = (p) => /pork/i.test(p.id || '') || /pork/i.test(p.name || '');
+      const isPork = (p) => p.category === 'pork' || /pork/i.test(p.id || '') || /pork/i.test(p.name || '');
       const sorted = [...filtered].sort((a, b) => {
         const aPork = isPork(a), bPork = isPork(b);
         if (aPork && !bPork) return 1;
