@@ -9,16 +9,12 @@
       "label": "Android 앱"
     },
     {
-      "id": "python",
-      "label": "Python 데스크톱"
+      "id": "pc",
+      "label": "PC 유틸"
     },
     {
       "id": "web",
       "label": "웹 / PWA"
-    },
-    {
-      "id": "windows",
-      "label": "Windows 도구"
     },
     {
       "id": "fork",
@@ -86,7 +82,7 @@
     {
       "id": "karaoke-timing",
       "name": "karaoke-timing-generator",
-      "category": "python",
+      "category": "pc",
       "description": "로컬 Whisper로 노래방 타이밍(.lrc)을 생성하고, Audacity 스타일 멀티트랙 오디오 편집기를 제공합니다.",
       "tech": [
         "Python",
@@ -105,7 +101,7 @@
     {
       "id": "4cut-comic",
       "name": "4cut_LocalComic_Studio",
-      "category": "python",
+      "category": "pc",
       "description": "LM Studio + ComfyUI 기반 4컷 만화 제작 스튜디오. 채팅형 UI와 세션 저장/복원을 지원합니다.",
       "tech": [
         "Python",
@@ -124,7 +120,7 @@
     {
       "id": "novel-studio",
       "name": "Novel_Studio_Maker",
-      "category": "python",
+      "category": "pc",
       "description": "장편 한국어 웹소설의 기획부터 원고 집필, 화 종료 상태, 연속성 검증까지 관리하는 데스크톱 집필 도구.",
       "tech": [
         "Python",
@@ -142,7 +138,7 @@
     {
       "id": "split-text",
       "name": "split-text-file",
-      "category": "python",
+      "category": "pc",
       "description": "텍스트 파일 분할기. GUI와 CLI를 모두 지원하며, 사용자 지정 크기로 분할합니다.",
       "tech": [
         "Python",
@@ -159,7 +155,7 @@
     {
       "id": "txtviewer",
       "name": "txtviewer",
-      "category": "python",
+      "category": "pc",
       "description": "다크 모드 TXT 뷰어. 자동 인코딩 감지, 폰트/배경/색상 변경, 설정 저장을 지원합니다.",
       "tech": [
         "Python",
@@ -177,7 +173,7 @@
     {
       "id": "dark-rpg",
       "name": "dark-text-rpg",
-      "category": "python",
+      "category": "pc",
       "description": "Python과 Tkinter로 만든 텍스트 기반 방치형 RPG 게임. 캐릭터 육성, 던전 탐험, 장비 강화.",
       "tech": [
         "Python",
@@ -248,7 +244,7 @@
     {
       "id": "tray-translator",
       "name": "TrayTranslator",
-      "category": "windows",
+      "category": "pc",
       "description": "드래그한 텍스트를 핫키로 즉시 번역해 커서 옆 팝업에 보여주는 트레이 상주 프로그램. 10종 번역 엔진 지원.",
       "tech": [
         "C#",
@@ -300,7 +296,7 @@
     {
       "id": "geuryeojwo",
       "name": "Geuryeojwo",
-      "category": "python",
+      "category": "pc",
       "description": "ComfyUI 기반 로컬 AI 이미지 스튜디오. 워크플로를 골라 값을 넣고 결과를 저장합니다.",
       "tech": [
         "Python",
@@ -318,7 +314,7 @@
     {
       "id": "video-duplicate-remover",
       "name": "video-duplicate-remover",
-      "category": "windows",
+      "category": "pc",
       "description": "같은 영상의 여러 버전(다른 화질/용량)을 자동으로 찾아 최고 화질 1개만 남기고 나머지를 자동 이동하는 Windows 데스크톱 프로그램.",
       "tech": [
         "Python",
