@@ -115,7 +115,6 @@
         </div>
         <div class="mb-6 pl-2">
           <div class="text-blue-400 font-bold text-3xl md:text-5xl keep-all donian-name"><span id="donian-text"></span><span class="donian-cursor" aria-hidden="true">_</span></div>
-          <div class="text-zinc-500 text-xs md:text-sm font-mono mt-1">Since 2009.01.16</div>
           <div class="text-zinc-400 text-sm -ml-2">AI Coder · AI Music Creator</div>
         </div>
         <div class="mt-4 mb-2">
@@ -712,8 +711,8 @@ function isNewProject(p) {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const target = document.getElementById('donian-text');
       if (!target) return;
-      const words = ['Donian'];
-      const colors = ['#60a5fa'];
+      const words = ['Donian', 'Since 2009.01.16'];
+      const colors = ['#60a5fa', '#a1a1aa'];
       if (reduceMotion) {
         target.textContent = words[0];
         return;
