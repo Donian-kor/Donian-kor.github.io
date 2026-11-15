@@ -414,7 +414,7 @@ function isNewProject(p) {
               currentLine.insertBefore(document.createTextNode(out[oi]), cursor);
             }
             oi++;
-            setTimeout(streamChar, 18 + Math.random() * 18);
+            setTimeout(streamChar, 32 + Math.random() * 24);
           } else {
             // 다 찍은 실제 높이를 최소 높이로 고정 → 반복 초기화 시 레이아웃 점프 방지
             minHeight = Math.max(minHeight, body.offsetHeight);
@@ -422,7 +422,7 @@ function isNewProject(p) {
             setTimeout(() => {
               body.innerHTML = '';
               setTimeout(runStream, 600);
-            }, 2200);
+            }, 2600);
           }
         }
         streamChar();
@@ -537,7 +537,7 @@ function isNewProject(p) {
       function runCommand() {
         if (ci >= commands.length) {
           ci = 0;
-          setTimeout(() => { body.innerHTML = ''; setTimeout(runCommand, 600); }, 2200);
+          setTimeout(() => { body.innerHTML = ''; setTimeout(runCommand, 600); }, 3200);
           return;
         }
         const { cmd, out } = commands[ci];
@@ -553,7 +553,7 @@ function isNewProject(p) {
           if (cmd && i < cmd.length) {
             typingText.textContent += cmd[i++];
             body.scrollTop = body.scrollHeight;
-            setTimeout(typeChar, 40 + Math.random() * 30);
+            setTimeout(typeChar, 55 + Math.random() * 35);
           } else {
             setTimeout(() => {
               let currentLine = document.createElement('div');
@@ -576,11 +576,11 @@ function isNewProject(p) {
                   }
                   oi++;
                   body.scrollTop = body.scrollHeight;
-                  setTimeout(streamChar, 20 + Math.random() * 20);
+                  setTimeout(streamChar, 36 + Math.random() * 28);
                 } else {
                   ci++;
                   body.scrollTop = body.scrollHeight;
-                  setTimeout(runCommand, 2200);
+                  setTimeout(runCommand, 2800);
                 }
               }
               streamChar();
