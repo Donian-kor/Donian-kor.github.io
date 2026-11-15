@@ -52,14 +52,15 @@
       position: relative;
       display: inline-block;
       color: #a3e635;
-      font-size: 6.75rem;
+      font-size: clamp(2rem, 14vw, 9rem);
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.54rem;
-      padding: 1.5rem 1.2rem 0.6rem;
+      letter-spacing: clamp(0.1rem, 0.7vw, 0.66rem);
+      padding: 0.5rem 0.4rem 0.2rem;
       line-height: 1;
+      white-space: nowrap;
+      max-width: 100%;
     }
-    @media (min-width: 768px) { .donian-slash { font-size: 9rem; letter-spacing: 0.66rem; } }
     .donian-slash .slash {
       position: absolute;
       top: 50%;
@@ -254,7 +255,7 @@
           </div>
           <div class="text-zinc-400 text-sm font-mono">AI Coder · AI Music Creator</div>
         </div>
-        <div class="mb-6 pl-2">
+        <div class="mb-6 pl-2 max-w-full overflow-hidden">
           <div class="donian-slash donian-name" aria-label="Donian">
             <div class="slash"></div>
             <div class="sides">
