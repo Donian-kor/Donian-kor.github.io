@@ -49,7 +49,7 @@
     .cursor-blink { animation: blink 1s step-end infinite; }
     .term-cursor { display: inline-block; width: 0.6ch; height: 1.1em; margin-left: 0.15rem; background: #22c55e; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
     .career-extra { max-height: 0; transition: max-height 0.5s ease; }
-    .career-log:hover .career-extra, .career-log.expanded .career-extra { max-height: 420px; }
+    .career-log:hover .career-extra, .career-log.hovered .career-extra, .career-log.expanded .career-extra { max-height: 420px; }
     .career-log.expanded .career-hint { opacity: 0; }
     .prompt::before { content: '$ '; color: #22c55e; font-weight: 700; }
     .section-cmd { color: #22c55e; }
@@ -133,7 +133,7 @@
           <span class="text-zinc-200 text-lg">cat career.log</span>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/70 p-4 font-mono text-xs leading-relaxed">
-          <div id="career-log" class="group space-y-1 cursor-pointer" tabindex="0" role="button" aria-expanded="false">
+          <div id="career-log" class="career-log group space-y-1 cursor-pointer" tabindex="0" role="button" aria-expanded="false">
             <div><span class="text-blue-400">2026.11.12</span>  <span class="text-zinc-200">MyAITutor 개발 중</span>  <span class="text-zinc-500"># AI 튜터 프로젝트</span></div>
             <div class="career-extra overflow-hidden">
               <div class="space-y-1 pt-1">
@@ -497,6 +497,8 @@ function isNewProject(p) {
         log.classList.toggle('expanded');
         log.setAttribute('aria-expanded', log.classList.contains('expanded') ? 'true' : 'false');
       }
+      log.addEventListener('mouseenter', () => log.classList.add('hovered'));
+      log.addEventListener('mouseleave', () => log.classList.remove('hovered'));
       log.addEventListener('click', toggle);
       log.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
