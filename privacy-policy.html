@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Donian 개인정보처리방침 (Privacy Policy)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #1d2330;
+    --muted: #5b6475;
+    --line: #dfe3ea;
+    --accent: #1f5fa8;
+    --tint: #eef4fb;
+    --paper: #ffffff;
+    --note: #f6f7f9;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.85;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    -webkit-text-size-adjust: 100%;
+  }
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+  }
+
+  .doc-title {
+    margin: 0 0 20px;
+    font-size: 1.9rem;
+    line-height: 1.35;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .meta {
+    margin: 0 0 28px;
+    padding: 16px 20px;
+    background: var(--note);
+    border-left: 4px solid var(--accent);
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+  .meta dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
+  .meta dt { color: var(--muted); }
+  .meta dd { margin: 0; font-weight: 500; }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 32px;
+    padding: 0;
+    list-style: none;
+  }
+  .tabs button {
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 8px 20px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .tabs button:focus-visible { outline: 3px solid #8fb7e6; outline-offset: 2px; }
+  .tabs { display: none; }
+  .js .tabs { display: flex; }
+
+  .toc {
+    margin: 0 0 36px;
+    padding: 18px 22px;
+    background: var(--tint);
+    border-radius: 6px;
+  }
+  .toc p { margin: 0 0 8px; font-weight: 700; font-size: 0.95rem; }
+  .toc ol { margin: 0; padding-left: 1.4em; columns: 2; column-gap: 32px; font-size: 0.95rem; }
+  .toc li { margin: 2px 0; break-inside: avoid; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  .lead { margin: 0 0 36px; }
+  section.item { margin: 0 0 40px; scroll-margin-top: 16px; }
+  h2 {
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--ink);
+    font-size: 1.3rem;
+    line-height: 1.45;
+    font-weight: 700;
+  }
+  h2 .no { color: var(--accent); margin-right: 6px; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 1.3em; }
+  li { margin: 0 0 10px; padding-left: 4px; }
+  li::marker { color: var(--accent); }
+  strong { font-weight: 700; }
+  a { color: var(--accent); }
+  a:hover { text-decoration: underline; }
+
+  .scope {
+    display: inline-block;
+    margin-left: 2px;
+    padding: 0 8px;
+    border-radius: 4px;
+    background: var(--note);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.7;
+    white-space: normal;
+  }
+  .steps { list-style: none; padding: 0; counter-reset: step; }
+  .steps li {
+    position: relative;
+    margin: 0 0 12px;
+    padding: 14px 16px 14px 56px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .steps li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    line-height: 28px;
+    text-align: center;
+  }
+  .note {
+    margin: 0 0 14px;
+    padding: 12px 16px;
+    background: var(--note);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  .contact {
+    padding: 18px 22px;
+    border: 2px solid var(--accent);
+    border-radius: 6px;
+  }
+  .contact dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; }
+  .contact dt { color: var(--muted); }
+  .contact dd { margin: 0; font-weight: 500; }
+
+  .panel + .panel { margin-top: 56px; padding-top: 48px; border-top: 1px solid var(--line); }
+  .js .panel[hidden] { display: none; }
+  .js .panel + .panel { margin-top: 0; padding-top: 0; border-top: 0; }
+
+  @media (max-width: 560px) {
+    body { font-size: 15.5px; }
+    .page { padding: 28px 18px 48px; }
+    .doc-title { font-size: 1.5rem; }
+    .toc ol { columns: 1; }
+    .meta dl, .contact dl { grid-template-columns: 1fr; gap: 0; }
+    .meta dd, .contact dd { margin-bottom: 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1 class="doc-title">Donian 애플리케이션 개인정보처리방침<br>Privacy Policy</h1>
+
+  <div class="meta">
+    <dl>
+      <dt>시행일자 (Effective Date)</dt><dd>2026년 11월 14일</dd>
+      <dt>개발자 (Developer)</dt><dd>Donian</dd>
+      <dt>적용 대상</dt><dd>Donian 배포 전체 Google Play 앱</dd>
+    </dl>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="언어 선택 / Language">
+    <button type="button" role="tab" id="tab-ko" aria-controls="ko" aria-selected="true">한국어</button>
+    <button type="button" role="tab" id="tab-en" aria-controls="en" aria-selected="false">English</button>
+  </div>
+
+  <!-- ============ 한국어 ============ -->
+  <div class="panel" id="ko" role="tabpanel" aria-labelledby="tab-ko" lang="ko">
+
+    <nav class="toc" aria-label="목차">
+      <p>목차</p>
+      <ol>
+        <li><a href="#ko-1">처리하는 개인정보 항목 및 수집 방법</a></li>
+        <li><a href="#ko-2">개인정보의 이용 목적</a></li>
+        <li><a href="#ko-3">제3자 서비스(SDK) 및 외부 API 처리 안내</a></li>
+        <li><a href="#ko-4">보유 기간 및 계정·데이터 삭제 방법</a></li>
+        <li><a href="#ko-5">이용자의 권리 및 아동의 개인정보 보호</a></li>
+        <li><a href="#ko-6">개인정보의 안전성 확보조치</a></li>
+        <li><a href="#ko-7">개인정보 자동 수집 장치의 설치·운영 및 거부</a></li>
+        <li><a href="#ko-8">정보주체의 권익침해에 대한 구제방법</a></li>
+        <li><a href="#ko-9">개인정보 처리방침의 변경</a></li>
+        <li><a href="#ko-10">개인정보 보호책임자 및 문의처</a></li>
+      </ol>
+    </nav>
+
+    <p class="lead">Donian(이하 “개발자”)은 개발자가 Google Play 스토어를 통해 배포하는 모든 모바일 애플리케이션(이하 “앱”) 이용자의 개인정보를 중요시하며, 「개인정보 보호법」 및 Google Play 개발자 정책을 준수합니다. 각 앱이 실제로 제공하는 기능에 따라 아래 항목 중 해당되는 정보만을 최소한으로 처리합니다.</p>
+
+    <section class="item" id="ko-1">
+      <h2><span class="no">1.</span>처리하는 개인정보 항목 및 수집 방법</h2>
+      <p>개발자는 별도의 회원가입 없이 이용할 수 있는 기능을 우선 제공하며, 앱의 구체적 기능에 따라 아래와 같은 정보를 처리할 수 있습니다.</p>
+      <ul>
+        <li><strong>오프라인·온디바이스 데이터 (로컬 처리):</strong> 기기 내부에서만 동작하는 AI 추론, 학습 기록, 설정 데이터, 임시 촬영 이미지는 개발자 서버로 전송되지 않고 이용자의 기기 내에만 저장됩니다.</li>
+        <li><strong>계정 및 인증 정보</strong> <span class="scope">회원가입·로그인 기능 제공 앱에 한함</span><br>이메일 주소, 닉네임, 소셜 로그인 고유 식별자(UID) 등</li>
+        <li><strong>이용자 입력 콘텐츠</strong> <span class="scope">해당 기능 제공 앱에 한함</span><br>이용자가 AI 질의, 텍스트 변환, 이미지 인식, 커뮤니티 게시물 작성을 위해 직접 입력하거나 카메라·갤러리로 선택한 텍스트, 이미지, 음성 데이터</li>
+        <li><strong>결제 및 구독 기록</strong> <span class="scope">유료 인앱 결제 제공 앱에 한함</span><br>Google Play 스토어를 통한 결제 승인 여부, 상품 식별자, 구독 상태 정보 (신용카드 번호 등 민감 금융정보는 개발자가 수집·저장하지 않음)</li>
+        <li><strong>자동 수집 진단 및 광고 정보</strong> <span class="scope">해당 SDK 탑재 앱에 한함</span><br>기기 모델명, OS 버전, 앱 버전, 비정상 종료(Crash) 로그, 성능 데이터, 광고 식별자(AD_ID)</li>
+      </ul>
+    </section>
+
+    <section class="item" id="ko-2">
+      <h2><span class="no">2.</span>개인정보의 이용 목적</h2>
+      <ul>
+        <li>앱의 핵심 기능 제공, 사용자 요청에 대한 콘텐츠·AI 응답 생성 및 결과 반환</li>
+        <li>이용자 계정 식별, 로그인 유지 및 서비스 이용 기록 관리 <span class="scope">계정 기능을 제공하는 앱에 한함</span></li>
+        <li>인앱 결제 확인, 유료 콘텐츠 및 구독 권한 부여 <span class="scope">결제 기능을 제공하는 앱에 한함</span></li>
+        <li>앱 오류(Crash) 분석, 품질 개선, 보안 유지 및 부정 이용 방지</li>
+        <li>맞춤형 또는 비맞춤형 광고 게재 <span class="scope">광고 포함 앱에 한함</span></li>
+        <li>이용자 문의 응대 및 기술 지원</li>
+      </ul>
+    </section>
+
+    <section class="item" id="ko-3">
+      <h2><span class="no">3.</span>제3자 서비스(SDK) 및 외부 API 처리 안내</h2>
+      <p>앱은 안정적인 서비스 제공을 위해 아래와 같은 신뢰할 수 있는 제3자 서비스(SDK 및 외부 API)를 연동할 수 있으며, 해당 기능 사용 시 각 제공업체의 개인정보처리방침이 함께 적용됩니다.</p>
+      <ul>
+        <li><strong>Google Play Services / Firebase</strong> (Authentication, Analytics, Crashlytics 등)<br>앱 인증, 사용 통계 및 오류 추적 (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a>)</li>
+        <li><strong>Google Play Billing</strong><br>인앱 상품 및 정기 구독 결제 처리 (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a>)</li>
+        <li><strong>Google AdMob</strong><br>앱 내 광고 제공 및 광고 성과 측정 (Google AdMob 정책)</li>
+        <li><strong>외부 AI API 제공업체</strong> (Google Gemini API, Cohere 등 온라인 AI 기능 사용 시)<br>이용자가 입력한 프롬프트(텍스트·이미지 등)에 대한 응답 생성 처리. 전송된 데이터는 응답 생성 목적 외에 개발자가 별도 저장하거나 제3자에게 판매하지 않습니다.</li>
+        <li><strong>위탁 / 국외 이전 / 가명정보 / 민감정보 / 자동화된 결정</strong> <span class="scope">해당하는 앱에 한함</span><br>앱은 개인정보 처리업무를 외부에 위탁하지 않으며, 개인정보를 국외로 이전하지 않고, 가명정보·민감정보를 별도로 처리하지 않으며, 자동화된 결정을 수행하지 않습니다. 해당 사항이 발생할 경우 본 방침을 통해 구체적인 내용을 공개합니다.</li>
+      </ul>
+    </section>
+
+    <section class="item" id="ko-4">
+      <h2><span class="no">4.</span>개인정보의 보유 기간 및 계정·데이터 삭제 방법</h2>
+      <p><strong>보유 및 파기 원칙:</strong> 개인정보는 수집 및 이용 목적이 달성되거나 이용자의 삭제 요청이 있을 경우 지체 없이 복구 불가능한 방법으로 파기합니다. 기기 내 로컬 데이터는 이용자가 앱 내에서 직접 삭제하거나 앱을 삭제하면 즉시 제거됩니다.</p>
+      <p><strong>계정 및 데이터 영구 삭제 절차</strong> <span class="scope">계정 기능 제공 앱에 한함</span></p>
+      <ol class="steps">
+        <li><strong>인앱 삭제:</strong> 앱 내 <strong>[설정 &gt; 계정 삭제(회원 탈퇴)]</strong> 메뉴를 통해 언제든지 직접 계정을 영구 삭제할 수 있습니다.</li>
+        <li><strong>웹/이메일을 통한 삭제 요청:</strong> 앱을 삭제했거나 직접 접근이 어려운 경우, 아래 개발자 이메일로 삭제를 요청하시면 본인 확인 후 지체 없이 계정 및 관련 데이터를 영구 삭제합니다.</li>
+      </ol>
+      <p class="note">단, 전자상거래 등 관련 법령에 따라 일정 기간 보관이 의무화된 결제·거래 기록 등은 해당 법령이 정한 기간 동안 안전하게 보관 후 파기합니다.</p>
+    </section>
+
+    <section class="item" id="ko-5">
+      <h2><span class="no">5.</span>이용자의 권리 및 아동의 개인정보 보호</h2>
+      <ul>
+        <li>이용자는 언제든지 자신의 개인정보 열람, 정정, 삭제, 처리 정지 및 동의 철회를 요청할 수 있습니다.</li>
+        <li><strong>권리 행사 방법:</strong> 위 개인정보 보호책임자 이메일로 요청하시면 법정대리인을 통한 행사도 가능하며, 지체 없이 조치하겠습니다.</li>
+        <li>개발자의 앱이 아동(만 14세 미만 또는 해당 국가 법정 연령 미만)을 대상으로 제공되는 경우, Google Play 가족 정책(Families Policy)을 엄격히 준수하며 아동의 광고 식별자(AAID/AD_ID)를 수집·전송하지 않고 불필요한 개인정보를 요구하지 않습니다.</li>
+      </ul>
+    </section>
+
+    <section class="item" id="ko-6">
+      <h2><span class="no">6.</span>개인정보의 안전성 확보조치</h2>
+      <p>개발자는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.</p>
+      <ul>
+        <li>개인정보에 대한 접근 권한의 최소화 및 비밀번호 등 인증수단 관리</li>
+        <li>개인정보 전송 시 암호화(HTTPS) 적용 및 저장 데이터의 보호</li>
+        <li>접근 기록의 보관 및 점검, 보안 업데이트 적용</li>
+        <li>개인정보 처리시스템에 대한 물리적·관리적 보호조치</li>
+      </ul>
+    </section>
+
+    <section class="item" id="ko-7">
+      <h2><span class="no">7.</span>개인정보 자동 수집 장치의 설치·운영 및 그 거부에 관한 사항 <span class="scope">해당하는 앱에 한함</span></h2>
+      <p>앱은 서비스 제공을 위해 쿠키(Cookie), 웹 비콘, 광고 식별자(AD_ID/AAID) 등 개인정보를 자동으로 수집하는 장치를 사용할 수 있습니다. <span class="scope">해당하는 앱에 한함</span></p>
+      <ul>
+        <li><strong>수집 장치:</strong> 앱 내 웹뷰(WebView) 쿠키, SDK 기반 광고 식별자, 사용 통계 수집 도구 등</li>
+        <li><strong>수집 목적:</strong> 서비스 품질 개선, 맞춤형 광고 게재, 사용자 환경 설정 유지</li>
+        <li><strong>거부 방법:</strong> 기기 설정에서 광고 식별자 사용을 제한하거나, 앱 내 설정에서 분석·광고 수집을 거부할 수 있습니다. 거부 시 일부 기능이 제한될 수 있습니다.</li>
+      </ul>
+      <p class="note">본 항목은 자동 수집 장치를 사용하는 앱에만 적용되며, 사용하지 않는 앱은 해당되지 않습니다.</p>
+    </section>
+
+    <section class="item" id="ko-8">
+      <h2><span class="no">8.</span>정보주체의 권익침해에 대한 구제방법</h2>
+      <p>개인정보 침해로 인한 구제를 받기 위하여 아래 기관에 분쟁 해결이나 상담을 신청할 수 있습니다.</p>
+      <ul>
+        <li>개인정보 침해신고센터 (한국인터넷진흥원): (국번없이) 118, <a href="https://privacy.kisa.or.kr" target="_blank" rel="noopener">privacy.kisa.or.kr</a></li>
+        <li>개인정보 분쟁조정위원회: (국번없이) 1833-6972, <a href="https://www.kopico.go.kr" target="_blank" rel="noopener">www.kopico.go.kr</a></li>
+        <li>대검찰청 사이버수사과: (국번없이) 1301, <a href="https://www.spo.go.kr" target="_blank" rel="noopener">www.spo.go.kr</a></li>
+        <li>경찰청 사이버수사국: (국번없이) 182, <a href="https://ecrm.cyber.go.kr" target="_blank" rel="noopener">ecrm.cyber.go.kr</a></li>
+      </ul>
+    </section>
+
+    <section class="item" id="ko-9">
+      <h2><span class="no">9.</span>개인정보 처리방침의 변경</h2>
+      <p>본 개인정보 처리방침은 법령·정책 또는 서비스 변경에 따라 수정될 수 있으며, 변경 시 시행일자 및 변경 내용을 본 페이지를 통해 고지합니다. 중요한 변경이 있는 경우 앱 내 공지 또는 팝업을 통해 안내합니다.</p>
+    </section>
+
+    <section class="item" id="ko-10">
+      <h2><span class="no">10.</span>개인정보 보호책임자 및 문의처</h2>
+      <p>개인정보 보호 관련 문의, 불만 처리, 피해 구제 및 계정·데이터 삭제 요청은 아래 연락처로 접수해 주시기 바랍니다.</p>
+      <div class="contact">
+        <dl>
+          <dt>개발자 / 개인정보 보호책임자</dt><dd>Donian</dd>
+          <dt>이메일 (Contact Email)</dt><dd><a href="mailto:doniankhj@gmail.com">doniankhj@gmail.com</a></dd>
+        </dl>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ English ============ -->
+  <div class="panel" id="en" role="tabpanel" aria-labelledby="tab-en" lang="en">
+
+    <nav class="toc" aria-label="Table of contents">
+      <p>Contents</p>
+      <ol>
+        <li><a href="#en-1">Information We Collect and Process</a></li>
+        <li><a href="#en-2">How We Use Information</a></li>
+        <li><a href="#en-3">Third-Party Services &amp; External APIs</a></li>
+        <li><a href="#en-4">Data Retention &amp; Account Deletion</a></li>
+        <li><a href="#en-5">User Rights &amp; Children’s Privacy</a></li>
+        <li><a href="#en-6">Security Measures</a></li>
+        <li><a href="#en-7">Automatic Collection (Cookies)</a></li>
+        <li><a href="#en-8">Remedies for Rights Infringement</a></li>
+        <li><a href="#en-9">Changes to This Policy</a></li>
+        <li><a href="#en-10">Contact Information</a></li>
+      </ol>
+    </nav>
+
+    <p class="lead">Donian (“Developer”) values your privacy and complies with applicable data protection laws and Google Play Developer Policies across all mobile applications (“Apps”) published by Donian on Google Play. Depending on the features enabled in each specific App, only the minimum necessary information described below is processed.</p>
+
+    <section class="item" id="en-1">
+      <h2><span class="no">1.</span>Information We Collect and Process</h2>
+      <ul>
+        <li><strong>Offline / On-Device Data (Local Processing):</strong> Data processed by on-device AI models, local study logs, app preferences, and temporary camera captures remain strictly on your device and are not transmitted to Developer servers.</li>
+        <li><strong>Account &amp; Authentication Information</strong> <span class="scope">for Apps with account creation</span><br>Email address, display name, or authentication user ID (UID).</li>
+        <li><strong>User-Provided Content</strong> <span class="scope">for Apps with interactive/AI/UGC features</span><br>Text, images, or voice inputs voluntarily submitted by users for AI queries, OCR/translation, or community posts.</li>
+        <li><strong>Purchase &amp; Subscription Records</strong> <span class="scope">for Apps with in-app purchases</span><br>Purchase verification tokens, product IDs, and subscription status provided via Google Play Billing. Sensitive payment details such as credit card numbers are never collected or stored by the Developer.</li>
+        <li><strong>Diagnostic &amp; Advertising Data</strong> <span class="scope">for Apps integrating analytics/ad SDKs</span><br>Device model, OS version, app version, crash logs, performance diagnostics, and Advertising ID (AD_ID).</li>
+      </ul>
+    </section>
+
+    <section class="item" id="en-2">
+      <h2><span class="no">2.</span>How We Use Information</h2>
+      <ul>
+        <li>To provide core App functionality, process user inputs, and generate AI or functional responses.</li>
+        <li>To authenticate users, maintain sessions, and manage user accounts <span class="scope">where applicable</span></li>
+        <li>To verify in-app purchases and grant access to digital content or subscriptions <span class="scope">where applicable</span></li>
+        <li>To diagnose crashes, monitor stability, prevent abuse, and improve App quality.</li>
+        <li>To display personalized or non-personalized advertisements <span class="scope">in ad-supported Apps only</span></li>
+        <li>To respond to user inquiries, support requests, and data deletion requests.</li>
+      </ul>
+    </section>
+
+    <section class="item" id="en-3">
+      <h2><span class="no">3.</span>Third-Party Services &amp; External APIs</h2>
+      <p>Our Apps may integrate trusted third-party SDKs and APIs to deliver specific features. When used, data handling is also governed by each provider’s privacy policy:</p>
+      <ul>
+        <li><strong>Google Play Services / Firebase</strong> (Auth, Analytics, Crashlytics)<br>Authentication, usage analytics, and crash diagnostics (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>)</li>
+        <li><strong>Google Play Billing</strong><br>Processing in-app purchases and subscriptions (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>)</li>
+        <li><strong>Google AdMob</strong><br>Serving ads and measuring ad performance (Google AdMob Policy)</li>
+        <li><strong>External AI API Providers</strong> (e.g., Google Gemini API, Cohere, when online AI features are used)<br>Used solely to process user prompts (text/images) and return generated responses. Submitted data is not stored separately or sold by the Developer.</li>
+        <li><strong>Entrustment / Cross-border Transfer / Pseudonymization / Sensitive Data / Automated Decisions</strong> <span class="scope">for applicable Apps only</span><br>The Apps do not entrust personal data processing to third parties, do not transfer personal data overseas, do not separately process pseudonymized or sensitive data, and do not make automated decisions. If any of these apply in the future, details will be disclosed in this Policy.</li>
+      </ul>
+    </section>
+
+    <section class="item" id="en-4">
+      <h2><span class="no">4.</span>Data Retention &amp; Account Deletion</h2>
+      <p><strong>Retention &amp; Disposal:</strong> Personal data is retained only as long as necessary to fulfill the purposes outlined above and is promptly deleted upon request or purpose fulfillment. Local on-device data is removed when cleared in-app or when the App is uninstalled.</p>
+      <p><strong>How to Delete Your Account &amp; Data</strong> <span class="scope">for Apps with account features</span></p>
+      <ol class="steps">
+        <li><strong>In-App Deletion:</strong> Navigate to <strong>[Settings &gt; Delete Account]</strong> inside the App to permanently delete your account and associated data at any time.</li>
+        <li><strong>Web / Email Deletion Request:</strong> If you have uninstalled the App or cannot access your account, email us at the address below to request permanent deletion of your account and all associated data.</li>
+      </ol>
+      <p class="note">Where retention is required by applicable laws (such as e-commerce or tax regulations), relevant transaction records are securely stored for the legally mandated period before permanent disposal.</p>
+    </section>
+
+    <section class="item" id="en-5">
+      <h2><span class="no">5.</span>User Rights &amp; Children’s Privacy</h2>
+      <ul>
+        <li>Users may request access to, correction of, deletion of, or restriction of processing for their personal data at any time.</li>
+        <li><strong>How to exercise rights:</strong> Requests may be made by email to the Data Protection Contact above (including by a legal guardian), and will be handled without delay.</li>
+        <li>For Apps directed toward children, Donian strictly complies with the Google Play Families Policy, does not collect or transmit the Android Advertising ID (AAID/AD_ID), and does not require unnecessary personal information.</li>
+      </ul>
+    </section>
+
+    <section class="item" id="en-6">
+      <h2><span class="no">6.</span>Security Measures</h2>
+      <p>The Developer takes the following measures to ensure the security of personal data:</p>
+      <ul>
+        <li>Minimization of access rights and management of authentication credentials</li>
+        <li>Encryption of data in transit (HTTPS) and protection of stored data</li>
+        <li>Retention and review of access logs, security updates</li>
+        <li>Physical and managerial protection of personal data processing systems</li>
+      </ul>
+    </section>
+
+    <section class="item" id="en-7">
+      <h2><span class="no">7.</span>Automatic Collection Devices (Cookies) <span class="scope">for applicable Apps only</span></h2>
+      <p>The Apps may use cookies, web beacons, and advertising identifiers (AD_ID/AAID) to automatically collect personal data for service delivery. <span class="scope">for applicable Apps only</span></p>
+      <ul>
+        <li><strong>Devices used:</strong> In-app WebView cookies, SDK-based advertising identifiers, usage analytics tools</li>
+        <li><strong>Purpose:</strong> Service quality improvement, personalized advertising, user preference retention</li>
+        <li><strong>How to refuse:</strong> You may limit advertising identifier usage in device settings or disable analytics/ad collection in app settings. Some features may be limited if refused.</li>
+      </ul>
+      <p class="note">This section applies only to Apps that use automatic collection devices; Apps that do not use them are not affected.</p>
+    </section>
+
+    <section class="item" id="en-8">
+      <h2><span class="no">8.</span>Remedies for Rights Infringement</h2>
+      <p>If your personal data is infringed, you may request dispute resolution or consultation from the following organizations:</p>
+      <ul>
+        <li>Personal Information Infringement Report Center (KISA): 118, <a href="https://privacy.kisa.or.kr" target="_blank" rel="noopener">privacy.kisa.or.kr</a></li>
+        <li>Personal Information Dispute Mediation Committee: 1833-6972, <a href="https://www.kopico.go.kr" target="_blank" rel="noopener">www.kopico.go.kr</a></li>
+        <li>Supreme Prosecutors’ Office Cyber Crime Investigation: 1301, <a href="https://www.spo.go.kr" target="_blank" rel="noopener">www.spo.go.kr</a></li>
+        <li>National Police Agency Cyber Bureau: 182, <a href="https://ecrm.cyber.go.kr" target="_blank" rel="noopener">ecrm.cyber.go.kr</a></li>
+      </ul>
+    </section>
+
+    <section class="item" id="en-9">
+      <h2><span class="no">9.</span>Changes to This Policy</h2>
+      <p>This Privacy Policy may be revised due to changes in laws, policies, or services. Any changes will be announced on this page with the effective date and details. Significant changes will also be notified via in-app notices or pop-ups.</p>
+    </section>
+
+    <section class="item" id="en-10">
+      <h2><span class="no">10.</span>Contact Information</h2>
+      <div class="contact">
+        <dl>
+          <dt>Developer / Data Protection Contact</dt><dd>Donian</dd>
+          <dt>Contact Email</dt><dd><a href="mailto:doniankhj@gmail.com">doniankhj@gmail.com</a></dd>
+        </dl>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    root.classList.add('js');
+    var tabs = { ko: document.getElementById('tab-ko'), en: document.getElementById('tab-en') };
+    var panels = { ko: document.getElementById('ko'), en: document.getElementById('en') };
+
+    function show(lang) {
+      for (var k in panels) {
+        var on = (k === lang);
+        panels[k].hidden = !on;
+        tabs[k].setAttribute('aria-selected', on ? 'true' : 'false');
+      }
+    }
+    tabs.ko.addEventListener('click', function () { show('ko'); });
+    tabs.en.addEventListener('click', function () { show('en'); });
+
+    var start = (location.hash.indexOf('#en') === 0) ? 'en' : 'ko';
+    show(start);
+  })();
+</script>
+</body>
+</html>
