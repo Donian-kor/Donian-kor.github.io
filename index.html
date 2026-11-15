@@ -245,6 +245,20 @@ function isNewProject(p) {
 }
     let currentCategory = 'all';
 
+    const platformIcon = {
+      'android': 'solar:smartphone-bold',
+      'windows': 'solar:monitor-bold',
+      'web': 'solar:global-bold',
+      'python': 'solar:terminal-bold',
+      'fork': 'solar:fork-bold',
+    };
+    const platformLabel = {
+      'android': 'Android 앱',
+      'windows': 'Windows 프로그램',
+      'web': '웹 브라우저',
+      'python': 'PC/Python 스크립트',
+      'fork': 'Fork 프로젝트',
+    };
     const langColor = {
       'Kotlin': 'text-purple-300',
       'Python': 'text-yellow-300',
@@ -352,6 +366,7 @@ function isNewProject(p) {
           <div class="p-3">
             <div class="flex items-center justify-between gap-2 mb-1">
               <div class="flex items-center gap-2 min-w-0 flex-1">
+                <iconify-icon icon="${platformIcon[p.category] || 'solar:code-square-bold'}" class="text-base text-zinc-400" title="${platformLabel[p.category] || '프로그램'}"></iconify-icon>
                 <span class="lang-badge ${badgeClass}" title="${langDesc[p.language] || p.language}">${p.language}</span>
                 <span class="text-zinc-500 text-[0.65rem] truncate sm:hidden"># ${p.description.slice(0, 18)}${p.description.length > 18 ? '…' : ''}</span>
               </div>
