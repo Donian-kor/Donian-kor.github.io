@@ -159,15 +159,15 @@
           <span class="text-green-400 font-bold text-lg">$</span>
           <span class="text-zinc-200 text-lg">ls projects/</span>
           <div id="category-tabs" class="hidden sm:flex flex-wrap gap-1.5 ml-auto" role="tablist"></div>
-          <select id="category-select" class="sm:hidden ml-auto px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-300 text-xs font-mono min-h-[2.75rem]" aria-label="프로젝트 카테고리 선택"></select>
         </div>
-        <div id="platform-legend" class="flex flex-wrap gap-3 text-[0.65rem] text-zinc-400 mb-3">
-          <span class="inline-flex items-center gap-1"><iconify-icon icon="logos:android-icon" class="text-base text-zinc-400"></iconify-icon> Android 앱</span>
-          <span class="inline-flex items-center gap-1"><iconify-icon icon="material-symbols:language" class="text-base text-sky-400"></iconify-icon> 웹 브라우저</span>
-          <span class="inline-flex items-center gap-1"><iconify-icon icon="logos:microsoft-windows" class="text-base text-zinc-400"></iconify-icon></span>
-          <span class="inline-flex items-center gap-1"><iconify-icon icon="solar:git-branch-bold" class="text-base text-amber-400"></iconify-icon> Fork 프로젝트</span>
+                <div id="platform-legend" class="flex flex-wrap gap-2 text-[0.65rem] text-zinc-400 mb-3">
+          <button type="button" data-cat="all" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="solar:widget-bold" class="text-base text-zinc-300"></iconify-icon> 전체</button>
+          <button type="button" data-cat="android" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="logos:android-icon" class="text-base"></iconify-icon> Android</button>
+          <button type="button" data-cat="pc" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="logos:microsoft-windows" class="text-base"></iconify-icon> PC 유틸</button>
+          <button type="button" data-cat="web" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="material-symbols:language" class="text-base text-sky-400"></iconify-icon> Web</button>
+          <button type="button" data-cat="fork" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="solar:git-branch-bold" class="text-base text-amber-400"></iconify-icon> Fork</button>
         </div>
-        <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-live="polite"></div>
+<div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-live="polite"></div>
         <div id="empty-state" class="hidden mt-4 text-center text-zinc-400">해당 카테고리에 프로젝트가 없습니다.</div>
       </div>
     </section>
@@ -331,6 +331,17 @@ function isNewProject(p) {
       if (select && !select._bound) {
         select._bound = true;
         select.addEventListener('change', () => { currentCategory = select.value; renderTabs(categories); renderGrid(); });
+      }
+      // 범례 active 상태 동기화
+      const legend = document.getElementById('platform-legend');
+      if (legend) {
+        legend.querySelectorAll('.legend-item').forEach((btn) => {
+          if (btn.dataset.cat === currentCategory) {
+            btn.classList.add('ring-2', 'ring-green-500/60', 'bg-green-500/10');
+          } else {
+            btn.classList.remove('ring-2', 'ring-green-500/60', 'bg-green-500/10');
+          }
+        });
       }
     }
 
@@ -542,6 +553,17 @@ function isNewProject(p) {
         allProjects = data.projects;
         renderTabs(data.categories);
         renderGrid();
+        // 범례 클릭으로 분류
+        const legend = document.getElementById('platform-legend');
+        if (legend) {
+          legend.querySelectorAll('.legend-item').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              currentCategory = btn.dataset.cat;
+              renderTabs(data.categories);
+              renderGrid();
+            });
+          });
+        }
       })
       .catch(err => {
         console.error('projects.json 로드 실패:', err);
