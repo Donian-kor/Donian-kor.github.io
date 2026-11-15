@@ -133,7 +133,7 @@
           <span class="text-zinc-200 text-lg">cat career.log</span>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/70 p-4 font-mono text-xs leading-relaxed">
-          <div id="career-log" class="career-log group space-y-1 cursor-pointer" tabindex="0" role="button" aria-expanded="false">
+          <div id="career-log" class="career-log group space-y-1 cursor-pointer" tabindex="0" role="button" aria-expanded="false" onclick="this.classList.toggle('expanded'); this.setAttribute('aria-expanded', this.classList.contains('expanded'));" style="touch-action: manipulation;">
             <div><span class="text-blue-400">2026.11.12</span>  <span class="text-zinc-200">MyAITutor 개발 중</span>  <span class="text-zinc-500"># AI 튜터 프로젝트</span></div>
             <div class="career-extra overflow-hidden">
               <div class="space-y-1 pt-1">
@@ -499,7 +499,7 @@ function isNewProject(p) {
       }
       log.addEventListener('mouseenter', () => log.classList.add('hovered'));
       log.addEventListener('mouseleave', () => log.classList.remove('hovered'));
-      log.addEventListener('click', toggle);
+      // 클릭은 인라인 onclick에서 처리 (모바일 호환성)
       log.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
