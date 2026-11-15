@@ -711,17 +711,31 @@ function isNewProject(p) {
       const ctx = canvas.getContext('2d', { alpha: false });
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const consonants = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ';
-      const others = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+      const digits = '0123456789';
+      const IDLE_DELAY = 700;      // 스크롤이 멈춘 뒤 자동 낙하 시작까지(ms)
+      const DRIFT_PER_SEC = 26;    // 자동 낙하 속도(px/s)
+      const IDLE_FPS = 30;         // 자동 낙하 시 렌더링 주기
       let items = [];
       let raf = 0;
       let pending = 0;
+      let drift = 0;
       let dpr = 1;
       let lastScroll = window.scrollY;
+      let lastScrollAt = 0;
+      let lastDraw = 0;
+      let idleTimer = 0;
 
-      function randomGlyph() {
-        // 한글 자음이 다른 문자보다 더 자주 나오도록 가중치 부여
-        const pool = Math.random() < 0.68 ? consonants : others;
+      function pick(pool) {
         return pool[(Math.random() * pool.length) | 0];
+      }
+
+      // 한글 자음 45% · 영문 30% · 숫자 25%
+      function randomGlyph() {
+        const r = Math.random();
+        if (r < 0.45) return pick(consonants);
+        if (r < 0.75) return pick(letters);
+        return pick(digits);
       }
 
       // 글자+글로우+블러를 미리 스프라이트로 구워 두어, 스크롤 중에는 drawImage만 한다.
@@ -805,36 +819,65 @@ function isNewProject(p) {
         render();
       }
 
-      function step() {
+      function step(now) {
         raf = 0;
+        if (!lastDraw) lastDraw = now;
+        const idle = now - lastScrollAt > IDLE_DELAY;
+        // 자동 낙하 중에는 프레임을 제한해 CPU 사용을 줄인다.
+        if (idle && now - lastDraw < 1000 / IDLE_FPS) {
+          raf = requestAnimationFrame(step);
+          return;
+        }
+        const dt = Math.min(now - lastDraw, 250);
+        lastDraw = now;
+
+        if (idle) drift += DRIFT_PER_SEC * dt / 1000;
+
         const chunk = Math.min(pending, 120);
         pending -= chunk;
-        if (chunk > 0) {
+        const auto = Math.min(drift, 120);
+        drift -= auto;
+        if (chunk > 0 || auto > 0) {
           const w = window.innerWidth, h = window.innerHeight;
           for (const it of items) {
-            it.y += chunk * 0.5 * it.speed;
+            it.y += (chunk * 0.5 + auto) * it.speed;
             if (it.y > h + it.sprite.h) {
               Object.assign(it, makeItem(w, h, false));
             }
           }
           render();
         }
-        if (pending > 0.5) raf = requestAnimationFrame(step);
+        if (pending > 0.5 || now - lastScrollAt > IDLE_DELAY) {
+          raf = requestAnimationFrame(step);
+        } else {
+          lastDraw = 0;
+          // 스크롤이 멈춘 뒤 자동 낙하가 시작되도록 대기 후 루프를 다시 깨운다.
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(function () {
+            idleTimer = 0;
+            if (!raf) raf = requestAnimationFrame(step);
+          }, Math.max(IDLE_DELAY - (now - lastScrollAt), 0) + 30);
+        }
       }
 
       function onScroll() {
         const y = window.scrollY;
         pending = Math.min(pending + Math.min(Math.abs(y - lastScroll), 220), 900);
         lastScroll = y;
+        lastScrollAt = performance.now();
+        clearTimeout(idleTimer);
+        idleTimer = 0;
         if (!raf) raf = requestAnimationFrame(step);
       }
 
       layout();
+      lastScrollAt = performance.now();
       if (reduceMotion) {
         drawStatic();
       } else {
         window.addEventListener('resize', layout);
         window.addEventListener('scroll', onScroll, { passive: true });
+        raf = requestAnimationFrame(step);
       }
     })();
   </script>
