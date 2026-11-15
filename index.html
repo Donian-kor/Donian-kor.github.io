@@ -278,6 +278,7 @@
               <span class="lang-badge ${badgeClass}" title="${langDesc[p.language] || p.language}">${p.language}</span>
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed keep-all mb-2">${p.description}</p>
+            <div class="text-[0.6rem] text-zinc-600 font-mono mb-2">created ${p.created_at || '-'} · updated ${p.updated_at || '-'}</div>
             <div class="flex flex-wrap gap-1 mb-2">
               ${p.tech.map(t => `<span class="text-[0.65rem] px-1.5 py-0.5 rounded bg-white/5 text-zinc-400" title="${techDesc[t] || t}">${t}</span>`).join('')}
             </div>
@@ -371,6 +372,7 @@
             <span class="lang-badge ${badgeClass}">${p.language}</span>
           </div>
           <p class="text-sm text-zinc-300 leading-relaxed keep-all mb-3">${p.description}</p>
+          <div class="text-xs text-zinc-500 font-mono mb-3">created ${p.created_at || '-'} · updated ${p.updated_at || '-'}</div>
           <div class="flex flex-wrap gap-1.5 mb-3">
             ${p.tech.map(t => `<span class="text-xs px-2 py-0.5 rounded bg-white/5 text-zinc-400" title="${techDesc[t] || t}">${t}</span>`).join('')}
           </div>

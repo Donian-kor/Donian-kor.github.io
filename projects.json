@@ -1,11 +1,29 @@
 {
   "categories": [
-    { "id": "all", "label": "전체" },
-    { "id": "android", "label": "Android 앱" },
-    { "id": "python", "label": "Python 데스크톱" },
-    { "id": "web", "label": "웹 / PWA" },
-    { "id": "windows", "label": "Windows 도구" },
-    { "id": "fork", "label": "포크 / 참여" }
+    {
+      "id": "all",
+      "label": "전체"
+    },
+    {
+      "id": "android",
+      "label": "Android 앱"
+    },
+    {
+      "id": "python",
+      "label": "Python 데스크톱"
+    },
+    {
+      "id": "web",
+      "label": "웹 / PWA"
+    },
+    {
+      "id": "windows",
+      "label": "Windows 도구"
+    },
+    {
+      "id": "fork",
+      "label": "포크 / 참여"
+    }
   ],
   "projects": [
     {
@@ -13,206 +31,305 @@
       "name": "MyAITutor",
       "category": "android",
       "description": "카메라로 문제를 비추면 AI가 풀이를 알려주는 온디바이스 학습 앱. PaddleOCR로 텍스트를 인식하고 Gemma 4 E4B / Qwen3-4B가 풀이를 제공합니다.",
-      "tech": ["Kotlin", "Jetpack Compose", "PaddleOCR", "Gemma 4 E4B", "Qwen3-4B"],
+      "tech": [
+        "Kotlin",
+        "Jetpack Compose",
+        "PaddleOCR",
+        "Gemma 4 E4B",
+        "Qwen3-4B"
+      ],
       "language": "Kotlin",
       "github": "https://github.com/Donian-kor/MyAITutor",
       "demo": null,
       "screenshot": "assets/images/projects/MyAITutor.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-11-12",
+      "updated_at": "2026-11-12"
     },
     {
       "id": "galaxy-battery",
       "name": "Galaxy Battery",
       "category": "android",
       "description": "삼성 덤프스테이트 로그로 배터리 건강도(SOH), 충전 사이클, 용량을 진단하는 오프라인 진단 앱.",
-      "tech": ["Kotlin", "Jetpack Compose", "Android"],
+      "tech": [
+        "Kotlin",
+        "Jetpack Compose",
+        "Android"
+      ],
       "language": "Kotlin",
       "github": "https://github.com/Donian-kor/Galaxy_Battery",
       "demo": null,
       "screenshot": "assets/images/projects/Galaxy_Battery.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-11-10",
+      "updated_at": "2026-11-12"
     },
     {
       "id": "pdf-hwp-viewer",
       "name": "pdf_hwp_viewer",
       "category": "android",
       "description": "Android PDF / HWP / HWPX 통합 문서 뷰어. PdfRenderer와 rhwp WASM 렌더러를 사용합니다.",
-      "tech": ["Kotlin", "Jetpack Compose", "Room", "WebAssembly"],
+      "tech": [
+        "Kotlin",
+        "Jetpack Compose",
+        "Room",
+        "WebAssembly"
+      ],
       "language": "Kotlin",
       "github": "https://github.com/Donian-kor/pdf_hwp_viewer",
       "demo": null,
       "screenshot": "assets/images/projects/pdf_hwp_viewer.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-11-06",
+      "updated_at": "2026-11-08"
     },
     {
       "id": "karaoke-timing",
       "name": "karaoke-timing-generator",
       "category": "python",
       "description": "로컬 Whisper로 노래방 타이밍(.lrc)을 생성하고, Audacity 스타일 멀티트랙 오디오 편집기를 제공합니다.",
-      "tech": ["Python", "Tkinter", "faster-whisper", "FFmpeg"],
+      "tech": [
+        "Python",
+        "Tkinter",
+        "faster-whisper",
+        "FFmpeg"
+      ],
       "language": "Python",
       "github": "https://github.com/Donian-kor/karaoke-timing-generator",
       "demo": null,
       "screenshot": "assets/images/projects/karaoke-timing-generator.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-10-31",
+      "updated_at": "2026-11-03"
     },
     {
       "id": "4cut-comic",
       "name": "4cut_LocalComic_Studio",
       "category": "python",
       "description": "LM Studio + ComfyUI 기반 4컷 만화 제작 스튜디오. 채팅형 UI와 세션 저장/복원을 지원합니다.",
-      "tech": ["Python", "PySide6", "ComfyUI", "LM Studio"],
+      "tech": [
+        "Python",
+        "PySide6",
+        "ComfyUI",
+        "LM Studio"
+      ],
       "language": "Python",
       "github": "https://github.com/Donian-kor/4cut_LocalComic_Studio",
       "demo": null,
       "screenshot": "assets/images/projects/4cut_LocalComic_Studio.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-09-20",
+      "updated_at": "2026-10-03"
     },
     {
       "id": "novel-studio",
       "name": "Novel_Studio_Maker",
       "category": "python",
       "description": "장편 한국어 웹소설의 기획부터 원고 집필, 화 종료 상태, 연속성 검증까지 관리하는 데스크톱 집필 도구.",
-      "tech": ["Python", "SQLite", "AI API"],
+      "tech": [
+        "Python",
+        "SQLite",
+        "AI API"
+      ],
       "language": "Python",
       "github": "https://github.com/Donian-kor/Novel_Studio_Maker",
       "demo": null,
       "screenshot": "assets/images/projects/Novel_Studio_Maker.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-09-12",
+      "updated_at": "2026-10-03"
     },
     {
       "id": "comfycraft",
       "name": "ComfyCraft_AI_Easy_Studio",
       "category": "python",
       "description": "ComfyUI 기반 AI 이미지/영상 생성 스튜디오.",
-      "tech": ["Python", "ComfyUI"],
+      "tech": [
+        "Python",
+        "ComfyUI"
+      ],
       "language": "Python",
       "github": "https://github.com/Donian-kor/ComfyCraft_AI_Easy_Studio",
       "demo": null,
       "screenshot": "assets/images/projects/ComfyCraft_AI_Easy_Studio.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-09-05",
+      "updated_at": "2026-10-03"
     },
     {
       "id": "split-text",
       "name": "split-text-file",
       "category": "python",
       "description": "텍스트 파일 분할기. GUI와 CLI를 모두 지원하며, 사용자 지정 크기로 분할합니다.",
-      "tech": ["Python", "Tkinter"],
+      "tech": [
+        "Python",
+        "Tkinter"
+      ],
       "language": "Python",
       "github": "https://github.com/Donian-kor/split-text-file",
       "demo": null,
       "screenshot": "assets/images/projects/split-text-file.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-06-02",
+      "updated_at": "2026-06-02"
     },
     {
       "id": "gemini-trans",
       "name": "gemini-ai-trans",
       "category": "python",
       "description": "Gemini API 기반 번역/학습 도구. 처음 시작하는 파이썬 코드 공유 및 배우기 위한 프로젝트.",
-      "tech": ["Python", "Gemini API"],
+      "tech": [
+        "Python",
+        "Gemini API"
+      ],
       "language": "Python",
       "github": "https://github.com/Donian-kor/gemini-ai-trans",
       "demo": null,
       "screenshot": "assets/images/projects/gemini-ai-trans.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-01-06",
+      "updated_at": "2026-01-08"
     },
     {
       "id": "txtviewer",
       "name": "txtviewer",
       "category": "python",
       "description": "다크 모드 TXT 뷰어. 자동 인코딩 감지, 폰트/배경/색상 변경, 설정 저장을 지원합니다.",
-      "tech": ["Python", "Tkinter", "chardet"],
+      "tech": [
+        "Python",
+        "Tkinter",
+        "chardet"
+      ],
       "language": "Python",
       "github": "https://github.com/Donian-kor/txtviewer",
       "demo": null,
       "screenshot": "assets/images/projects/txtviewer.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-01-07",
+      "updated_at": "2026-01-07"
     },
     {
       "id": "dark-rpg",
       "name": "dark-text-rpg",
       "category": "python",
       "description": "Python과 Tkinter로 만든 텍스트 기반 방치형 RPG 게임. 캐릭터 육성, 던전 탐험, 장비 강화.",
-      "tech": ["Python", "Tkinter", "JSON"],
+      "tech": [
+        "Python",
+        "Tkinter",
+        "JSON"
+      ],
       "language": "Python",
       "github": "https://github.com/Donian-kor/dark-text-rpg",
       "demo": null,
       "screenshot": "assets/images/projects/dark-text-rpg.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-01-07",
+      "updated_at": "2026-01-07"
     },
     {
       "id": "ai-gostop",
       "name": "AI_GoStop",
       "category": "web",
       "description": "3인 삼파전·2인 맞고·4인 광팔기 고스톱 웹 게임. PWA 지원, 가족 계정·순위표 포함.",
-      "tech": ["JavaScript", "Node.js", "PWA"],
+      "tech": [
+        "JavaScript",
+        "Node.js",
+        "PWA"
+      ],
       "language": "JavaScript",
       "github": "https://github.com/Donian-kor/AI_GoStop",
       "demo": "https://donian-kor.github.io/AI_GoStop/",
       "screenshot": "assets/images/projects/AI_GoStop.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-10-21",
+      "updated_at": "2026-10-24"
     },
     {
       "id": "ai-jjangie",
       "name": "AI_jjangie",
       "category": "web",
       "description": "Fairy-Stockfish WASM 기반 한국 장기 웹 게임. 서버 없이 브라우저에서 바로 실행.",
-      "tech": ["HTML", "JavaScript", "WebAssembly"],
+      "tech": [
+        "HTML",
+        "JavaScript",
+        "WebAssembly"
+      ],
       "language": "HTML",
       "github": "https://github.com/Donian-kor/AI_jjangie",
       "demo": "https://donian-kor.github.io/AI_jjangie/",
       "screenshot": "assets/images/projects/AI_jjangie.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-10-19",
+      "updated_at": "2026-10-20"
     },
     {
       "id": "gpu-cpu-monitor",
       "name": "gpu-cpu-status-monitor",
       "category": "web",
       "description": "VS Code 상태바에 CPU/RAM/GPU/VRAM 사용률을 실시간으로 표시하는 확장 프로그램.",
-      "tech": ["JavaScript", "VS Code API"],
+      "tech": [
+        "JavaScript",
+        "VS Code API"
+      ],
       "language": "JavaScript",
       "github": "https://github.com/Donian-kor/gpu-cpu-status-monitor",
       "demo": null,
       "screenshot": "assets/images/projects/gpu-cpu-status-monitor.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-09-25",
+      "updated_at": "2026-10-16"
     },
     {
       "id": "tray-translator",
       "name": "TrayTranslator",
       "category": "windows",
       "description": "드래그한 텍스트를 핫키로 즉시 번역해 커서 옆 팝업에 보여주는 트레이 상주 프로그램. 10종 번역 엔진 지원.",
-      "tech": ["C#", ".NET 10", "LLM API"],
+      "tech": [
+        "C#",
+        ".NET 10",
+        "LLM API"
+      ],
       "language": "C#",
       "github": "https://github.com/Donian-kor/TrayTranslator",
       "demo": null,
       "screenshot": "assets/images/projects/TrayTranslator.webp",
-      "forked": false
+      "forked": false,
+      "created_at": "2026-09-30",
+      "updated_at": "2026-11-14"
     },
     {
       "id": "craft-anything",
       "name": "craft-anything",
       "category": "fork",
       "description": "소프트웨어 동작을 분석하고 재현하는 도구. (Fork from storytold/craft-anything)",
-      "tech": ["Rust"],
+      "tech": [
+        "Rust"
+      ],
       "language": "Rust",
       "github": "https://github.com/Donian-kor/craft-anything",
       "demo": null,
       "screenshot": "assets/images/projects/craft-anything.webp",
       "forked": true,
-      "original": "storytold/craft-anything"
+      "original": "storytold/craft-anything",
+      "created_at": "2026-11-08",
+      "updated_at": "2026-11-08"
     },
     {
       "id": "rea",
       "name": "rea",
       "category": "fork",
       "description": "에이전트 기반 리버스 엔지니어링 도구. (Fork from morluto/rea)",
-      "tech": ["TypeScript"],
+      "tech": [
+        "TypeScript"
+      ],
       "language": "TypeScript",
       "github": "https://github.com/Donian-kor/rea",
       "demo": null,
       "screenshot": "assets/images/projects/rea.webp",
       "forked": true,
-      "original": "morluto/rea"
+      "original": "morluto/rea",
+      "created_at": "2026-10-15",
+      "updated_at": "2026-10-15"
     }
   ]
 }
