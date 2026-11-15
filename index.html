@@ -716,8 +716,8 @@ function isNewProject(p) {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const target = document.getElementById('donian-text');
       if (!target) return;
-      const words = ['Donian', 'Since 2009.01.16'];
-      const colors = ['#60a5fa', '#a1a1aa'];
+      const words = ['Donian'];
+      const colors = ['#60a5fa'];
       if (reduceMotion) {
         target.textContent = words[0];
         return;
