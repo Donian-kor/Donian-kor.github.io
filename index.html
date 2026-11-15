@@ -163,7 +163,7 @@
         </div>
         <div id="platform-legend" class="flex flex-wrap gap-3 text-[0.65rem] text-zinc-400 mb-3">
           <span class="inline-flex items-center gap-1"><iconify-icon icon="logos:android-icon" class="text-base text-zinc-400"></iconify-icon> Android 앱</span>
-          <span class="inline-flex items-center gap-1"><iconify-icon icon="noto:globe-showing-americas" class="text-base text-zinc-400"></iconify-icon> 웹 브라우저</span>
+          <span class="inline-flex items-center gap-1"><iconify-icon icon="material-symbols:language" class="text-base text-sky-400"></iconify-icon> 웹 브라우저</span>
           <span class="inline-flex items-center gap-1"><iconify-icon icon="logos:microsoft-windows" class="text-base text-zinc-400"></iconify-icon></span>
           <span class="inline-flex items-center gap-1"><iconify-icon icon="solar:git-branch-bold" class="text-base text-zinc-400"></iconify-icon> Fork 프로젝트</span>
         </div>
@@ -254,7 +254,7 @@ function isNewProject(p) {
     const platformIcon = {
       'android': 'logos:android-icon',
       'pc': 'logos:microsoft-windows',
-      'web': 'noto:globe-showing-americas',
+      'web': 'material-symbols:language',
       'fork': 'solar:git-branch-bold',
     };
     const platformLabel = {
@@ -370,7 +370,7 @@ function isNewProject(p) {
           <div class="p-3">
             <div class="flex items-center justify-between gap-2 mb-1">
               <div class="flex items-center gap-2 min-w-0 flex-1">
-                <iconify-icon icon="${platformIcon[p.category] || 'solar:code-square-bold'}" class="text-base text-zinc-400" title="${platformLabel[p.category] || '프로그램'}"></iconify-icon>
+                <iconify-icon icon="${platformIcon[p.category] || 'solar:code-square-bold'}" class="text-base ${p.category === 'web' ? 'text-sky-400' : 'text-zinc-400'}" title="${platformLabel[p.category] || '프로그램'}"></iconify-icon>
                 <span class="lang-badge ${badgeClass}" title="${langDesc[p.language] || p.language}">${p.language}</span>
                 <span class="text-zinc-500 text-[0.65rem] truncate sm:hidden"># ${p.description.slice(0, 18)}${p.description.length > 18 ? '…' : ''}</span>
               </div>
