@@ -48,6 +48,7 @@
     @keyframes donianGlow { 0%,100% { transform: scale(1.15); text-shadow: 0 0 8px rgba(96,165,250,0.5); } 50% { transform: scale(1.15); text-shadow: 0 0 16px rgba(96,165,250,0.8); } }
     .new-badge { animation: newPulse 1.6s ease-in-out infinite; }
     .donian-name { display: inline-block; animation: donianGlow 2.4s ease-in-out infinite; }
+    .donian-cursor { display: inline-block; margin-left: 0.05em; animation: blink 0.8s step-end infinite; }
     .cursor-blink { animation: blink 1s step-end infinite; }
     .term-cursor { display: inline-block; width: 0.6ch; height: 1.1em; margin-left: 0.15rem; background: #22c55e; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
     .career-extra { max-height: 0; transition: max-height 0.12s ease; }
@@ -66,6 +67,7 @@
     @media (prefers-reduced-motion: reduce) {
       .reveal { animation: none !important; opacity:1 !important; transform:none !important; }
       html { scroll-behavior: auto; }
+      .donian-cursor { animation: none !important; opacity: 1 !important; }
     }
     .lang-badge { font-size: 0.65rem; }
   </style>
@@ -112,7 +114,7 @@
           <span class="text-zinc-200 ml-2 text-lg">who am i</span>
         </div>
         <div class="mb-6 pl-2">
-          <div class="text-blue-400 font-bold text-2xl md:text-4xl keep-all donian-name">Donian</div>
+          <div class="text-blue-400 font-bold text-2xl md:text-4xl keep-all donian-name"><span id="donian-text"></span><span class="donian-cursor" aria-hidden="true">_</span></div>
           <div class="text-zinc-400 text-sm -ml-2">AI Coder · AI Music Creator</div>
         </div>
         <div class="mt-4 mb-2">
@@ -702,6 +704,51 @@ function isNewProject(p) {
       }
       body.innerHTML = '';
       setTimeout(runCommand, 500);
+    })();
+
+    // ---------- Donian 이름 라벨 타이핑 효과 (Terminal Text Effect) ----------
+    (function () {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const target = document.getElementById('donian-text');
+      if (!target) return;
+      const words = ['Donian'];
+      const colors = ['#60a5fa'];
+      if (reduceMotion) {
+        target.textContent = words[0];
+        return;
+      }
+      let visible = true;
+      const cursor = document.querySelector('.donian-cursor');
+      let letterCount = 1;
+      let x = 1;
+      let waiting = false;
+      target.setAttribute('style', 'color:' + colors[0]);
+      window.setInterval(function () {
+        if (letterCount === 0 && waiting === false) {
+          waiting = true;
+          target.innerHTML = words[0].substring(0, letterCount);
+          window.setTimeout(function () {
+            var usedColor = colors.shift();
+            colors.push(usedColor);
+            var usedWord = words.shift();
+            words.push(usedWord);
+            x = 1;
+            target.setAttribute('style', 'color:' + colors[0]);
+            letterCount += x;
+            waiting = false;
+          }, 1000);
+        } else if (letterCount === words[0].length + 1 && waiting === false) {
+          waiting = true;
+          window.setTimeout(function () {
+            x = -1;
+            letterCount += x;
+            waiting = false;
+          }, 1000);
+        } else if (waiting === false) {
+          target.innerHTML = words[0].substring(0, letterCount);
+          letterCount += x;
+        }
+      }, 120);
     })();
 
     // ---------- Matrix 배경 (스크롤 연동 · 영문/숫자/한글 자음) ----------
