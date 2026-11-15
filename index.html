@@ -163,9 +163,8 @@
         </div>
         <div id="platform-legend" class="flex flex-wrap gap-3 text-[0.65rem] text-zinc-400 mb-3">
           <span class="inline-flex items-center gap-1"><iconify-icon icon="solar:smartphone-bold" class="text-base text-zinc-400"></iconify-icon> Android 앱</span>
-          <span class="inline-flex items-center gap-1"><iconify-icon icon="solar:monitor-bold" class="text-base text-zinc-400"></iconify-icon> Windows 프로그램</span>
           <span class="inline-flex items-center gap-1"><iconify-icon icon="solar:global-bold" class="text-base text-zinc-400"></iconify-icon> 웹 브라우저</span>
-          <span class="inline-flex items-center gap-1"><iconify-icon icon="solar:laptop-bold" class="text-base text-zinc-400"></iconify-icon> PC/Python 스크립트</span>
+          <span class="inline-flex items-center gap-1"><iconify-icon icon="solar:laptop-bold" class="text-base text-zinc-400"></iconify-icon> PC 유틸</span>
           <span class="inline-flex items-center gap-1"><iconify-icon icon="solar:git-branch-bold" class="text-base text-zinc-400"></iconify-icon> Fork 프로젝트</span>
         </div>
         <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-live="polite"></div>
@@ -254,16 +253,16 @@ function isNewProject(p) {
 
     const platformIcon = {
       'android': 'solar:smartphone-bold',
-      'windows': 'solar:monitor-bold',
+      'windows': 'solar:laptop-bold',
       'web': 'solar:global-bold',
       'python': 'solar:laptop-bold',
       'fork': 'solar:git-branch-bold',
     };
     const platformLabel = {
       'android': 'Android 앱',
-      'windows': 'Windows 프로그램',
+      'windows': 'PC 유틸',
       'web': '웹 브라우저',
-      'python': 'PC/Python 스크립트',
+      'python': 'PC 유틸',
       'fork': 'Fork 프로젝트',
     };
     const langColor = {
