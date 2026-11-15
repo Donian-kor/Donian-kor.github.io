@@ -204,7 +204,7 @@
         card.innerHTML = `
           <div class="flex items-center gap-1.5 px-2 py-1.5 bg-zinc-800/60 border-b border-white/5">
             <iconify-icon icon="solar:terminal-bold" class="text-sm text-green-400"></iconify-icon>
-            <span class="ml-1 text-xs text-zinc-400 font-mono truncate flex-1">${p.id}</span>
+            <span class="ml-1 text-sm text-zinc-200 font-mono truncate flex-1"><a href="${p.github}" target="_blank" rel="noopener" class="hover:text-blue-300 transition">${p.name}</a></span>
             <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition text-xs" aria-label="${p.name} GitHub 저장소로 이동" title="GitHub 저장소 열기">
               <iconify-icon icon="solar:arrow-right-up-bold" class="text-sm"></iconify-icon>
               <span>open</span>
@@ -212,7 +212,6 @@
           </div>
           <div class="p-3">
             <div class="flex items-center justify-between gap-2 mb-1">
-              <h3 class="font-bold text-sm keep-all text-zinc-100"><a href="${p.github}" target="_blank" rel="noopener" class="hover:text-blue-300 transition">${p.name}</a></h3>
               <span class="lang-badge ${badgeClass}">${p.language}</span>
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed keep-all mb-2">${p.description}</p>
