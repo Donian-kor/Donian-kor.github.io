@@ -807,12 +807,12 @@ function isNewProject(p) {
 
       function step() {
         raf = 0;
-        const chunk = Math.min(pending, 80);
+        const chunk = Math.min(pending, 120);
         pending -= chunk;
         if (chunk > 0) {
           const w = window.innerWidth, h = window.innerHeight;
           for (const it of items) {
-            it.y += chunk * 0.16 * it.speed;
+            it.y += chunk * 0.5 * it.speed;
             if (it.y > h + it.sprite.h) {
               Object.assign(it, makeItem(w, h, false));
             }
