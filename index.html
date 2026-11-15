@@ -351,7 +351,10 @@ function isNewProject(p) {
           </div>
           <div class="p-3">
             <div class="flex items-center justify-between gap-2 mb-1">
-              <span class="lang-badge ${badgeClass}" title="${langDesc[p.language] || p.language}">${p.language}</span>
+              <div class="flex items-center gap-2 min-w-0 flex-1">
+                <span class="lang-badge ${badgeClass}" title="${langDesc[p.language] || p.language}">${p.language}</span>
+                <span class="text-zinc-500 text-[0.65rem] truncate sm:hidden"># ${p.description.slice(0, 18)}${p.description.length > 18 ? '…' : ''}</span>
+              </div>
               ${isNewProject(p) ? '<span class="new-badge px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">NEW</span>' : ''}
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed keep-all mb-2 hidden sm:block">${p.description}</p>
