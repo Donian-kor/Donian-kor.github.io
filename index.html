@@ -272,14 +272,23 @@
             obs.unobserve(entry.target);
             let currentLine = document.createElement('div');
             body.appendChild(currentLine);
+            let cursor = document.createElement('span');
+            cursor.className = 'cursor-blink text-green-400';
+            cursor.textContent = '█';
+            currentLine.appendChild(cursor);
             let oi = 0;
             function streamChar() {
               if (oi < out.length) {
                 if (out[oi] === '\n') {
                   currentLine = document.createElement('div');
                   body.appendChild(currentLine);
+                  cursor = document.createElement('span');
+                  cursor.className = 'cursor-blink text-green-400';
+                  cursor.textContent = '█';
+                  currentLine.appendChild(cursor);
                 } else {
-                  currentLine.textContent += out[oi];
+                  // 커서 앞에 텍스트 삽입
+                  currentLine.insertBefore(document.createTextNode(out[oi]), cursor);
                 }
                 oi++;
                 setTimeout(streamChar, 18 + Math.random() * 18);
