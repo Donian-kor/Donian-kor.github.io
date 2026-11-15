@@ -76,6 +76,7 @@
         <a href="#about" class="hover:text-zinc-200 transition">about</a>
         <a href="#projects" class="hover:text-zinc-200 transition">projects</a>
         <a href="#stack" class="hover:text-zinc-200 transition">stack</a>
+        <a href="#contact" class="hover:text-zinc-200 transition">contact</a>
         <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="hover:text-zinc-200 transition">github</a>
       </div>
     </div>
@@ -149,6 +150,34 @@
         </div>
         <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-live="polite"></div>
         <div id="empty-state" class="hidden mt-4 text-center text-zinc-400">해당 카테고리에 프로젝트가 없습니다.</div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-4 border-t border-white/5">
+      <div class="mb-3 font-mono text-sm">
+        <span class="text-green-400 font-bold">$</span>
+        <span class="text-zinc-200 ml-2">send_message</span>
+      </div>
+      <div class="rounded-lg bg-zinc-900/60 border border-white/10 p-4 max-w-2xl">
+        <form action="https://api.web3forms.com/submit" method="POST" class="space-y-3 font-mono text-sm">
+          <input type="hidden" name="access_key" value="86ed093a-3831-49d5-af59-51b56c5cfeb9">
+          <div>
+            <label class="block text-zinc-400 mb-1 text-xs">name</label>
+            <input type="text" name="name" required class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-blue-500/50">
+          </div>
+          <div>
+            <label class="block text-zinc-400 mb-1 text-xs">email</label>
+            <input type="email" name="email" required class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-blue-500/50">
+          </div>
+          <div>
+            <label class="block text-zinc-400 mb-1 text-xs">message</label>
+            <textarea name="message" required rows="4" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-blue-500/50 resize-y"></textarea>
+          </div>
+          <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-blue-500/20 border border-blue-500/40 text-blue-300 text-sm hover:bg-blue-500/30 transition">
+            <iconify-icon icon="solar:plain-bold"></iconify-icon> Submit
+          </button>
+        </form>
       </div>
     </section>
 
