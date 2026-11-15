@@ -175,6 +175,40 @@
       'Rust': 'text-red-300',
       'TypeScript': 'text-blue-300',
     };
+    const langDesc = {
+      'Kotlin': 'JetBrains의 JVM 기반 언어, Android 공식 언어',
+      'Python': '범용 프로그래밍 언어, 스크립팅·자동화·AI',
+      'JavaScript': '웹 브라우저 스크립트 언어',
+      'HTML': '웹 페이지 구조 마크업 언어',
+      'C#': 'Microsoft의 객체지향 언어, Windows 앱',
+      'Rust': '메모리 안전 시스템 프로그래밍 언어',
+      'TypeScript': 'JavaScript에 정적 타입을 추가한 언어',
+    };
+    const techDesc = {
+      'Jetpack Compose': 'Android 선언형 UI 프레임워크',
+      'PaddleOCR': '텍스트 인식(OCR) 라이브러리',
+      'Gemma 4 E4B': 'Google 온디바이스 LLM',
+      'Qwen3-4B': 'Alibaba 소형 LLM',
+      'Tkinter': 'Python 표준 GUI 라이브러리',
+      'PySide6': 'Qt 기반 Python GUI 프레임워크',
+      'ComfyUI': '노드 기반 AI 이미지 생성',
+      'LM Studio': '로컬 LLM 실행 도구',
+      'WebAssembly': '브라우저에서 네이티브 속도 실행',
+      'Room': 'Android SQLite ORM',
+      'FFmpeg': '오디오/비디오 처리 도구',
+      'faster-whisper': '음성 인식(STT) 라이브러리',
+      'PWA': 'Progressive Web App',
+      'VS Code API': 'VS Code 확장 API',
+      'SQLite': '경량 파일 기반 DB',
+      'AI API': 'AI 서비스 API 연동',
+      'LLM API': '대규모 언어 모델 API',
+      'Gemini API': 'Google Gemini API',
+      '.NET 10': 'Microsoft .NET 10 런타임',
+      'chardet': '문자 인코딩 감지 라이브러리',
+      'JSON': '데이터 교환 포맷',
+      'Node.js': 'JavaScript 서버 런타임',
+      'OpenCV': '컴퓨터 비전 라이브러리',
+    };
 
     function renderTabs(categories) {
       tabs.innerHTML = '';
@@ -212,11 +246,11 @@
           </div>
           <div class="p-3">
             <div class="flex items-center justify-between gap-2 mb-1">
-              <span class="lang-badge ${badgeClass}">${p.language}</span>
+              <span class="lang-badge ${badgeClass}" title="${langDesc[p.language] || p.language}">${p.language}</span>
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed keep-all mb-2">${p.description}</p>
             <div class="flex flex-wrap gap-1 mb-2">
-              ${p.tech.map(t => `<span class="text-[0.65rem] px-1.5 py-0.5 rounded bg-white/5 text-zinc-400">${t}</span>`).join('')}
+              ${p.tech.map(t => `<span class="text-[0.65rem] px-1.5 py-0.5 rounded bg-white/5 text-zinc-400" title="${techDesc[t] || t}">${t}</span>`).join('')}
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
