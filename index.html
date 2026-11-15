@@ -400,14 +400,19 @@ function isNewProject(p) {
         body.innerHTML = '';
         let currentLine = document.createElement('div');
         body.appendChild(currentLine);
+        const cursor = document.createElement('span');
+        cursor.className = 'term-cursor';
+        currentLine.appendChild(cursor);
         let oi = 0;
         function streamChar() {
           if (oi < out.length) {
             if (out[oi] === '\n') {
+              currentLine.removeChild(cursor);
               currentLine = document.createElement('div');
               body.appendChild(currentLine);
+              currentLine.appendChild(cursor);
             } else {
-              currentLine.appendChild(document.createTextNode(out[oi]));
+              currentLine.insertBefore(document.createTextNode(out[oi]), cursor);
             }
             oi++;
             setTimeout(streamChar, 18 + Math.random() * 18);
@@ -555,15 +560,20 @@ function isNewProject(p) {
               let currentLine = document.createElement('div');
               currentLine.className = 'text-zinc-400 pl-4';
               body.appendChild(currentLine);
+              const cursor = document.createElement('span');
+              cursor.className = 'term-cursor';
+              currentLine.appendChild(cursor);
               let oi = 0;
               function streamChar() {
                 if (oi < out.length) {
                   if (out[oi] === '\n') {
+                    currentLine.removeChild(cursor);
                     currentLine = document.createElement('div');
                     currentLine.className = 'text-zinc-400 pl-4';
                     body.appendChild(currentLine);
+                    currentLine.appendChild(cursor);
                   } else {
-                    currentLine.textContent += out[oi];
+                    currentLine.insertBefore(document.createTextNode(out[oi]), cursor);
                   }
                   oi++;
                   body.scrollTop = body.scrollHeight;
