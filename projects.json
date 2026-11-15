@@ -21,8 +21,8 @@
       "label": "Windows 도구"
     },
     {
-      "id": "pork",
-      "label": "pork"
+      "id": "fork",
+      "label": "Fork"
     }
   ],
   "projects": [
@@ -266,7 +266,7 @@
     {
       "id": "craft-anything",
       "name": "craft-anything",
-      "category": "pork",
+      "category": "fork",
       "description": "소프트웨어 동작을 분석하고 재현하는 도구. (Fork from storytold/craft-anything)",
       "tech": [
         "Rust"
@@ -283,7 +283,7 @@
     {
       "id": "rea",
       "name": "rea",
-      "category": "pork",
+      "category": "fork",
       "description": "에이전트 기반 리버스 엔지니어링 도구. (Fork from morluto/rea)",
       "tech": [
         "TypeScript"

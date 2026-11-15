@@ -268,13 +268,13 @@ function isNewProject(p) {
       const filtered = currentCategory === 'all' ? allProjects : allProjects.filter(p => p.category === currentCategory);
       if (filtered.length === 0) { empty.classList.remove('hidden'); return; }
       empty.classList.add('hidden');
-      // pork 는 항상 마지막, 나머지는 생성일(created_at) 기준 내림차순 정렬
-      const isPork = (p) => p.category === 'pork' || /pork/i.test(p.id || '') || /pork/i.test(p.name || '');
+      // Fork 는 항상 마지막, 나머지는 업데이트일(updated_at) 기준 내림차순 정렬
+      const isFork = (p) => p.category === 'fork' || /fork/i.test(p.id || '') || /fork/i.test(p.name || '');
       const sorted = [...filtered].sort((a, b) => {
-        const aPork = isPork(a), bPork = isPork(b);
-        if (aPork && !bPork) return 1;
-        if (!aPork && bPork) return -1;
-        if (aPork && bPork) return 0;
+        const aFork = isFork(a), bFork = isFork(b);
+        if (aFork && !bFork) return 1;
+        if (!aFork && bFork) return -1;
+        if (aFork && bFork) return 0;
         return (b.updated_at || '').localeCompare(a.updated_at || '');
       });
       // 7일 이내 업데이트 여부는 isNewProject() (전역) 사용
