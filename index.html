@@ -43,7 +43,9 @@
     .reveal.visible { animation: fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
     @keyframes blink { 0%,50% { opacity:1; } 51%,100% { opacity:0; } }
     @keyframes newPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0.6); } 50% { transform: scale(1.08); box-shadow: 0 0 8px 2px rgba(16,185,129,0.4); } }
+    @keyframes donianGlow { 0%,100% { transform: scale(1.15); text-shadow: 0 0 8px rgba(96,165,250,0.5); } 50% { transform: scale(1.15); text-shadow: 0 0 16px rgba(96,165,250,0.8); } }
     .new-badge { animation: newPulse 1.6s ease-in-out infinite; }
+    .donian-name { display: inline-block; animation: donianGlow 2.4s ease-in-out infinite; }
     .cursor-blink { animation: blink 1s step-end infinite; }
     .prompt::before { content: '$ '; color: #22c55e; font-weight: 700; }
     .section-cmd { color: #22c55e; }
@@ -102,7 +104,7 @@
           <span class="text-zinc-200 ml-2 text-2xl">who am i</span>
         </div>
         <div class="mb-4 pl-2">
-          <div class="text-blue-400 font-bold text-2xl md:text-4xl keep-all">Donian</div>
+          <div class="text-blue-400 font-bold text-2xl md:text-4xl keep-all donian-name">Donian</div>
           <div class="text-zinc-400 text-sm">개인 포트폴리오 · Python · Kotlin 개발자</div>
         </div>
         <div class="mb-4">
