@@ -48,144 +48,26 @@
     @keyframes donianGlow { 0%,100% { transform: scale(1.15); text-shadow: 0 0 8px rgba(163,230,53,0.5); } 50% { transform: scale(1.15); text-shadow: 0 0 16px rgba(163,230,53,0.8); } }
     .new-badge { animation: newPulse 1.6s ease-in-out infinite; }
     .donian-name { display: inline-block; }
-    .donian-slash {
-      position: relative;
+    .donian-decode {
       display: inline-block;
       color: #a3e635;
       font-size: clamp(2rem, 14vw, 9rem);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: clamp(0.1rem, 0.7vw, 0.66rem);
-      padding: 0.5rem 0.4rem 0.2rem;
       line-height: 1;
       white-space: nowrap;
       max-width: 100%;
+      text-shadow: 0 0 8px rgba(163,230,53,0.55), 0 0 22px rgba(163,230,53,0.25);
+      font-variant-numeric: tabular-nums;
+      transition: text-shadow 0.15s ease;
     }
-    .donian-slash .slash {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(-24deg) scaleY(0);
-      transform-origin: center center;
-      width: 0.12rem;
-      height: 145%;
-      background: #a3e635;
-      z-index: 4;
-      animation: donianSlash 6s ease-in infinite;
-    }
-    .donian-slash .slash:before {
-      content: '';
-      display: block;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 0.6rem;
-      height: 120%;
-      background: #0a0a0a;
-      z-index: -1;
-    }
-    .donian-slash .slash:after {
-      content: '';
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #a3e635;
-    }
-    .donian-slash .sides { position: absolute; width: 100%; height: 100%; top: 0; left: 0; overflow: hidden; }
-    .donian-slash .side { position: absolute; background: #a3e635; }
-    .donian-slash .sides .side:nth-child(1) { top: 0; left: 0; width: 100%; height: 0.12rem; transform: scaleX(0); transform-origin: center; animation: donianSideH ease 6s infinite; }
-    .donian-slash .sides .side:nth-child(2) { top: 0; right: 0; width: 0.12rem; height: 100%; transform: scaleY(0); transform-origin: center; animation: donianSideV ease 6s infinite; }
-    .donian-slash .sides .side:nth-child(3) { left: 0; bottom: 0; width: 100%; height: 0.12rem; transform: scaleX(0); transform-origin: center; animation: donianSideH ease 6s infinite; }
-    .donian-slash .sides .side:nth-child(4) { top: 0; left: 0; width: 0.12rem; height: 100%; transform: scaleY(0); transform-origin: center; animation: donianSideV ease 6s infinite; }
-    .donian-slash .text { position: relative; }
-    .donian-slash .text--backing { opacity: 0; }
-    .donian-slash .text--left { position: absolute; top: 0; left: 0; width: 51%; height: 100%; overflow: hidden; }
-    .donian-slash .text--left .inner { transform: translateX(100%); animation: donianTextLeft 6s ease-in-out infinite; }
-    .donian-slash .text--right { position: absolute; top: 0; right: 0; width: 50%; height: 100%; overflow: hidden; }
-    .donian-slash .text--right .inner { transform: translateX(-200%); animation: donianTextRight 6s ease-in-out infinite; }
-    .donian-slash .glitch {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      mix-blend-mode: screen;
-      opacity: 0;
-      animation: donianGlitch 6s steps(1, end) infinite;
-    }
-    .donian-slash .glitch--cyan { color: #22d3ee; text-shadow: 0 0 6px #22d3ee; }
-    .donian-slash .glitch--magenta { color: #f472b6; text-shadow: 0 0 6px #f472b6; animation-delay: 0.05s; }
-    .donian-slash .shimmer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(105deg, transparent 35%, rgba(163,230,53,0.55) 50%, transparent 65%);
-      background-size: 200% 100%;
-      background-position: 200% 0;
-      mix-blend-mode: screen;
-      opacity: 0;
-      animation: donianShimmer 6s ease-in-out infinite;
-    }
-    .donian-slash .text { text-shadow: 0 0 0 rgba(163,230,53,0); animation: donianGlowPulse 6s ease-in-out infinite; }
-    @keyframes donianSlash {
-      0% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(0); }
-      6% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(1); }
-      13% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(1); }
-      16.6% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(0); }
-      100% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(0); }
-    }
-    @keyframes donianTextLeft {
-      0% { transform: translateX(100%); }
-      10% { transform: translateX(0); }
-      58% { transform: translateX(0); }
-      70% { transform: translateX(-200%); }
-      100% { transform: translateX(-200%); }
-    }
-    @keyframes donianTextRight {
-      0% { transform: translateX(-200%); }
-      10% { transform: translateX(-100%); }
-      58% { transform: translateX(-100%); }
-      70% { transform: translateX(-300%); }
-      100% { transform: translateX(-300%); }
-    }
-    @keyframes donianSideH {
-      0%, 6% { transform: scaleX(0); }
-      16%, 58% { transform: scaleX(1); }
-      68% { transform: scaleX(0); }
-      100% { transform: scaleX(0); }
-    }
-    @keyframes donianSideV {
-      0%, 6% { transform: scaleY(0); }
-      16%, 58% { transform: scaleY(1); }
-      68% { transform: scaleY(0); }
-      100% { transform: scaleY(0); }
-    }
-    @keyframes donianGlitch {
-      0%, 48% { opacity: 0; transform: translate(0,0); clip-path: inset(0 0 0 0); }
-      49% { opacity: 0.85; transform: translate(-3px, 1px); clip-path: inset(10% 0 60% 0); }
-      50% { opacity: 0.85; transform: translate(3px, -1px); clip-path: inset(55% 0 15% 0); }
-      51% { opacity: 0.6; transform: translate(-2px, 2px); clip-path: inset(30% 0 40% 0); }
-      52%, 100% { opacity: 0; transform: translate(0,0); clip-path: inset(0 0 0 0); }
-    }
-    @keyframes donianShimmer {
-      0%, 28% { opacity: 0; background-position: 200% 0; }
-      32% { opacity: 1; }
-      46% { opacity: 1; background-position: -200% 0; }
-      50%, 100% { opacity: 0; background-position: -200% 0; }
-    }
-    @keyframes donianGlowPulse {
-      0%, 55% { text-shadow: 0 0 0 rgba(163,230,53,0); }
-      60% { text-shadow: 0 0 12px rgba(163,230,53,0.9), 0 0 28px rgba(163,230,53,0.4); }
-      70% { text-shadow: 0 0 8px rgba(163,230,53,0.6); }
-      85% { text-shadow: 0 0 14px rgba(163,230,53,0.8); }
-      100% { text-shadow: 0 0 4px rgba(163,230,53,0.4); }
+    .donian-decode.is-glitch {
+      text-shadow: 2px 0 0 #22d3ee, -2px 0 0 #f472b6, 0 0 14px rgba(163,230,53,0.9);
+      transform: skewX(-6deg) translateX(2px);
     }
     @media (prefers-reduced-motion: reduce) {
-      .donian-slash .text--backing { opacity: 1; }
-      .donian-slash .slash, .donian-slash .sides, .donian-slash .text--left, .donian-slash .text--right, .donian-slash .glitch, .donian-slash .shimmer { display: none; }
+      .donian-decode { text-shadow: 0 0 8px rgba(163,230,53,0.5); }
     }
     .donian-cursor { display: inline-block; margin-left: 0.05em; animation: blink 0.8s step-end infinite; }
     .cursor-blink { animation: blink 1s step-end infinite; }
@@ -267,23 +149,7 @@
           <div class="text-zinc-400 text-sm font-mono">AI Coder · AI Music Creator</div>
         </div>
         <div class="mb-6 pl-2 max-w-full overflow-hidden">
-          <div class="donian-slash donian-name" aria-label="Donian">
-            <div class="slash"></div>
-            <div class="sides">
-              <div class="side"></div>
-              <div class="side"></div>
-              <div class="side"></div>
-              <div class="side"></div>
-            </div>
-            <div class="text">
-              <div class="text--backing">Donian</div>
-              <div class="text--left"><div class="inner">Donian</div></div>
-              <div class="text--right"><div class="inner">Donian</div></div>
-              <div class="glitch glitch--cyan" aria-hidden="true">Donian</div>
-              <div class="glitch glitch--magenta" aria-hidden="true">Donian</div>
-            </div>
-            <div class="shimmer"></div>
-          </div>
+          <div class="donian-decode donian-name" aria-label="Donian">Donian</div>
         </div>
         <div class="mt-4 mb-2">
           <span class="text-green-400 font-bold text-lg">C:\></span>
@@ -994,6 +860,53 @@ function isNewProject(p) {
       }
 
       load();
+    })();
+
+    // ---------- Donian 이름 라벨: Matrix 디코드 (Decode) ----------
+    (function () {
+      const el = document.querySelector('.donian-decode');
+      if (!el) return;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const FINAL = 'Donian';
+      const GLYPHS = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      if (reduceMotion) { el.textContent = FINAL; return; }
+
+      const SCRAMBLE = 1100;   // 디코드(스크램블) 구간 ms
+      const HOLD = 2200;       // 완성 후 유지 ms
+      const GLITCH = 260;      // 글리치 구간 ms
+      const LOOP = SCRAMBLE + HOLD + GLITCH;
+
+      let start = null;
+      function rndGlyph() { return GLYPHS[(Math.random() * GLYPHS.length) | 0]; }
+
+      function frame(now) {
+        if (start === null) start = now;
+        const t = (now - start) % LOOP;
+        if (t < SCRAMBLE) {
+          const p = t / SCRAMBLE;
+          const settled = Math.min(FINAL.length, Math.floor(p * (FINAL.length + 1)));
+          let out = '';
+          for (let i = 0; i < FINAL.length; i++) {
+            out += (i < settled) ? FINAL[i] : rndGlyph();
+          }
+          el.textContent = out;
+          el.classList.remove('is-glitch');
+          el.style.transform = '';
+        } else if (t < SCRAMBLE + HOLD) {
+          el.textContent = FINAL;
+          el.classList.remove('is-glitch');
+          el.style.transform = '';
+        } else {
+          el.textContent = FINAL;
+          el.classList.add('is-glitch');
+          // 랜덤 글리치 지터
+          const dx = (Math.random() * 4 - 2).toFixed(1);
+          const dy = (Math.random() * 2 - 1).toFixed(1);
+          el.style.transform = 'translate(' + dx + 'px,' + dy + 'px) skewX(' + (Math.random() * 6 - 3).toFixed(1) + 'deg)';
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
     })();
 
     // ---------- Matrix 배경 (스크롤 연동 · 영문/숫자/한글 자음) ----------
