@@ -280,6 +280,8 @@
             function streamChar() {
               if (oi < out.length) {
                 if (out[oi] === '\n') {
+                  // 이전 라인의 커서 제거
+                  if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
                   currentLine = document.createElement('div');
                   body.appendChild(currentLine);
                   cursor = document.createElement('span');
