@@ -378,25 +378,14 @@ function isNewProject(p) {
             obs.unobserve(entry.target);
             let currentLine = document.createElement('div');
             body.appendChild(currentLine);
-            let cursor = document.createElement('span');
-            cursor.className = 'cursor-blink text-green-400';
-            cursor.textContent = '█';
-            currentLine.appendChild(cursor);
             let oi = 0;
             function streamChar() {
               if (oi < out.length) {
                 if (out[oi] === '\n') {
-                  // 이전 라인의 커서 제거
-                  if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
                   currentLine = document.createElement('div');
                   body.appendChild(currentLine);
-                  cursor = document.createElement('span');
-                  cursor.className = 'cursor-blink text-green-400';
-                  cursor.textContent = '█';
-                  currentLine.appendChild(cursor);
                 } else {
-                  // 커서 앞에 텍스트 삽입
-                  currentLine.insertBefore(document.createTextNode(out[oi]), cursor);
+                  currentLine.appendChild(document.createTextNode(out[oi]));
                 }
                 oi++;
                 setTimeout(streamChar, 18 + Math.random() * 18);
@@ -483,13 +472,11 @@ function isNewProject(p) {
         }
         const { cmd, out } = commands[ci];
         let typingText = null;
-        let cursor = null;
         if (cmd) {
           const line = document.createElement('div');
-          line.innerHTML = '<span class="text-green-400 font-bold">$</span> <span class="text-zinc-200 ml-2 typing-text"></span><span class="cursor-blink text-green-400">█</span>';
+          line.innerHTML = '<span class="text-green-400 font-bold">$</span> <span class="text-zinc-200 ml-2 typing-text"></span>';
           body.appendChild(line);
           typingText = line.querySelector('.typing-text');
-          cursor = line.querySelector('span:last-child');
         }
         let i = 0;
         function typeChar() {
@@ -498,7 +485,6 @@ function isNewProject(p) {
             body.scrollTop = body.scrollHeight;
             setTimeout(typeChar, 40 + Math.random() * 30);
           } else {
-            if (cursor) cursor.remove();
             setTimeout(() => {
               let currentLine = document.createElement('div');
               currentLine.className = 'text-zinc-400 pl-4';
@@ -518,10 +504,8 @@ function isNewProject(p) {
                   setTimeout(streamChar, 20 + Math.random() * 20);
                 } else {
                   ci++;
-                  const cursorLine = document.createElement('div');
-                  cursorLine.innerHTML = '<span class="text-green-400 font-bold">$</span> <span class="cursor-blink text-green-400 ml-2">█</span>';
-                  body.appendChild(cursorLine);
                   body.scrollTop = body.scrollHeight;
+                  setTimeout(runCommand, 2200);
                 }
               }
               streamChar();
