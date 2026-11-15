@@ -52,7 +52,7 @@
     .section-cmd::before { content: '$ '; }
     .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
     .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 24px -8px rgba(37,99,235,0.25); }
-    .project-card { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s; position: relative; transform-origin: center center; }
+    .project-card { transition: transform 0.8s cubic-bezier(0.16,1,0.3,1), box-shadow 0.8s; position: relative; transform-origin: center center; }
     .project-card:hover { transform: scale(1.5); z-index: 50; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.7); }
     .term-border { border: 1px solid rgba(255,255,255,0.08); }
     ::selection { background: rgba(37,99,235,0.4); }
@@ -75,6 +75,7 @@
       <span class="w-3 h-3 rounded-full bg-green-500"></span>
       <span class="ml-3 text-xs font-mono"><span class="text-white">Donian</span><span class="text-zinc-400 hidden sm:inline"> Portfolio — AI coding session</span></span>
       <div class="ml-auto flex items-center gap-4 text-xs text-zinc-400 font-mono">
+        <a href="#career" class="hover:text-zinc-200 transition">career</a>
         <a href="#projects" class="hover:text-zinc-200 transition">projects</a>
         <a href="#contact" class="hover:text-zinc-200 transition">contact</a>
         <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="hover:text-zinc-200 transition">github</a>
@@ -104,7 +105,7 @@
         </div>
         <div class="mb-4 pl-2">
           <div class="text-blue-400 font-bold text-2xl md:text-4xl keep-all donian-name">Donian</div>
-          <div class="text-zinc-400 text-sm">개인 포트폴리오 · Python · Kotlin 개발자</div>
+          <div class="text-zinc-400 text-sm">AI Coder · AI Music Creator</div>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/60 p-4 mb-4">
           <div class="mb-2">
@@ -116,6 +117,28 @@
             <div id="about-body" class="pl-2 text-zinc-400 leading-relaxed space-y-1 min-h-[4rem]"></div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Career -->
+    <section id="career" class="py-4 border-t border-white/5">
+      <div class="font-mono text-sm">
+        <div class="mb-3 flex items-center gap-3">
+          <span class="text-green-400 font-bold text-lg">$</span>
+          <span class="text-zinc-200 text-lg">cat career.log</span>
+        </div>
+        <ul class="space-y-3">
+          <li class="rounded-lg border border-white/10 bg-zinc-900/60 p-4">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-blue-400">2026.01.07</span>
+              <span class="text-zinc-500">–</span>
+              <span class="text-emerald-400">현재</span>
+              <span id="career-duration" class="text-xs px-1.5 py-0.5 rounded bg-white/5 text-zinc-400"></span>
+              <span class="text-zinc-200 ml-1">개인 개발 (Open Source)</span>
+            </div>
+            <div class="text-zinc-400 mt-1 text-xs keep-all">첫 GitHub 저장소(dark-text-rpg)를 공개한 날을 시작으로 지금까지 이어지는 개인 개발 경력</div>
+          </li>
+        </ul>
       </div>
     </section>
 
@@ -355,33 +378,46 @@ function isNewProject(p) {
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 
-    // ---------- About 스트리밍 ----------
+    // ---------- About 스트리밍 (무한 반복) ----------
     (function () {
       const body = document.getElementById('about-body');
       if (!body) return;
-      const out = '◆ Android 앱, Python 데스크톱 도구, 웹 게임, Windows 유틸리티까지\n→ 다양한 플랫폼에서 직접 만들어보며 배우고 있습니다.\n✓ AI·OCR·음성인식·LLM 등 최신 기술을 활용한 실용적인 프로그램을 만드는 것을 좋아합니다.\n$ cat skills.txt\n◆ Kotlin · Jetpack Compose · Python · Tkinter · PySide6\n◆ JavaScript · TypeScript · C#/.NET 10 · Rust · WebAssembly';
+      const out = '◆ Android 앱 · Windows 유틸리티 · 웹 게임\n→ OCR · 음성인식 · LLM을 붙인 실용 도구를 주로 다룹니다.\n$ cat skills.txt\n◆ Jetpack Compose · Tkinter · PySide6\n◆ JavaScript · TypeScript · C#/.NET 10 · Rust · WebAssembly';
       let started = false;
+      let minHeight = 0;
+      function runStream() {
+        body.innerHTML = '';
+        let currentLine = document.createElement('div');
+        body.appendChild(currentLine);
+        let oi = 0;
+        function streamChar() {
+          if (oi < out.length) {
+            if (out[oi] === '\n') {
+              currentLine = document.createElement('div');
+              body.appendChild(currentLine);
+            } else {
+              currentLine.appendChild(document.createTextNode(out[oi]));
+            }
+            oi++;
+            setTimeout(streamChar, 18 + Math.random() * 18);
+          } else {
+            // 다 찍은 실제 높이를 최소 높이로 고정 → 반복 초기화 시 레이아웃 점프 방지
+            minHeight = Math.max(minHeight, body.offsetHeight);
+            body.style.minHeight = minHeight + 'px';
+            setTimeout(() => {
+              body.innerHTML = '';
+              setTimeout(runStream, 600);
+            }, 2200);
+          }
+        }
+        streamChar();
+      }
       const obs = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !started) {
             started = true;
             obs.unobserve(entry.target);
-            let currentLine = document.createElement('div');
-            body.appendChild(currentLine);
-            let oi = 0;
-            function streamChar() {
-              if (oi < out.length) {
-                if (out[oi] === '\n') {
-                  currentLine = document.createElement('div');
-                  body.appendChild(currentLine);
-                } else {
-                  currentLine.appendChild(document.createTextNode(out[oi]));
-                }
-                oi++;
-                setTimeout(streamChar, 18 + Math.random() * 18);
-              }
-            }
-            setTimeout(streamChar, 300);
+            setTimeout(runStream, 300);
           }
         });
       }, { threshold: 0.3 });
@@ -432,6 +468,17 @@ function isNewProject(p) {
     if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
+    // ---------- 경력 기간(첫 GitHub 저장소 생성일 기준) ----------
+    (function () {
+      const el = document.getElementById('career-duration');
+      if (!el) return;
+      const start = new Date(2026, 0, 7); // dark-text-rpg 최초 공개일
+      const now = new Date();
+      let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+      if (now.getDate() < start.getDate()) months -= 1;
+      el.textContent = months >= 1 ? `${months}개월째` : `${Math.max(1, Math.floor((now - start) / 86400000))}일째`;
+    })();
+
     // ---------- 데이터 로드 ----------
     fetch('projects.json')
       .then(r => r.json())
@@ -450,7 +497,7 @@ function isNewProject(p) {
       const body = document.getElementById('terminal-body');
       if (!body) return;
       const commands = [
-        { cmd: '', out: '◆ Initializing profile...\n▸ 안녕하세요, Donian 입니다.\n◆ 시골아재, 파이썬과 코틀린으로 프로그래밍을 공부하고 있습니다.\n→ 문제를 직접 만들고 해결하는 과정을 즐기며,\n✓ 오픈소스 프로젝트를 공개하고 있습니다.\n⚡ Done.' },
+        { cmd: '', out: '◆ Initializing profile...\n▸ 안녕하세요, Donian 입니다.\n◆ 파이썬과 코틀린을 AI와 함께 공부하며 프로그래밍을 배우고 있습니다.\n→ 문제를 직접 만들고 해결하는 과정을 즐기며,\n✓ 오픈소스 프로젝트를 공개하고 있습니다.\n♫ ACE-Step Studio로 AI 음악 생성도 공부하고 있습니다.\n⚡ Done.' },
       ];
       let ci = 0;
       function runCommand() {
