@@ -47,7 +47,114 @@
     @keyframes newPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0.6); } 50% { transform: scale(1.08); box-shadow: 0 0 8px 2px rgba(16,185,129,0.4); } }
     @keyframes donianGlow { 0%,100% { transform: scale(1.15); text-shadow: 0 0 8px rgba(96,165,250,0.5); } 50% { transform: scale(1.15); text-shadow: 0 0 16px rgba(96,165,250,0.8); } }
     .new-badge { animation: newPulse 1.6s ease-in-out infinite; }
-    .donian-name { display: inline-block; animation: donianGlow 2.4s ease-in-out infinite; }
+    .donian-name { display: inline-block; }
+    .donian-slash {
+      position: relative;
+      display: inline-block;
+      color: #60a5fa;
+      font-size: 2.25rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18rem;
+      padding: 0.5rem 0.4rem 0.2rem;
+      line-height: 1;
+    }
+    @media (min-width: 768px) { .donian-slash { font-size: 3rem; letter-spacing: 0.22rem; } }
+    .donian-slash .slash {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-24deg) scaleY(0);
+      transform-origin: center center;
+      width: 0.12rem;
+      height: 145%;
+      background: #60a5fa;
+      z-index: 4;
+      animation: donianSlash 6s ease-in infinite;
+    }
+    .donian-slash .slash:before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0.6rem;
+      height: 120%;
+      background: #0a0a0a;
+      z-index: -1;
+    }
+    .donian-slash .slash:after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #60a5fa;
+    }
+    .donian-slash .sides { position: absolute; width: 100%; height: 100%; top: 0; left: 0; overflow: hidden; }
+    .donian-slash .side { position: absolute; background: #60a5fa; }
+    .donian-slash .sides .side:nth-child(1) { top: 0; left: 0; width: 100%; height: 0.12rem; transform: translateX(-101%); animation: donianSideTop ease 6s infinite; }
+    .donian-slash .sides .side:nth-child(2) { top: 0; right: 0; width: 0.12rem; height: 100%; transform: translateY(-101%); animation: donianSideRight ease 6s infinite; }
+    .donian-slash .sides .side:nth-child(3) { left: 0; bottom: 0; width: 100%; height: 0.12rem; transform: translateX(101%); animation: donianSideBottom ease 6s infinite; }
+    .donian-slash .sides .side:nth-child(4) { top: 0; left: 0; width: 0.12rem; height: 100%; transform: translateY(101%); animation: donianSideLeft ease 6s infinite; }
+    .donian-slash .text { position: relative; }
+    .donian-slash .text--backing { opacity: 0; }
+    .donian-slash .text--left { position: absolute; top: 0; left: 0; width: 51%; height: 100%; overflow: hidden; }
+    .donian-slash .text--left .inner { transform: translateX(100%); animation: donianTextLeft 6s ease-in-out infinite; }
+    .donian-slash .text--right { position: absolute; top: 0; right: 0; width: 50%; height: 100%; overflow: hidden; }
+    .donian-slash .text--right .inner { transform: translateX(-200%); animation: donianTextRight 6s ease-in-out infinite; }
+    @keyframes donianSlash {
+      0% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(0); }
+      6% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(1); }
+      13% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(1); }
+      16.6% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(0); }
+      100% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(0); }
+    }
+    @keyframes donianTextLeft {
+      0% { transform: translateX(100%); }
+      10% { transform: translateX(0); }
+      58% { transform: translateX(0); }
+      70% { transform: translateX(-200%); }
+      100% { transform: translateX(-200%); }
+    }
+    @keyframes donianTextRight {
+      0% { transform: translateX(-200%); }
+      10% { transform: translateX(-100%); }
+      58% { transform: translateX(-100%); }
+      70% { transform: translateX(-300%); }
+      100% { transform: translateX(-300%); }
+    }
+    @keyframes donianSideTop {
+      0%, 14% { transform: translateX(-101%); }
+      24%, 55% { transform: translateX(0); }
+      65% { transform: translateX(101%); }
+      100% { transform: translateX(101%); }
+    }
+    @keyframes donianSideRight {
+      0%, 14%, 23% { transform: translateY(-101%); }
+      30%, 62% { transform: translateY(0); }
+      72% { transform: translateY(101%); }
+      100% { transform: translateY(101%); }
+    }
+    @keyframes donianSideBottom {
+      0%, 14%, 24%, 28% { transform: translateX(101%); }
+      37%, 70% { transform: translateX(0); }
+      79% { transform: translateX(-101%); }
+      100% { transform: translateX(-101%); }
+    }
+    @keyframes donianSideLeft {
+      0%, 14%, 24%, 34%, 35% { transform: translateY(101%); }
+      44%, 79% { transform: translateY(0); }
+      86% { transform: translateY(-101%); }
+      100% { transform: translateY(-101%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .donian-slash .text--backing { opacity: 1; }
+      .donian-slash .slash, .donian-slash .sides, .donian-slash .text--left, .donian-slash .text--right { display: none; }
+    }
     .donian-cursor { display: inline-block; margin-left: 0.05em; animation: blink 0.8s step-end infinite; }
     .cursor-blink { animation: blink 1s step-end infinite; }
     .term-cursor { display: inline-block; width: 0.6ch; height: 1.1em; margin-left: 0.15rem; background: #22c55e; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
@@ -114,7 +221,20 @@
           <span class="text-zinc-200 ml-2 text-lg">who am i</span>
         </div>
         <div class="mb-6 pl-2">
-          <div class="text-blue-400 font-bold text-3xl md:text-5xl keep-all donian-name"><span id="donian-text"></span><span class="donian-cursor" aria-hidden="true">_</span></div>
+          <div class="donian-slash donian-name" aria-label="Donian">
+            <div class="slash"></div>
+            <div class="sides">
+              <div class="side"></div>
+              <div class="side"></div>
+              <div class="side"></div>
+              <div class="side"></div>
+            </div>
+            <div class="text">
+              <div class="text--backing">Donian</div>
+              <div class="text--left"><div class="inner">Donian</div></div>
+              <div class="text--right"><div class="inner">Donian</div></div>
+            </div>
+          </div>
           <div class="text-zinc-400 text-sm -ml-2">AI Coder · AI Music Creator</div>
         </div>
         <div class="mt-4 mb-2">
@@ -709,51 +829,6 @@ function isNewProject(p) {
       }
       body.innerHTML = '';
       setTimeout(runCommand, 500);
-    })();
-
-    // ---------- Donian 이름 라벨 타이핑 효과 (Terminal Text Effect) ----------
-    (function () {
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const target = document.getElementById('donian-text');
-      if (!target) return;
-      const words = ['Donian'];
-      const colors = ['#60a5fa'];
-      if (reduceMotion) {
-        target.textContent = words[0];
-        return;
-      }
-      let visible = true;
-      const cursor = document.querySelector('.donian-cursor');
-      let letterCount = 1;
-      let x = 1;
-      let waiting = false;
-      target.setAttribute('style', 'color:' + colors[0]);
-      window.setInterval(function () {
-        if (letterCount === 0 && waiting === false) {
-          waiting = true;
-          target.innerHTML = words[0].substring(0, letterCount);
-          window.setTimeout(function () {
-            var usedColor = colors.shift();
-            colors.push(usedColor);
-            var usedWord = words.shift();
-            words.push(usedWord);
-            x = 1;
-            target.setAttribute('style', 'color:' + colors[0]);
-            letterCount += x;
-            waiting = false;
-          }, 1000);
-        } else if (letterCount === words[0].length + 1 && waiting === false) {
-          waiting = true;
-          window.setTimeout(function () {
-            x = -1;
-            letterCount += x;
-            waiting = false;
-          }, 1000);
-        } else if (waiting === false) {
-          target.innerHTML = words[0].substring(0, letterCount);
-          letterCount += x;
-        }
-      }, 120);
     })();
 
     // ---------- Matrix 배경 (스크롤 연동 · 영문/숫자/한글 자음) ----------
