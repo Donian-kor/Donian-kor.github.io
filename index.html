@@ -45,13 +45,13 @@
     .reveal.visible { animation: fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
     @keyframes blink { 0%,50% { opacity:1; } 51%,100% { opacity:0; } }
     @keyframes newPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0.6); } 50% { transform: scale(1.08); box-shadow: 0 0 8px 2px rgba(16,185,129,0.4); } }
-    @keyframes donianGlow { 0%,100% { transform: scale(1.15); text-shadow: 0 0 8px rgba(96,165,250,0.5); } 50% { transform: scale(1.15); text-shadow: 0 0 16px rgba(96,165,250,0.8); } }
+    @keyframes donianGlow { 0%,100% { transform: scale(1.15); text-shadow: 0 0 8px rgba(163,230,53,0.5); } 50% { transform: scale(1.15); text-shadow: 0 0 16px rgba(163,230,53,0.8); } }
     .new-badge { animation: newPulse 1.6s ease-in-out infinite; }
     .donian-name { display: inline-block; }
     .donian-slash {
       position: relative;
       display: inline-block;
-      color: #60a5fa;
+      color: #a3e635;
       font-size: 6.75rem;
       font-weight: 700;
       text-transform: uppercase;
@@ -68,7 +68,7 @@
       transform-origin: center center;
       width: 0.12rem;
       height: 145%;
-      background: #60a5fa;
+      background: #a3e635;
       z-index: 4;
       animation: donianSlash 6s ease-in infinite;
     }
@@ -92,10 +92,10 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: #60a5fa;
+      background: #a3e635;
     }
     .donian-slash .sides { position: absolute; width: 100%; height: 100%; top: 0; left: 0; overflow: hidden; }
-    .donian-slash .side { position: absolute; background: #60a5fa; }
+    .donian-slash .side { position: absolute; background: #a3e635; }
     .donian-slash .sides .side:nth-child(1) { top: 0; left: 0; width: 100%; height: 0.12rem; transform: translateX(-101%); animation: donianSideTop ease 6s infinite; }
     .donian-slash .sides .side:nth-child(2) { top: 0; right: 0; width: 0.12rem; height: 100%; transform: translateY(-101%); animation: donianSideRight ease 6s infinite; }
     .donian-slash .sides .side:nth-child(3) { left: 0; bottom: 0; width: 100%; height: 0.12rem; transform: translateX(101%); animation: donianSideBottom ease 6s infinite; }
@@ -121,14 +121,14 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(105deg, transparent 35%, rgba(96,165,250,0.55) 50%, transparent 65%);
+      background: linear-gradient(105deg, transparent 35%, rgba(163,230,53,0.55) 50%, transparent 65%);
       background-size: 200% 100%;
       background-position: 200% 0;
       mix-blend-mode: screen;
       opacity: 0;
       animation: donianShimmer 6s ease-in-out infinite;
     }
-    .donian-slash .text { text-shadow: 0 0 0 rgba(96,165,250,0); animation: donianGlowPulse 6s ease-in-out infinite; }
+    .donian-slash .text { text-shadow: 0 0 0 rgba(163,230,53,0); animation: donianGlowPulse 6s ease-in-out infinite; }
     @keyframes donianSlash {
       0% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(0); }
       6% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(1); }
@@ -188,11 +188,11 @@
       50%, 100% { opacity: 0; background-position: -200% 0; }
     }
     @keyframes donianGlowPulse {
-      0%, 55% { text-shadow: 0 0 0 rgba(96,165,250,0); }
-      60% { text-shadow: 0 0 12px rgba(96,165,250,0.9), 0 0 28px rgba(96,165,250,0.4); }
-      70% { text-shadow: 0 0 8px rgba(96,165,250,0.6); }
-      85% { text-shadow: 0 0 14px rgba(96,165,250,0.8); }
-      100% { text-shadow: 0 0 4px rgba(96,165,250,0.4); }
+      0%, 55% { text-shadow: 0 0 0 rgba(163,230,53,0); }
+      60% { text-shadow: 0 0 12px rgba(163,230,53,0.9), 0 0 28px rgba(163,230,53,0.4); }
+      70% { text-shadow: 0 0 8px rgba(163,230,53,0.6); }
+      85% { text-shadow: 0 0 14px rgba(163,230,53,0.8); }
+      100% { text-shadow: 0 0 4px rgba(163,230,53,0.4); }
     }
     @media (prefers-reduced-motion: reduce) {
       .donian-slash .text--backing { opacity: 1; }
