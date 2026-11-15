@@ -271,7 +271,7 @@
             </a>
           </div>
           <div class="screenshot bg-zinc-800 overflow-hidden hidden sm:group-hover:block" style="aspect-ratio:16/10">
-            <img src="${p.screenshot}" alt="${p.name} 스크린샷" loading="lazy" decoding="async" class="w-full h-full object-cover" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center h-full text-zinc-600&quot;><iconify-icon icon=&quot;solar:code-square-bold&quot; class=&quot;text-2xl&quot;></iconify-icon></div>';">
+            <img src="${p.screenshot}" alt="${p.name} 스크린샷" loading="lazy" decoding="async" class="w-full h-full object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center h-full text-zinc-600&quot;><iconify-icon icon=&quot;solar:code-square-bold&quot; class=&quot;text-2xl&quot;></iconify-icon></div>';">
           </div>
           <div class="p-3">
             <div class="flex items-center justify-between gap-2 mb-1">
@@ -364,7 +364,7 @@
       const demoLink = p.demo ? `<a href="${p.demo}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline">demo →</a>` : '';
       modalContent.innerHTML = `
         <div class="screenshot bg-zinc-800 overflow-hidden" style="aspect-ratio:16/10">
-          <img src="${p.screenshot}" alt="${p.name} 스크린샷" loading="lazy" decoding="async" class="w-full h-full object-cover" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center h-full text-zinc-600&quot;><iconify-icon icon=&quot;solar:code-square-bold&quot; class=&quot;text-4xl&quot;></iconify-icon></div>';">
+          <img src="${p.screenshot}" alt="${p.name} 스크린샷" loading="lazy" decoding="async" class="w-full h-full object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center h-full text-zinc-600&quot;><iconify-icon icon=&quot;solar:code-square-bold&quot; class=&quot;text-4xl&quot;></iconify-icon></div>';">
         </div>
         <div class="p-5">
           <div class="flex items-center justify-between gap-2 mb-2">
