@@ -315,7 +315,7 @@
       "id": "video-duplicate-remover",
       "name": "video-duplicate-remover",
       "category": "pc",
-      "description": "같은 영상의 여러 버전(다른 화질/용량)을 자동으로 찾아 최고 화질 1개만 남기고 나머지를 자동 이동하는 Windows 데스크톱 프로그램.",
+      "description": "같은 영상의 여러 버전(다른 화질/용량)을 자동으로 찾아 최고 화질 1개만 남기고 나머지를 자동 이동하는 데스크톱 프로그램.",
       "tech": [
         "Python",
         "PySide6",
