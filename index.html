@@ -223,13 +223,14 @@
             <span class="w-2 h-2 rounded-full bg-yellow-500/70"></span>
             <span class="w-2 h-2 rounded-full bg-green-500/70"></span>
             <span class="ml-1.5 text-xs text-zinc-500 font-mono truncate flex-1">${p.id}</span>
-            <a href="${p.github}" target="_blank" rel="noopener" class="text-zinc-400 hover:text-zinc-200 transition" aria-label="${p.name} GitHub" title="GitHub">
-              <iconify-icon icon="solar:github-bold" class="text-sm"></iconify-icon>
+            <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition text-xs" aria-label="${p.name} GitHub 저장소로 이동" title="GitHub 저장소 열기">
+              <iconify-icon icon="solar:arrow-right-up-bold" class="text-sm"></iconify-icon>
+              <span>open</span>
             </a>
           </div>
           <div class="p-3">
             <div class="flex items-center justify-between gap-2 mb-1">
-              <h3 class="font-bold text-sm keep-all text-zinc-100">${p.name}</h3>
+              <h3 class="font-bold text-sm keep-all text-zinc-100"><a href="${p.github}" target="_blank" rel="noopener" class="hover:text-blue-300 transition">${p.name}</a></h3>
               <span class="lang-badge ${badgeClass}">${p.language}</span>
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed keep-all mb-2">${p.description}</p>
