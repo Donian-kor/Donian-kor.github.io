@@ -48,6 +48,8 @@
     .section-cmd::before { content: '$ '; }
     .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
     .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 24px -8px rgba(37,99,235,0.25); }
+    .project-card { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s; position: relative; transform-origin: center center; }
+    .project-card:hover { transform: scale(2); z-index: 50; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.7); }
     .term-border { border: 1px solid rgba(255,255,255,0.08); }
     ::selection { background: rgba(37,99,235,0.4); }
     @media (prefers-reduced-motion: reduce) {
@@ -231,7 +233,7 @@
       empty.classList.add('hidden');
       filtered.forEach((p, i) => {
         const card = document.createElement('article');
-        card.className = 'card-hover rounded-lg bg-zinc-900/60 border border-white/5 overflow-hidden';
+        card.className = 'project-card rounded-lg bg-zinc-900/60 border border-white/5 overflow-hidden';
         const badgeClass = langColor[p.language] || 'text-zinc-300';
         const demoLink = p.demo ? `<a href="${p.demo}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:underline">demo →</a>` : '';
         const forkLabel = p.forked ? `<span class="text-xs text-zinc-600">forked${p.original ? ' from ' + p.original : ''}</span>` : '';
