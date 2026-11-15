@@ -310,7 +310,7 @@
       const body = document.getElementById('terminal-body');
       if (!body) return;
       const commands = [
-        { cmd: 'ai --intro', out: '◆ Initializing profile...\n▸ 안녕하세요, Donian 입니다.\n◆ 시골아재, 파이썬과 코틀린으로 프로그래밍을 공부하고 있습니다.\n→ 문제를 직접 만들고 해결하는 과정을 즐기며,\n✓ 오픈소스 프로젝트를 공개하고 있습니다.\n⚡ Done.' },
+        { cmd: '', out: '◆ Initializing profile...\n▸ 안녕하세요, Donian 입니다.\n◆ 시골아재, 파이썬과 코틀린으로 프로그래밍을 공부하고 있습니다.\n→ 문제를 직접 만들고 해결하는 과정을 즐기며,\n✓ 오픈소스 프로젝트를 공개하고 있습니다.\n⚡ Done.' },
         { cmd: 'ai --about', out: '◆ Android 앱, Python 데스크톱 도구, 웹 게임, Windows 유틸리티까지\n→ 다양한 플랫폼에서 직접 만들어보며 배우고 있습니다.\n✓ AI·OCR·음성인식·LLM 등 최신 기술을 활용한 실용적인 프로그램을 만드는 것을 좋아합니다.\n⚡ Done.' },
       ];
       let ci = 0;
@@ -321,19 +321,23 @@
           return;
         }
         const { cmd, out } = commands[ci];
-        const line = document.createElement('div');
-        line.innerHTML = '<span class="text-green-400 font-bold">$</span> <span class="text-zinc-200 ml-2 typing-text"></span><span class="cursor-blink text-green-400">█</span>';
-        body.appendChild(line);
-        const typingText = line.querySelector('.typing-text');
-        const cursor = line.querySelector('span:last-child');
+        let typingText = null;
+        let cursor = null;
+        if (cmd) {
+          const line = document.createElement('div');
+          line.innerHTML = '<span class="text-green-400 font-bold">$</span> <span class="text-zinc-200 ml-2 typing-text"></span><span class="cursor-blink text-green-400">█</span>';
+          body.appendChild(line);
+          typingText = line.querySelector('.typing-text');
+          cursor = line.querySelector('span:last-child');
+        }
         let i = 0;
         function typeChar() {
-          if (i < cmd.length) {
+          if (cmd && i < cmd.length) {
             typingText.textContent += cmd[i++];
             body.scrollTop = body.scrollHeight;
             setTimeout(typeChar, 40 + Math.random() * 30);
           } else {
-            cursor.remove();
+            if (cursor) cursor.remove();
             setTimeout(() => {
               let currentLine = document.createElement('div');
               currentLine.className = 'text-zinc-400 pl-4';
