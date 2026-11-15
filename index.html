@@ -177,6 +177,17 @@
     const tabs = document.getElementById('category-tabs');
     const empty = document.getElementById('empty-state');
     let allProjects = [];
+function isNewProject(p) {
+  if (!p || !p.updated_at) return false;
+  const d = new Date(p.updated_at);
+  if (isNaN(d.getTime())) return false;
+  const now = new Date();
+  // 날짜만 비교 (시간 무시) - 7일 이내 업데이트
+  const dDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const sevenDaysAgo = new Date(nowDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+  return dDate >= sevenDaysAgo;
+}
     let currentCategory = 'all';
 
     const langColor = {
@@ -255,7 +266,17 @@
       const filtered = currentCategory === 'all' ? allProjects : allProjects.filter(p => p.category === currentCategory);
       if (filtered.length === 0) { empty.classList.remove('hidden'); return; }
       empty.classList.add('hidden');
-      filtered.forEach((p, i) => {
+      // pork 는 항상 마지막, 나머지는 생성일(created_at) 기준 내림차순 정렬
+      const isPork = (p) => /pork/i.test(p.id || '') || /pork/i.test(p.name || '');
+      const sorted = [...filtered].sort((a, b) => {
+        const aPork = isPork(a), bPork = isPork(b);
+        if (aPork && !bPork) return 1;
+        if (!aPork && bPork) return -1;
+        if (aPork && bPork) return 0;
+        return (b.created_at || '').localeCompare(a.created_at || '');
+      });
+      // 7일 이내 업데이트 여부는 isNewProject() (전역) 사용
+      sorted.forEach((p, i) => {
         const card = document.createElement('article');
         card.className = 'project-card group rounded-lg bg-zinc-900/60 border border-white/5 overflow-hidden';
         const badgeClass = langColor[p.language] || 'text-zinc-300';
@@ -276,6 +297,7 @@
           <div class="p-3">
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="lang-badge ${badgeClass}" title="${langDesc[p.language] || p.language}">${p.language}</span>
+              ${isNewProject(p) ? '<span class="px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">NEW</span>' : ''}
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed keep-all mb-2">${p.description}</p>
             <div class="text-[0.65rem] text-zinc-300 font-mono mb-2">생성일: ${p.created_at || '-'} · 업데이트: ${p.updated_at || '-'}</div>
@@ -370,6 +392,7 @@
           <div class="flex items-center justify-between gap-2 mb-2">
             <h3 id="modal-title" class="font-bold text-lg keep-all text-zinc-100">${p.name}</h3>
             <span class="lang-badge ${badgeClass}">${p.language}</span>
+            ${isNewProject(p) ? '<span class="px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">NEW</span>' : ''}
           </div>
           <p class="text-sm text-zinc-300 leading-relaxed keep-all mb-3">${p.description}</p>
           <div class="text-sm text-zinc-300 font-mono mb-3">생성일: ${p.created_at || '-'} · 업데이트: ${p.updated_at || '-'}</div>
