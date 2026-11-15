@@ -95,12 +95,12 @@
   </div>
 
   <!-- Hero -->
-  <header id="top" class="min-h-[100dvh] flex items-center pt-16 relative overflow-hidden">
+  <header id="top" class="pt-16 relative overflow-hidden">
     <div class="absolute inset-0 -z-10">
       <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl"></div>
       <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
     </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
       <!-- 홈페이지 제목 (맨위) -->
       <div class="mb-12 reveal">
         <h1 class="text-5xl md:text-7xl font-bold tracking-tight keep-all">
@@ -145,7 +145,7 @@
             <span class="w-3 h-3 rounded-full bg-green-500"></span>
             <span class="ml-2 text-xs text-zinc-400">donian@portfolio:~</span>
           </div>
-          <div id="terminal-body" class="p-5 h-72 overflow-y-auto text-zinc-300 leading-relaxed space-y-1 w-full">
+          <div id="terminal-body" class="p-5 h-48 overflow-y-auto text-zinc-300 leading-relaxed space-y-1 w-full">
           </div>
         </div>
       </div>
@@ -153,7 +153,7 @@
   </header>
 
   <!-- About -->
-  <section id="about" class="py-24 border-t border-white/5">
+  <section id="about" class="py-12 border-t border-white/5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all reveal prompt">소개</h2>
@@ -189,7 +189,7 @@
   </section>
 
   <!-- Projects -->
-  <section id="projects" class="py-24 border-t border-white/5">
+  <section id="projects" class="py-12 border-t border-white/5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all reveal prompt">프로젝트</h2>
@@ -200,7 +200,7 @@
       <!-- Category tabs -->
       <div id="category-tabs" class="mt-8 flex flex-wrap gap-2 reveal" role="tablist" aria-label="프로젝트 카테고리"></div>
       <!-- Project grid -->
-      <div id="project-grid" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" aria-live="polite"></div>
+      <div id="project-grid" class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-live="polite"></div>
       <div id="empty-state" class="hidden mt-12 text-center text-zinc-500 keep-all">
         해당 카테고리에 프로젝트가 없습니다.
       </div>
@@ -208,7 +208,7 @@
   </section>
 
   <!-- Tech Stack -->
-  <section id="stack" class="py-24 border-t border-white/5">
+  <section id="stack" class="py-12 border-t border-white/5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all reveal prompt">기술 스택</h2>
@@ -234,7 +234,7 @@
   </section>
 
   <!-- Footer -->
-  <footer class="py-12 border-t border-white/5">
+  <footer class="py-6 border-t border-white/5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="text-sm text-zinc-500 keep-all">© 2026 Donian. All rights reserved.</div>
       <div class="flex items-center gap-4 text-zinc-400">
@@ -316,8 +316,8 @@
                  class="w-full h-full object-cover"
                  onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center h-full text-zinc-600&quot;><iconify-icon icon=&quot;solar:code-square-bold&quot; class=&quot;text-4xl&quot;></iconify-icon></div>';">
           </div>
-          <div class="p-5">
-            <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="p-4">
+            <div class="flex items-center justify-between gap-2 mb-1">
               <h3 class="font-bold text-lg keep-all">${p.name}</h3>
               <span class="lang-badge px-2 py-0.5 rounded-full ${badgeClass}">${p.language}</span>
             </div>
