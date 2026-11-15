@@ -377,8 +377,8 @@
             ${p.tech.map(t => `<span class="text-xs px-2 py-0.5 rounded bg-white/5 text-zinc-400" title="${techDesc[t] || t}">${t}</span>`).join('')}
           </div>
           <div class="flex items-center gap-3">
-            <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-zinc-200 text-xs transition">
-              <iconify-icon icon="solar:github-bold"></iconify-icon> GitHub
+            <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 rounded bg-white/5 hover:bg-white/10 text-zinc-100 text-base font-medium transition">
+              <iconify-icon icon="solar:arrow-right-up-bold" class="text-2xl"></iconify-icon> open
             </a>
             ${demoLink}
             ${p.forked ? `<span class="text-xs text-zinc-500">forked${p.original ? ' from ' + p.original : ''}</span>` : ''}
