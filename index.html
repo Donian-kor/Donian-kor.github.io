@@ -563,7 +563,7 @@ function isNewProject(p) {
       const now = new Date();
       let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
       if (now.getDate() < start.getDate()) months -= 1;
-      el.textContent = months >= 1 ? `${months}개월째` : `${Math.max(1, Math.floor((now - start) / 86400000))}일째`;
+      el.textContent = months >= 1 ? `${months}개월 차` : `${Math.max(1, Math.floor((now - start) / 86400000))}일째`;
     })();
 
     // ---------- career.log 펼치기 (모바일 탭 지원) ----------
