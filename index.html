@@ -124,11 +124,7 @@
           <span class="text-green-400 font-bold">$</span>
           <span class="text-zinc-200 ml-2">cat about.txt</span>
         </div>
-        <div class="pl-2 text-zinc-300 leading-relaxed space-y-1">
-          <div>◆ Android 앱, Python 데스크톱 도구, 웹 게임, Windows 유틸리티까지</div>
-          <div>→ 다양한 플랫폼에서 직접 만들어보며 배우고 있습니다.</div>
-          <div>✓ AI·OCR·음성인식·LLM 등 최신 기술을 활용한 실용적인 프로그램을 만드는 것을 좋아합니다.</div>
-        </div>
+        <div id="about-body" class="pl-2 text-zinc-300 leading-relaxed space-y-1 min-h-[4rem]"></div>
         <div class="mt-3 flex flex-wrap gap-2 pl-2">
           <span class="px-2 py-1 rounded bg-white/5 border border-white/10 text-xs text-zinc-400">Kotlin</span>
           <span class="px-2 py-1 rounded bg-white/5 border border-white/10 text-xs text-zinc-400">Jetpack Compose</span>
@@ -262,6 +258,39 @@
       });
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+    // ---------- About 스트리밍 ----------
+    (function () {
+      const body = document.getElementById('about-body');
+      if (!body) return;
+      const out = '◆ Android 앱, Python 데스크톱 도구, 웹 게임, Windows 유틸리티까지\n→ 다양한 플랫폼에서 직접 만들어보며 배우고 있습니다.\n✓ AI·OCR·음성인식·LLM 등 최신 기술을 활용한 실용적인 프로그램을 만드는 것을 좋아합니다.';
+      let started = false;
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !started) {
+            started = true;
+            obs.unobserve(entry.target);
+            let currentLine = document.createElement('div');
+            body.appendChild(currentLine);
+            let oi = 0;
+            function streamChar() {
+              if (oi < out.length) {
+                if (out[oi] === '\n') {
+                  currentLine = document.createElement('div');
+                  body.appendChild(currentLine);
+                } else {
+                  currentLine.textContent += out[oi];
+                }
+                oi++;
+                setTimeout(streamChar, 18 + Math.random() * 18);
+              }
+            }
+            setTimeout(streamChar, 300);
+          }
+        });
+      }, { threshold: 0.3 });
+      obs.observe(body);
+    })();
 
     // ---------- 데이터 로드 ----------
     fetch('projects.json')
