@@ -18,7 +18,6 @@ python -m http.server 8765
 index.html        # 메인 페이지 (단일 파일)
 projects.json     # 프로젝트 메타데이터 (추가/삭제는 이 파일만 수정)
 assets/images/projects/  # 프로젝트 스크린샷 (WebP)
-개발기획서.md / .html     # 개발기획서
 ```
 
 ## 프로젝트 추가/삭제 방법
