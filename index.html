@@ -106,6 +106,29 @@
     .donian-slash .text--left .inner { transform: translateX(100%); animation: donianTextLeft 6s ease-in-out infinite; }
     .donian-slash .text--right { position: absolute; top: 0; right: 0; width: 50%; height: 100%; overflow: hidden; }
     .donian-slash .text--right .inner { transform: translateX(-200%); animation: donianTextRight 6s ease-in-out infinite; }
+    .donian-slash .glitch {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0;
+      animation: donianGlitch 6s steps(1, end) infinite;
+    }
+    .donian-slash .glitch--cyan { color: #22d3ee; text-shadow: 0 0 6px #22d3ee; }
+    .donian-slash .glitch--magenta { color: #f472b6; text-shadow: 0 0 6px #f472b6; animation-delay: 0.05s; }
+    .donian-slash .shimmer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(105deg, transparent 35%, rgba(96,165,250,0.55) 50%, transparent 65%);
+      background-size: 200% 100%;
+      background-position: 200% 0;
+      mix-blend-mode: screen;
+      opacity: 0;
+      animation: donianShimmer 6s ease-in-out infinite;
+    }
+    .donian-slash .text { text-shadow: 0 0 0 rgba(96,165,250,0); animation: donianGlowPulse 6s ease-in-out infinite; }
     @keyframes donianSlash {
       0% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(0); }
       6% { transform: translate(-50%, -50%) rotate(-24deg) scaleY(1); }
@@ -151,9 +174,29 @@
       86% { transform: translateY(-101%); }
       100% { transform: translateY(-101%); }
     }
+    @keyframes donianGlitch {
+      0%, 48% { opacity: 0; transform: translate(0,0); clip-path: inset(0 0 0 0); }
+      49% { opacity: 0.85; transform: translate(-3px, 1px); clip-path: inset(10% 0 60% 0); }
+      50% { opacity: 0.85; transform: translate(3px, -1px); clip-path: inset(55% 0 15% 0); }
+      51% { opacity: 0.6; transform: translate(-2px, 2px); clip-path: inset(30% 0 40% 0); }
+      52%, 100% { opacity: 0; transform: translate(0,0); clip-path: inset(0 0 0 0); }
+    }
+    @keyframes donianShimmer {
+      0%, 28% { opacity: 0; background-position: 200% 0; }
+      32% { opacity: 1; }
+      46% { opacity: 1; background-position: -200% 0; }
+      50%, 100% { opacity: 0; background-position: -200% 0; }
+    }
+    @keyframes donianGlowPulse {
+      0%, 55% { text-shadow: 0 0 0 rgba(96,165,250,0); }
+      60% { text-shadow: 0 0 12px rgba(96,165,250,0.9), 0 0 28px rgba(96,165,250,0.4); }
+      70% { text-shadow: 0 0 8px rgba(96,165,250,0.6); }
+      85% { text-shadow: 0 0 14px rgba(96,165,250,0.8); }
+      100% { text-shadow: 0 0 4px rgba(96,165,250,0.4); }
+    }
     @media (prefers-reduced-motion: reduce) {
       .donian-slash .text--backing { opacity: 1; }
-      .donian-slash .slash, .donian-slash .sides, .donian-slash .text--left, .donian-slash .text--right { display: none; }
+      .donian-slash .slash, .donian-slash .sides, .donian-slash .text--left, .donian-slash .text--right, .donian-slash .glitch, .donian-slash .shimmer { display: none; }
     }
     .donian-cursor { display: inline-block; margin-left: 0.05em; animation: blink 0.8s step-end infinite; }
     .cursor-blink { animation: blink 1s step-end infinite; }
@@ -233,7 +276,10 @@
               <div class="text--backing">Donian</div>
               <div class="text--left"><div class="inner">Donian</div></div>
               <div class="text--right"><div class="inner">Donian</div></div>
+              <div class="glitch glitch--cyan" aria-hidden="true">Donian</div>
+              <div class="glitch glitch--magenta" aria-hidden="true">Donian</div>
             </div>
+            <div class="shimmer"></div>
           </div>
           <div class="text-zinc-400 text-sm -ml-2">AI Coder · AI Music Creator</div>
         </div>
