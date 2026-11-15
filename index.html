@@ -28,6 +28,8 @@
   </script>
   <style>
     body { font-family: 'JetBrains Mono', 'Pretendard', monospace; background: #0a0a0a; }
+    #matrix-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.42; }
+    @media (max-width: 640px) { #matrix-bg { opacity: 0.25; } }
     .keep-all { word-break: keep-all; }
     html { scroll-behavior: smooth; }
     .noise {
@@ -69,6 +71,7 @@
   </style>
 </head>
 <body class="bg-[#0a0a0a] text-zinc-200 antialiased">
+  <canvas id="matrix-bg" aria-hidden="true"></canvas>
   <div class="noise"></div>
   <div class="scanlines"></div>
 
@@ -98,7 +101,7 @@
     </div>
   </div>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
 
     <!-- Hero / Terminal intro -->
     <section id="top" class="py-6">
@@ -116,7 +119,7 @@
           <span class="text-green-400 font-bold text-lg">$</span>
           <span class="text-zinc-200 ml-2 text-lg">cat intro.txt</span>
         </div>
-        <div class="rounded-lg border border-white/10 bg-zinc-900/60 p-4 mb-4">
+        <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-4 mb-4">
           <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 min-h-[8rem]"></div>
           <div class="mt-3 pt-3 border-t border-white/5">
             <div id="about-body" class="pl-2 text-zinc-400 leading-relaxed space-y-1 min-h-[4rem]"></div>
@@ -132,7 +135,7 @@
           <span class="text-green-400 font-bold text-lg">$</span>
           <span class="text-zinc-200 text-lg">cat career.log</span>
         </div>
-        <div class="rounded-lg border border-white/10 bg-zinc-900/70 p-4 font-mono text-xs leading-relaxed overflow-x-auto">
+        <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-4 font-mono text-xs leading-relaxed overflow-x-auto">
           <div id="career-log" class="career-log group space-y-1 cursor-pointer" tabindex="0" role="button" aria-expanded="false" onclick="this.classList.toggle('expanded'); this.setAttribute('aria-expanded', this.classList.contains('expanded'));" style="touch-action: manipulation;">
             <div><span class="text-blue-400">2026.11.12</span>  <span class="text-zinc-200">MyAITutor 개발 중</span>  <span class="text-zinc-500"># AI 튜터 프로젝트</span></div>
             <div class="career-extra overflow-hidden">
@@ -189,7 +192,7 @@
           <iconify-icon icon="solar:letter-bold"></iconify-icon> gmail
         </a>
       </div>
-      <div class="rounded-lg bg-zinc-900/60 border border-white/10 p-4 max-w-2xl">
+      <div class="rounded-lg bg-zinc-900/95 border border-white/10 p-4 max-w-2xl">
         <form action="https://api.web3forms.com/submit" method="POST" class="space-y-3 font-mono text-sm">
           <input type="hidden" name="access_key" value="86ed093a-3831-49d5-af59-51b56c5cfeb9">
           <div>
@@ -362,12 +365,12 @@ function isNewProject(p) {
       // 7일 이내 업데이트 여부는 isNewProject() (전역) 사용
       sorted.forEach((p, i) => {
         const card = document.createElement('article');
-        card.className = 'project-card group rounded-lg bg-zinc-900/70 border border-white/10 overflow-hidden';
+        card.className = 'project-card group rounded-lg bg-zinc-900/95 border border-white/10 overflow-hidden';
         const badgeClass = langColor[p.language] || 'text-zinc-300';
         const demoLink = p.demo ? `<a href="${p.demo}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:underline">demo →</a>` : '';
         const forkLabel = p.forked ? `<span class="text-xs text-zinc-600">forked${p.original ? ' from ' + p.original : ''}</span>` : '';
         card.innerHTML = `
-          <div class="flex items-center gap-1.5 px-2 py-1.5 bg-zinc-800/60 border-b border-white/5">
+          <div class="flex items-center gap-1.5 px-2 py-1.5 bg-zinc-800 border-b border-white/5">
             <iconify-icon icon="solar:terminal-bold" class="text-sm text-green-400"></iconify-icon>
             <span class="ml-1 text-sm text-zinc-200 font-mono truncate flex-1"><a href="${p.github}" target="_blank" rel="noopener" class="hover:text-blue-300 transition">${p.name}</a></span>
             <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition text-xs" aria-label="${p.name} GitHub 저장소로 이동" title="GitHub 저장소 열기">
@@ -699,6 +702,140 @@ function isNewProject(p) {
       }
       body.innerHTML = '';
       setTimeout(runCommand, 500);
+    })();
+
+    // ---------- Matrix 배경 (스크롤 연동 · 영문/숫자/한글 자음) ----------
+    (function () {
+      const canvas = document.getElementById('matrix-bg');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const consonants = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ';
+      const others = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let items = [];
+      let raf = 0;
+      let pending = 0;
+      let dpr = 1;
+      let lastScroll = window.scrollY;
+
+      function randomGlyph() {
+        // 한글 자음이 다른 문자보다 더 자주 나오도록 가중치 부여
+        const pool = Math.random() < 0.68 ? consonants : others;
+        return pool[(Math.random() * pool.length) | 0];
+      }
+
+      // 글자+글로우+블러를 미리 스프라이트로 구워 두어, 스크롤 중에는 drawImage만 한다.
+      function makeSprite(it) {
+        const pad = Math.ceil(it.size * 0.55 + (it.glow ? it.size * 0.5 : 0) + it.blur * 1.5) + 2;
+        const w = Math.ceil(it.size + pad * 2);
+        const h = w;
+        const c = document.createElement('canvas');
+        c.width = Math.ceil(w * dpr);
+        c.height = Math.ceil(h * dpr);
+        const g = c.getContext('2d');
+        g.scale(dpr, dpr);
+        g.font = it.size + "px 'JetBrains Mono', 'Pretendard', monospace";
+        g.textAlign = 'left';
+        g.textBaseline = 'top';
+        g.fillStyle = it.bright ? 'rgba(190,255,205,1)' : 'rgba(0,255,65,1)';
+        if (it.glow) {
+          g.shadowColor = 'rgba(0,255,65,0.9)';
+          g.shadowBlur = it.size * 0.5;
+        }
+        if (it.blur > 0) g.filter = 'blur(' + it.blur.toFixed(1) + 'px)';
+        g.fillText(it.char, pad, pad);
+        return { canvas: c, w: w, h: h, pad: pad };
+      }
+
+      function makeItem(w, h, initial) {
+        const size = 11 + Math.random() * 20;
+        const it = {
+          x: Math.random() * (w - size),
+          y: initial ? Math.random() * h : -size - Math.random() * h * 0.45,
+          size: size,
+          alpha: 0.12 + Math.random() * 0.72,
+          blur: Math.random() < 0.24 ? 1 + Math.random() * 6 : 0,
+          glow: Math.random() < 0.38,
+          bright: Math.random() < 0.12,
+          speed: 0.45 + Math.random() * 1.1,
+          char: randomGlyph(),
+        };
+        it.sprite = makeSprite(it);
+        return it;
+      }
+
+      function layout() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = window.innerWidth, h = window.innerHeight;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const count = Math.min(400, Math.max(140, Math.floor((w * h) / 2200)));
+        items = [];
+        for (let i = 0; i < count; i++) items.push(makeItem(w, h, true));
+        render();
+      }
+
+      function drawGlyph(it) {
+        ctx.globalAlpha = it.alpha;
+        ctx.drawImage(
+          it.sprite.canvas,
+          it.x - it.sprite.pad,
+          it.y - it.sprite.pad,
+          it.sprite.w,
+          it.sprite.h
+        );
+      }
+
+      function render() {
+        const w = window.innerWidth, h = window.innerHeight;
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(0, 0, w, h);
+        for (const it of items) {
+          if (it.y < -it.sprite.h || it.y > h + it.sprite.h) continue;
+          drawGlyph(it);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawStatic() {
+        render();
+      }
+
+      function step() {
+        raf = 0;
+        const chunk = Math.min(pending, 80);
+        pending -= chunk;
+        if (chunk > 0) {
+          const w = window.innerWidth, h = window.innerHeight;
+          for (const it of items) {
+            it.y += chunk * 0.16 * it.speed;
+            if (it.y > h + it.sprite.h) {
+              Object.assign(it, makeItem(w, h, false));
+            }
+          }
+          render();
+        }
+        if (pending > 0.5) raf = requestAnimationFrame(step);
+      }
+
+      function onScroll() {
+        const y = window.scrollY;
+        pending = Math.min(pending + Math.min(Math.abs(y - lastScroll), 220), 900);
+        lastScroll = y;
+        if (!raf) raf = requestAnimationFrame(step);
+      }
+
+      layout();
+      if (reduceMotion) {
+        drawStatic();
+      } else {
+        window.addEventListener('resize', layout);
+        window.addEventListener('scroll', onScroll, { passive: true });
+      }
     })();
   </script>
 </body>
