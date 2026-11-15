@@ -158,14 +158,14 @@
         <div class="mb-3 flex items-center gap-3 flex-wrap">
           <span class="text-green-400 font-bold text-lg">$</span>
           <span class="text-zinc-200 text-lg">ls projects/</span>
-          <div id="category-tabs" class="hidden flex-wrap gap-1.5 ml-auto" role="tablist"></div>
-        </div>
-                <div id="platform-legend" class="flex flex-wrap gap-2 text-[0.65rem] text-zinc-400 mb-3">
-          <button type="button" data-cat="all" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="solar:widget-bold" class="text-base text-zinc-300"></iconify-icon> 전체</button>
-          <button type="button" data-cat="android" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="logos:android-icon" class="text-base"></iconify-icon> Android</button>
-          <button type="button" data-cat="pc" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="logos:microsoft-windows" class="text-base"></iconify-icon></button>
-          <button type="button" data-cat="web" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="material-symbols:language" class="text-base text-sky-400"></iconify-icon> Web</button>
-          <button type="button" data-cat="fork" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="solar:git-branch-bold" class="text-base text-amber-400"></iconify-icon> Fork</button>
+          <div id="platform-legend" class="flex flex-wrap gap-2 text-[0.65rem] text-zinc-400 ml-auto justify-end">
+            <button type="button" data-cat="all" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="solar:widget-bold" class="text-base text-zinc-300"></iconify-icon> 전체</button>
+            <button type="button" data-cat="android" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="logos:android-icon" class="text-base"></iconify-icon> Android</button>
+            <button type="button" data-cat="pc" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="logos:microsoft-windows" class="text-base"></iconify-icon></button>
+            <button type="button" data-cat="web" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="material-symbols:language" class="text-base text-sky-400"></iconify-icon> Web</button>
+            <button type="button" data-cat="fork" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="solar:git-branch-bold" class="text-base text-amber-400"></iconify-icon> Fork</button>
+          </div>
+          <div id="category-tabs" class="hidden flex-wrap gap-1.5" role="tablist"></div>
         </div>
 <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-live="polite"></div>
         <div id="empty-state" class="hidden mt-4 text-center text-zinc-400">해당 카테고리에 프로젝트가 없습니다.</div>
@@ -428,6 +428,32 @@ function isNewProject(p) {
       const out = '◆ Android 앱 · 유틸리티 · 웹 게임\n→ OCR · 음성인식 · LLM을 붙인 실용 도구를 주로 다룹니다.\n$ cat skills.txt\n◆ Jetpack Compose · Tkinter · PySide6\n◆ JavaScript · TypeScript · C#/.NET 10 · Rust · WebAssembly';
       let started = false;
       let minHeight = 0;
+      // 스트리밍 중 박스 크기 고정 (최대 높이 미리 측정)
+      (function fixHeight() {
+        const m = document.createElement('div');
+        m.className = body.className;
+        m.style.position = 'absolute';
+        m.style.visibility = 'hidden';
+        m.style.left = '-9999px';
+        m.style.top = '0';
+        m.style.width = (body.offsetWidth || 320) + 'px';
+        let cl = document.createElement('div');
+        m.appendChild(cl);
+        out.split('\n').forEach((seg, idx) => {
+          if (idx > 0) {
+            cl = document.createElement('div');
+            m.appendChild(cl);
+          }
+          cl.appendChild(document.createTextNode(seg));
+        });
+        document.body.appendChild(m);
+        const h = m.offsetHeight;
+        document.body.removeChild(m);
+        body.style.minHeight = h + 'px';
+        body.style.height = h + 'px';
+        body.style.overflow = 'hidden';
+        minHeight = h;
+      })();
       function runStream() {
         body.innerHTML = '';
         let currentLine = document.createElement('div');
@@ -447,7 +473,10 @@ function isNewProject(p) {
               currentLine.insertBefore(document.createTextNode(out[oi]), cursor);
             }
             oi++;
-            setTimeout(streamChar, 32 + Math.random() * 24);
+            let delay = 32 + Math.random() * 24;
+            // 중간에 잠시 멈췄다가 이어가기: 명령어 라인 진입 전 휴지
+            if (out[oi] === '$') delay = 900;
+            setTimeout(streamChar, delay);
           } else {
             // 다 찍은 실제 높이를 최소 높이로 고정 → 반복 초기화 시 레이아웃 점프 방지
             minHeight = Math.max(minHeight, body.offsetHeight);
@@ -578,6 +607,41 @@ function isNewProject(p) {
         { cmd: '', out: '◆ Initializing profile...\n▸ 안녕하세요, Donian 입니다.\n◆ 파이썬과 코틀린을 AI와 함께 공부하며 프로그래밍을 배우고 있습니다.\n→ 문제를 직접 만들고 해결하는 과정을 즐기며,\n✓ 오픈소스 프로젝트를 공개하고 있습니다.\n♫ ACE-Step Studio로 AI 음악 생성도 공부하고 있습니다.\n⚡ Done.' },
       ];
       let ci = 0;
+      // 스트리밍 중 박스 크기 고정 (최대 높이 미리 측정)
+      (function fixHeight() {
+        const m = document.createElement('div');
+        m.className = body.className;
+        m.style.position = 'absolute';
+        m.style.visibility = 'hidden';
+        m.style.left = '-9999px';
+        m.style.top = '0';
+        m.style.width = (body.offsetWidth || 320) + 'px';
+        const { cmd, out } = commands[0];
+        if (cmd) {
+          const line = document.createElement('div');
+          line.innerHTML = '<span class="text-green-400 font-bold">$</span> <span class="text-zinc-200 ml-2 typing-text"></span>';
+          const t = line.querySelector('.typing-text');
+          t.textContent = cmd;
+          m.appendChild(line);
+        }
+        let cl = document.createElement('div');
+        cl.className = 'text-zinc-400 pl-4';
+        m.appendChild(cl);
+        out.split('\n').forEach((seg, idx) => {
+          if (idx > 0) {
+            cl = document.createElement('div');
+            cl.className = 'text-zinc-400 pl-4';
+            m.appendChild(cl);
+          }
+          cl.appendChild(document.createTextNode(seg));
+        });
+        document.body.appendChild(m);
+        const h = m.offsetHeight;
+        document.body.removeChild(m);
+        body.style.minHeight = h + 'px';
+        body.style.height = h + 'px';
+        body.style.overflow = 'hidden';
+      })();
       function runCommand() {
         if (ci >= commands.length) {
           ci = 0;
