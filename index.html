@@ -68,7 +68,7 @@
       <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
       <span class="w-3 h-3 rounded-full bg-green-500"></span>
       <span class="ml-3 text-xs text-zinc-400 font-mono">donian@portfolio:~</span>
-      <div class="ml-auto flex items-center gap-4 text-xs text-zinc-500 font-mono">
+      <div class="ml-auto flex items-center gap-4 text-xs text-zinc-400 font-mono">
         <a href="#about" class="hover:text-zinc-200 transition">about</a>
         <a href="#projects" class="hover:text-zinc-200 transition">projects</a>
         <a href="#stack" class="hover:text-zinc-200 transition">stack</a>
@@ -82,7 +82,7 @@
     <!-- Hero / Terminal intro -->
     <section id="top" class="py-6">
       <div class="font-mono text-sm leading-relaxed">
-        <div class="text-zinc-500 mb-2"># Donian Portfolio — AI coding session</div>
+        <div class="text-zinc-400 mb-2"># Donian Portfolio — AI coding session</div>
         <div class="mb-4">
           <span class="text-green-400 font-bold">$</span>
           <span class="text-zinc-200 ml-2">whoami</span>
@@ -100,12 +100,6 @@
           <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 min-h-[8rem]"></div>
         </div>
         <div class="flex flex-wrap gap-2 mb-6">
-          <a href="#projects" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs hover:bg-blue-500/30 transition">
-            <iconify-icon icon="solar:folder-with-files-bold"></iconify-icon> projects
-          </a>
-          <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-zinc-700/40 border border-zinc-600/40 text-zinc-300 text-xs hover:bg-zinc-700/60 transition">
-            <iconify-icon icon="solar:github-bold"></iconify-icon> github
-          </a>
           <a href="https://donian-kor.tistory.com/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs hover:bg-amber-500/30 transition">
             <iconify-icon icon="solar:document-text-bold"></iconify-icon> blog
           </a>
@@ -139,12 +133,12 @@
           <div id="category-tabs" class="flex flex-wrap gap-1.5 ml-auto" role="tablist"></div>
         </div>
         <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-live="polite"></div>
-        <div id="empty-state" class="hidden mt-4 text-center text-zinc-500">해당 카테고리에 프로젝트가 없습니다.</div>
+        <div id="empty-state" class="hidden mt-4 text-center text-zinc-400">해당 카테고리에 프로젝트가 없습니다.</div>
       </div>
     </section>
 
     <!-- Footer -->
-    <footer class="py-4 border-t border-white/5 font-mono text-xs text-zinc-500">
+    <footer class="py-4 border-t border-white/5 font-mono text-xs text-zinc-400">
       <div class="flex items-center justify-between">
         <span>© 2026 Donian. All rights reserved.</span>
         <div class="flex items-center gap-3">
@@ -210,7 +204,7 @@
         card.innerHTML = `
           <div class="flex items-center gap-1.5 px-2 py-1.5 bg-zinc-800/60 border-b border-white/5">
             <iconify-icon icon="solar:terminal-bold" class="text-sm text-green-400"></iconify-icon>
-            <span class="ml-1 text-xs text-zinc-500 font-mono truncate flex-1">${p.id}</span>
+            <span class="ml-1 text-xs text-zinc-400 font-mono truncate flex-1">${p.id}</span>
             <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition text-xs" aria-label="${p.name} GitHub 저장소로 이동" title="GitHub 저장소 열기">
               <iconify-icon icon="solar:arrow-right-up-bold" class="text-sm"></iconify-icon>
               <span>open</span>
@@ -223,7 +217,7 @@
             </div>
             <p class="text-xs text-zinc-400 leading-relaxed keep-all mb-2">${p.description}</p>
             <div class="flex flex-wrap gap-1 mb-2">
-              ${p.tech.map(t => `<span class="text-[0.65rem] px-1.5 py-0.5 rounded bg-white/5 text-zinc-500">${t}</span>`).join('')}
+              ${p.tech.map(t => `<span class="text-[0.65rem] px-1.5 py-0.5 rounded bg-white/5 text-zinc-400">${t}</span>`).join('')}
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -302,7 +296,7 @@
       })
       .catch(err => {
         console.error('projects.json 로드 실패:', err);
-        grid.innerHTML = '<p class="text-zinc-500 col-span-full text-center text-xs">프로젝트 데이터를 불러올 수 없습니다. 로컬 서버로 실행해 주세요.</p>';
+        grid.innerHTML = '<p class="text-zinc-400 col-span-full text-center text-xs">프로젝트 데이터를 불러올 수 없습니다. 로컬 서버로 실행해 주세요.</p>';
       });
 
     // ---------- 터미널 스트리밍 ----------
