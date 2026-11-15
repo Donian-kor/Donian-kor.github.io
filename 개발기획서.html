@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>개인 포트폴리오 홈페이지 개발기획서 — Donian</title>
+  <meta name="description" content="GitHub Pages 기반 개인 포트폴리오 홈페이지 개발기획서. 17개 GitHub 저장소 소개, 디자인 방향, 기술 스택, 개발 단계, 검증 계획을 정리했습니다.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            accent: '#2563EB',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'Pretendard', system-ui, sans-serif; }
+    .keep-all { word-break: keep-all; }
+    ::selection { background: rgba(37,99,235,0.3); }
+    .noise {
+      position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(2rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .reveal { opacity: 0; transform: translateY(2rem); }
+    .reveal.visible { animation: fadeInUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 antialiased">
+  <div class="noise"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl bg-zinc-950/70 border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-2 font-bold text-lg">
+        <iconify-icon icon="solar:document-text-bold" class="text-accent text-2xl"></iconify-icon>
+        <span class="keep-all">개발기획서</span>
+      </a>
+      <div class="hidden md:flex items-center gap-6 text-sm text-zinc-400">
+        <a href="#overview" class="hover:text-white transition">개요</a>
+        <a href="#structure" class="hover:text-white transition">구조</a>
+        <a href="#catalog" class="hover:text-white transition">카탈로그</a>
+        <a href="#design" class="hover:text-white transition">디자인</a>
+        <a href="#stack" class="hover:text-white transition">기술</a>
+        <a href="#roadmap" class="hover:text-white transition">로드맵</a>
+        <a href="#decision" class="hover:text-white transition">결정</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header id="top" class="min-h-[100dvh] flex items-center pt-16 relative overflow-hidden">
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-zinc-300 mb-6">
+          <iconify-icon icon="solar:code-square-bold" class="text-accent"></iconify-icon>
+          <span class="keep-all">GitHub Pages · 포트폴리오 홈페이지</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight keep-all">
+          개인 포트폴리오 홈페이지<br>
+          <span class="text-accent">개발기획서</span>
+        </h1>
+        <p class="mt-6 text-base md:text-lg text-zinc-400 leading-relaxed max-w-[65ch] keep-all">
+          GitHub에 공개된 17개 프로그램을 포트폴리오 형식으로 소개하는
+          개인 홈페이지를 GitHub Pages로 제작하기 위한 개발기획서입니다.
+          디자인 방향, 기술 스택, 사이트 구조, 개발 단계, 검증 계획을 정리했습니다.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#overview" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white font-medium hover:bg-blue-500 transition">
+            <iconify-icon icon="solar:arrow-down-linear"></iconify-icon>
+            <span class="keep-all">기획서 읽기</span>
+          </a>
+          <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition">
+            <iconify-icon icon="solar:github-bold"></iconify-icon>
+            <span>GitHub</span>
+          </a>
+        </div>
+        <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+          <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+            <div class="text-2xl font-bold text-accent">17</div>
+            <div class="text-zinc-400 keep-all">소개 프로젝트</div>
+          </div>
+          <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+            <div class="text-2xl font-bold text-accent">5</div>
+            <div class="text-zinc-400 keep-all">카테고리</div>
+          </div>
+          <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+            <div class="text-2xl font-bold text-accent">6</div>
+            <div class="text-zinc-400 keep-all">사이트 섹션</div>
+          </div>
+          <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+            <div class="text-2xl font-bold text-accent">4</div>
+            <div class="text-zinc-400 keep-all">개발 단계</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. 개요 -->
+    <section id="overview" class="py-24 border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all">1. 프로젝트 개요</h2>
+          <p class="mt-4 text-zinc-400 leading-relaxed keep-all">GitHub Pages 기반 정적 포트폴리오 사이트로, 별도 서버 없이 무료 호스팅합니다.</p>
+        </div>
+        <div class="mt-10 grid md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <iconify-icon icon="solar:target-bold" class="text-accent text-2xl"></iconify-icon>
+              <h3 class="font-bold text-lg keep-all">목적</h3>
+            </div>
+            <p class="text-zinc-400 text-sm leading-relaxed keep-all">GitHub에 공개된 17개 프로그램을 포트폴리오 형식으로 소개. 방문자가 각 프로그램의 목적·기능·기술 스택·GitHub 링크를 한눈에 파악할 수 있도록 구성합니다.</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <iconify-icon icon="solar:users-group-rounded-bold" class="text-accent text-2xl"></iconify-icon>
+              <h3 class="font-bold text-lg keep-all">대상 독자</h3>
+            </div>
+            <p class="text-zinc-400 text-sm leading-relaxed keep-all">채용 담당자·협업 파트너·동료 개발자. 디지털 명함 역할. 모바일 우선(한국 웹 트래픽 70%+ 모바일).</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <iconify-icon icon="solar:chart-2-bold" class="text-accent text-2xl"></iconify-icon>
+              <h3 class="font-bold text-lg keep-all">성공 기준</h3>
+            </div>
+            <ul class="text-zinc-400 text-sm leading-relaxed space-y-1 keep-all">
+              <li>· 17개 저장소 카테고리별 정리</li>
+              <li>· 각 카드에 설명·언어·GitHub 링크 포함</li>
+              <li>· GitHub Pages 정상 렌더링, 반응형</li>
+              <li>· Lighthouse 접근성·성능 90+</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <iconify-icon icon="solar:shield-check-bold" class="text-accent text-2xl"></iconify-icon>
+              <h3 class="font-bold text-lg keep-all">호스팅</h3>
+            </div>
+            <p class="text-zinc-400 text-sm leading-relaxed keep-all">GitHub Pages (정적, 무료). 저장소: <code class="text-accent">Donian-kor/Donian-kor.github.io</code> 또는 <code class="text-accent">homepage</code>. 브랜치 main → root.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 사이트 구조 -->
+    <section id="structure" class="py-24 border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all">2. 정보 아키텍처 (사이트 구조)</h2>
+          <p class="mt-4 text-zinc-400 leading-relaxed keep-all">단일 페이지 스크롤 + 섹션 앵커 방식. 상단 고정 글래스모피즘 네비게이션 바.</p>
+        </div>
+        <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">1. Hero</div>
+            <div class="text-sm text-zinc-400 keep-all">이름, 한 줄 소개, CTA 버튼</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">2. About</div>
+            <div class="text-sm text-zinc-400 keep-all">자기소개, 기술 스택, 연락처</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">3. Projects ★</div>
+            <div class="text-sm text-zinc-400 keep-all">카테고리 탭 + 프로젝트 카드 그리드 (핵심 섹션)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">4. Tech Stack</div>
+            <div class="text-sm text-zinc-400 keep-all">언어/프레임워크 아이콘 그리드</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">5. Contact</div>
+            <div class="text-sm text-zinc-400 keep-all">GitHub, 블로그, 이메일 (doniankhj@gmail.com, donian@naver.com)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">6. Footer</div>
+            <div class="text-sm text-zinc-400 keep-all">저작권, 링크</div>
+          </div>
+        </div>
+        <div class="mt-8 p-6 rounded-2xl bg-white/5 border border-white/5">
+          <h3 class="font-bold mb-3 keep-all">프로젝트 섹션 내부 구조</h3>
+          <ul class="text-sm text-zinc-400 space-y-2 keep-all">
+            <li>· <strong class="text-white">카테고리 탭 필터</strong>: 전체 / Android 앱 / Python 데스크톱 / 웹·PWA / Windows 도구 / 포크·참여</li>
+            <li>· <strong class="text-white">프로젝트 카드</strong>: 스크린샷(앱/프로그램 화면) + 제목 + 한 줄 설명 + 언어 배지 + GitHub 링크 + (데모 있는 경우) 데모 링크</li>
+            <li class="ml-4 text-xs">↳ 스크린샷: <code>assets/images/projects/&lt;repo-name&gt;.webp</code> / projects.json의 <code>screenshot</code> 필드로 관리 / 없으면 언어별 아이콘 또는 placeholder 폴백 / WebP + lazy load + decoding="async"</li>
+            <li>· <strong class="text-white">데이터 관리</strong>: projects.json (또는 JS 배열)로 분리, 카드는 JS 동적 렌더링 → 신규 프로젝트 추가 시 데이터만 수정</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2.4 유지보수성 + 2.5 반응형 -->
+    <section class="py-24 border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all">2.4 유지보수성 &amp; 2.5 반응형 설계</h2>
+          <p class="mt-4 text-zinc-400 leading-relaxed keep-all">저장소가 늘어나거나 삭제될 때 쉽게 관리하고, 모든 모바일 기종에서 반응형으로 동작하도록 설계합니다.</p>
+        </div>
+        <div class="mt-10 grid md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <iconify-icon icon="solar:add-circle-bold" class="text-accent text-2xl"></iconify-icon>
+              <h3 class="font-bold text-lg keep-all">유지보수성 (추가/삭제 용이)</h3>
+            </div>
+            <ul class="text-sm text-zinc-400 space-y-2 keep-all">
+              <li>· <strong class="text-white">데이터와 뷰 분리</strong>: 프로젝트 정보는 projects.json 단일 파일에만 저장</li>
+              <li>· <strong class="text-white">추가 절차</strong>: projects.json에 항목 1개 추가 → 페이지 새로고침으로 자동 반영</li>
+              <li>· <strong class="text-white">삭제 절차</strong>: projects.json에서 항목 1개 제거 → 카드 자동 사라짐</li>
+              <li>· <strong class="text-white">카테고리</strong>: 카테고리 목록도 데이터 파일에서 관리, 탭 UI 자동 생성</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <iconify-icon icon="solar:devices-bold" class="text-accent text-2xl"></iconify-icon>
+              <h3 class="font-bold text-lg keep-all">반응형 설계 (모바일 기종 무관)</h3>
+            </div>
+            <ul class="text-sm text-zinc-400 space-y-2 keep-all">
+              <li>· <strong class="text-white">Mobile-first</strong>: 375px부터 설계, 큰 화면으로 확장</li>
+              <li>· <strong class="text-white">브레이크포인트</strong>: 375 / 414 / 768 / 1024 / 1440px</li>
+              <li>· <strong class="text-white">레이아웃</strong>: CSS Grid (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3)</li>
+              <li>· <strong class="text-white">컨테이너</strong>: max-w-7xl mx-auto px-4 sm:px-6 lg:px-8</li>
+              <li>· <strong class="text-white">전체 높이</strong>: min-h-[100dvh] (h-screen 금지)</li>
+              <li>· <strong class="text-white">터치 타겟</strong>: 최소 44×44px, 버튼 간 8px+</li>
+              <li>· <strong class="text-white">가로 스크롤 금지</strong>: 모든 섹션에서 horizontal scroll 없음</li>
+              <li>· <strong class="text-white">테스트 기종</strong>: iPhone SE, iPhone 14 Pro, Galaxy S23, iPad, 데스크톱</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 카탈로그 -->
+    <section id="catalog" class="py-24 border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all">3. 콘텐츠 구성 (저장소 카탈로그)</h2>
+          <p class="mt-4 text-zinc-400 leading-relaxed keep-all">17개 저장소를 5개 카테고리로 분류했습니다.</p>
+        </div>
+
+        <!-- Android -->
+        <div class="mt-10">
+          <h3 class="text-xl font-bold flex items-center gap-2 mb-4">
+            <iconify-icon icon="solar:smartphone-bold" class="text-accent"></iconify-icon>
+            <span class="keep-all">📱 Android 앱 (Kotlin) — 3개</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="border-b border-white/10 text-zinc-400">
+                <th class="text-left py-2 pr-4">#</th>
+                <th class="text-left py-2 pr-4">저장소</th>
+                <th class="text-left py-2 pr-4">설명</th>
+                <th class="text-left py-2">주요 기술</th>
+              </tr></thead>
+              <tbody class="text-zinc-300">
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">1</td><td class="py-2 pr-4 font-medium">MyAITutor</td><td class="py-2 pr-4 keep-all">카메라로 문제를 비추면 AI가 풀이를 알려주는 온디바이스 학습 앱</td><td class="py-2 text-zinc-400">Kotlin, Compose, PaddleOCR, Gemma/Qwen</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">2</td><td class="py-2 pr-4 font-medium">Galaxy_Battery</td><td class="py-2 pr-4 keep-all">삼성 덤프스테이트 로그로 배터리 건강도·사이클·용량 진단</td><td class="py-2 text-zinc-400">Kotlin, Compose</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">3</td><td class="py-2 pr-4 font-medium">pdf_hwp_viewer</td><td class="py-2 pr-4 keep-all">Android PDF / HWP / HWPX 통합 뷰어</td><td class="py-2 text-zinc-400">Kotlin, Compose, Room, WASM</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Python -->
+        <div class="mt-10">
+          <h3 class="text-xl font-bold flex items-center gap-2 mb-4">
+            <iconify-icon icon="solar:code-square-bold" class="text-accent"></iconify-icon>
+            <span class="keep-all">🖥️ Python 데스크톱 앱 — 8개</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="border-b border-white/10 text-zinc-400">
+                <th class="text-left py-2 pr-4">#</th>
+                <th class="text-left py-2 pr-4">저장소</th>
+                <th class="text-left py-2 pr-4">설명</th>
+                <th class="text-left py-2">주요 기술</th>
+              </tr></thead>
+              <tbody class="text-zinc-300">
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">4</td><td class="py-2 pr-4 font-medium">karaoke-timing-generator</td><td class="py-2 pr-4 keep-all">로컬 Whisper로 노래방 타이밍(.lrc) 생성 + 오디오 편집기</td><td class="py-2 text-zinc-400">Python, Tkinter, faster-whisper, FFmpeg</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">5</td><td class="py-2 pr-4 font-medium">4cut_LocalComic_Studio</td><td class="py-2 pr-4 keep-all">LM Studio + ComfyUI 기반 4컷 만화 제작 스튜디오</td><td class="py-2 text-zinc-400">Python, PySide, ComfyUI</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">6</td><td class="py-2 pr-4 font-medium">Novel_Studio_Maker</td><td class="py-2 pr-4 keep-all">장편 한국어 웹소설 기획·집필·연속성 검증 도구</td><td class="py-2 text-zinc-400">Python, SQLite, AI API</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">7</td><td class="py-2 pr-4 font-medium">ComfyCraft_AI_Easy_Studio</td><td class="py-2 pr-4 keep-all">ComfyUI 기반 AI 이미지/영상 생성 스튜디오</td><td class="py-2 text-zinc-400">Python</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">8</td><td class="py-2 pr-4 font-medium">split-text-file</td><td class="py-2 pr-4 keep-all">텍스트 파일 분할기 (GUI + CLI)</td><td class="py-2 text-zinc-400">Python, Tkinter</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">9</td><td class="py-2 pr-4 font-medium">gemini-ai-trans</td><td class="py-2 pr-4 keep-all">Gemini API 기반 번역/학습 도구</td><td class="py-2 text-zinc-400">Python</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">10</td><td class="py-2 pr-4 font-medium">txtviewer</td><td class="py-2 pr-4 keep-all">다크 모드 TXT 뷰어 (인코딩 자동 감지)</td><td class="py-2 text-zinc-400">Python, Tkinter</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">11</td><td class="py-2 pr-4 font-medium">dark-text-rpg</td><td class="py-2 pr-4 keep-all">텍스트 기반 방치형 RPG 게임</td><td class="py-2 text-zinc-400">Python, Tkinter, JSON</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Web -->
+        <div class="mt-10">
+          <h3 class="text-xl font-bold flex items-center gap-2 mb-4">
+            <iconify-icon icon="solar:global-bold" class="text-accent"></iconify-icon>
+            <span class="keep-all">🌐 웹 / PWA / 확장 — 3개</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="border-b border-white/10 text-zinc-400">
+                <th class="text-left py-2 pr-4">#</th>
+                <th class="text-left py-2 pr-4">저장소</th>
+                <th class="text-left py-2 pr-4">설명</th>
+                <th class="text-left py-2">주요 기술</th>
+              </tr></thead>
+              <tbody class="text-zinc-300">
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">12</td><td class="py-2 pr-4 font-medium">AI_GoStop</td><td class="py-2 pr-4 keep-all">3인 삼파전·2인 맞고·4인 광팔기 고스톱 웹 게임 (PWA)</td><td class="py-2 text-zinc-400">JavaScript, Node.js</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">13</td><td class="py-2 pr-4 font-medium">AI_jjangie</td><td class="py-2 pr-4 keep-all">Fairy-Stockfish WASM 기반 한국 장기 웹 게임</td><td class="py-2 text-zinc-400">HTML, JS, WebAssembly</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">14</td><td class="py-2 pr-4 font-medium">gpu-cpu-status-monitor</td><td class="py-2 pr-4 keep-all">VS Code 상태바 CPU/RAM/GPU/VRAM 모니터 확장</td><td class="py-2 text-zinc-400">JavaScript, VS Code API</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Windows -->
+        <div class="mt-10">
+          <h3 class="text-xl font-bold flex items-center gap-2 mb-4">
+            <iconify-icon icon="solar:monitor-bold" class="text-accent"></iconify-icon>
+            <span class="keep-all">🪟 Windows 도구 — 1개</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="border-b border-white/10 text-zinc-400">
+                <th class="text-left py-2 pr-4">#</th>
+                <th class="text-left py-2 pr-4">저장소</th>
+                <th class="text-left py-2 pr-4">설명</th>
+                <th class="text-left py-2">주요 기술</th>
+              </tr></thead>
+              <tbody class="text-zinc-300">
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">15</td><td class="py-2 pr-4 font-medium">TrayTranslator</td><td class="py-2 pr-4 keep-all">드래그 텍스트를 핫키로 즉시 번역하는 트레이 상주 프로그램</td><td class="py-2 text-zinc-400">C#, .NET 10, LLM API</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Fork -->
+        <div class="mt-10">
+          <h3 class="text-xl font-bold flex items-center gap-2 mb-4">
+            <iconify-icon icon="solar:git-fork-bold" class="text-accent"></iconify-icon>
+            <span class="keep-all">🔀 포크 / 오픈소스 참여 — 2개</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="border-b border-white/10 text-zinc-400">
+                <th class="text-left py-2 pr-4">#</th>
+                <th class="text-left py-2 pr-4">저장소</th>
+                <th class="text-left py-2 pr-4">설명</th>
+                <th class="text-left py-2">비고</th>
+              </tr></thead>
+              <tbody class="text-zinc-300">
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">16</td><td class="py-2 pr-4 font-medium">craft-anything</td><td class="py-2 pr-4 keep-all">소프트웨어 동작 분석·재현 도구</td><td class="py-2 text-zinc-400">Rust, Fork (storytold)</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">17</td><td class="py-2 pr-4 font-medium">rea</td><td class="py-2 pr-4 keep-all">에이전트 기반 리버스 엔지니어링</td><td class="py-2 text-zinc-400">TypeScript, Fork (morluto)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 디자인 -->
+    <section id="design" class="py-24 border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all">4. 디자인 방향 (적용 스킬)</h2>
+        </div>
+        <div class="mt-10 grid md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <iconify-icon icon="solar:palette-bold" class="text-accent text-3xl mb-3"></iconify-icon>
+            <h3 class="font-bold mb-2">ui-ux-pro-max</h3>
+            <p class="text-sm text-zinc-400 keep-all">디자인 시스템 검색, UX 가이드라인, 접근성·터치·반응형 규칙</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <iconify-icon icon="solar:magic-stick-3-bold" class="text-accent text-3xl mb-3"></iconify-icon>
+            <h3 class="font-bold mb-2">supanova-design-engine</h3>
+            <p class="text-sm text-zinc-400 keep-all">한국어 우선 랜딩페이지 구조, Pretendard 폰트, 다크 모드 기본, 섹션 라이브러리</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <iconify-icon icon="solar:document-bold" class="text-accent text-3xl mb-3"></iconify-icon>
+            <h3 class="font-bold mb-2">supanova-full-output</h3>
+            <p class="text-sm text-zinc-400 keep-all">전체 페이지 완전 출력 보장 (생략 금지)</p>
+          </div>
+        </div>
+        <div class="mt-8 grid md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <h3 class="font-bold mb-3 keep-all">디자인 원칙</h3>
+            <ul class="text-sm text-zinc-400 space-y-2 keep-all">
+              <li>· <strong class="text-white">다크 모드 기본</strong> (zinc-950/slate-950) + 라이트 토글(선택)</li>
+              <li>· <strong class="text-white">폰트</strong>: Pretendard(한국어) + Geist/Outfit(영문)</li>
+              <li>· <strong class="text-white">악센트</strong>: 1개만 사용. Electric Blue #2563EB 또는 Emerald #10B981</li>
+              <li>· <strong class="text-white">금지</strong>: Inter/Noto Sans KR/Roboto, emoji 아이콘, Unsplash URL, 네온 글로우, Purple AI 그라디언트</li>
+              <li>· <strong class="text-white">그리드</strong>: Bento Grid / 비대칭 (3열 균등 카드 금지)</li>
+              <li>· <strong class="text-white">애니메이션</strong>: Motion One (IntersectionObserver), transform/opacity만</li>
+              <li>· <strong class="text-white">grain 텍스처</strong>: fixed pseudo-element로 유기적 질감</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <h3 class="font-bold mb-3 keep-all">섹션별 레이아웃 (Supanova)</h3>
+            <ul class="text-sm text-zinc-400 space-y-2 keep-all">
+              <li>· <strong class="text-white">Hero</strong>: Split Hero (좌: 텍스트+CTA, 우: 코드/터미널 모티프)</li>
+              <li>· <strong class="text-white">About</strong>: Minimal Statement + 기술 스택 칩</li>
+              <li>· <strong class="text-white">Projects</strong>: Bento Grid + 카테고리 탭 필터</li>
+              <li>· <strong class="text-white">Tech Stack</strong>: Icon Strip (수평 스크롤)</li>
+              <li>· <strong class="text-white">Contact</strong>: Full-bleed CTA + 소셜 링크</li>
+              <li>· <strong class="text-white">Footer</strong>: Minimal Footer</li>
+            </ul>
+            <h3 class="font-bold mt-4 mb-2 keep-all">접근성 (ui-ux-pro-max)</h3>
+            <ul class="text-sm text-zinc-400 space-y-1 keep-all">
+              <li>· 색상 대비 4.5:1+, 키보드 네비게이션, 포커스 링 유지</li>
+              <li>· prefers-reduced-motion 존중, 터치 타겟 44×44px</li>
+              <li>· 이미지 lazy load, CLS &lt; 0.1</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 기술 스택 -->
+    <section id="stack" class="py-24 border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all">5. 기술 스택</h2>
+        </div>
+        <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">마크업</div>
+            <div class="text-sm text-zinc-400">HTML5 (단일 파일)</div>
+            <div class="text-xs text-zinc-500 mt-1 keep-all">빌드 도구 없이 GitHub Pages 직접 서빙</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">스타일</div>
+            <div class="text-sm text-zinc-400">Tailwind CSS (CDN)</div>
+            <div class="text-xs text-zinc-500 mt-1 keep-all">Supanova 표준, 빠른 개발</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">폰트</div>
+            <div class="text-sm text-zinc-400">Pretendard + Geist</div>
+            <div class="text-xs text-zinc-500 mt-1 keep-all">한국어 우선 (jsdelivr CDN)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">아이콘</div>
+            <div class="text-sm text-zinc-400">Iconify (Solar set)</div>
+            <div class="text-xs text-zinc-500 mt-1 keep-all">Supanova 표준</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">애니메이션</div>
+            <div class="text-sm text-zinc-400">Motion One + CSS</div>
+            <div class="text-xs text-zinc-500 mt-1 keep-all">가벼움, standalone (unpkg CDN)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+            <div class="text-accent font-bold mb-1">호스팅</div>
+            <div class="text-sm text-zinc-400">GitHub Pages</div>
+            <div class="text-xs text-zinc-500 mt-1 keep-all">정적, 무료, main 브랜치</div>
+          </div>
+        </div>
+        <div class="mt-8 p-6 rounded-2xl bg-white/5 border border-white/5">
+          <h3 class="font-bold mb-3 keep-all">파일 / 폴더 구조</h3>
+          <pre class="text-xs text-zinc-400 overflow-x-auto leading-relaxed"><code>Donian_app_Homepage/
+├── index.html              ← 메인 페이지 (단일 파일)
+├── assets/
+│   ├── images/
+│   │   ├── avatar.jpg      ← 프로필 사진
+│   │   ├── og-image.png    ← OG 이미지
+│   │   └── projects/       ← 프로젝트 스크린샷
+│   └── favicon.ico
+├── projects.json           ← 프로젝트 메타데이터 (선택)
+├── README.md
+├── 개발기획서.md / .html
+└── .github/workflows/
+    └── deploy.yml          ← GitHub Actions 자동 배포 (선택)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 로드맵 -->
+    <section id="roadmap" class="py-24 border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all">6. 개발 단계 (로드맵)</h2>
+        </div>
+        <div class="mt-10 space-y-4">
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">완료</span>
+              <h3 class="font-bold keep-all">Phase 0 — 기획</h3>
+            </div>
+            <ul class="text-sm text-zinc-400 space-y-1 keep-all">
+              <li>· GitHub 저장소 목록 수집 (17개)</li>
+              <li>· README 기반 프로젝트 정보 정리</li>
+              <li>· 개발기획서 작성 (md + html)</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold">진행 예정</span>
+              <h3 class="font-bold keep-all">Phase 1 — 디자인 시스템 확정</h3>
+            </div>
+            <ul class="text-sm text-zinc-400 space-y-1 keep-all">
+              <li>· ui-ux-pro-max 디자인 시스템 검색으로 팔레트·타이포 확정</li>
+              <li>· 악센트 컬러 최종 결정 (Blue vs Emerald)</li>
+              <li>· 프로필 사진 / OG 이미지 준비</li>
+              <li>· 프로젝트 스크린샷 수집</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-3 py-1 rounded-full bg-zinc-700 text-zinc-300 text-xs font-bold">대기</span>
+              <h3 class="font-bold keep-all">Phase 2 — HTML 구현</h3>
+            </div>
+            <ul class="text-sm text-zinc-400 space-y-1 keep-all">
+              <li>· index.html 골격 (head, nav, 섹션)</li>
+              <li>· Hero / About / Projects / Tech Stack / Contact / Footer</li>
+              <li>· 카테고리 탭 + 카드 그리드 + JS 렌더링</li>
+              <li>· 스크롤 애니메이션 (IntersectionObserver)</li>
+              <li>· 반응형 (모바일/태블릿/데스크톱)</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-3 py-1 rounded-full bg-zinc-700 text-zinc-300 text-xs font-bold">대기</span>
+              <h3 class="font-bold keep-all">Phase 3 — 콘텐츠 채우기</h3>
+            </div>
+            <ul class="text-sm text-zinc-400 space-y-1 keep-all">
+              <li>· projects.json 데이터 입력 (17개)</li>
+              <li>· 실제 스크린샷/아이콘 적용</li>
+              <li>· SEO 메타 태그 (title, description, og:*, twitter:*)</li>
+              <li>· 접근성 점검 (aria, alt, focus)</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-3 py-1 rounded-full bg-zinc-700 text-zinc-300 text-xs font-bold">대기</span>
+              <h3 class="font-bold keep-all">Phase 4 — 검증 &amp; 배포</h3>
+            </div>
+            <ul class="text-sm text-zinc-400 space-y-1 keep-all">
+              <li>· 브라우저 렌더링 확인 (Chrome/Edge/Firefox/Safari)</li>
+              <li>· 모바일 뷰포트 확인 (375px, 768px, 1024px, 1440px)</li>
+              <li>· Lighthouse 점수 확인</li>
+              <li>· GitHub Pages 배포 (저장소 생성 → push → Pages 활성화)</li>
+              <li>· 실제 URL에서 최종 확인</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-8 p-6 rounded-2xl bg-white/5 border border-white/5">
+          <h3 class="font-bold mb-3 keep-all">검증 계획</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="border-b border-white/10 text-zinc-400">
+                <th class="text-left py-2 pr-4">검증 항목</th>
+                <th class="text-left py-2 pr-4">방법</th>
+                <th class="text-left py-2">통과 기준</th>
+              </tr></thead>
+              <tbody class="text-zinc-300">
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">HTML 유효성</td><td class="py-2 pr-4">W3C Validator</td><td class="py-2">오류 0</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">반응형</td><td class="py-2 pr-4">Chrome DevTools</td><td class="py-2">375/768/1024/1440px 정상</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">접근성</td><td class="py-2 pr-4">Lighthouse / axe</td><td class="py-2">90+</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">성능</td><td class="py-2 pr-4">Lighthouse</td><td class="py-2">90+ (FCP &lt; 1.5s)</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">SEO</td><td class="py-2 pr-4">Lighthouse</td><td class="py-2">90+</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">크로스 브라우저</td><td class="py-2 pr-4">Chrome/Edge/Firefox/Safari</td><td class="py-2">레이아웃 깨짐 없음</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">링크</td><td class="py-2 pr-4">수동 클릭 테스트</td><td class="py-2">모든 GitHub 링크 정상</td></tr>
+                <tr class="border-b border-white/5"><td class="py-2 pr-4">한국어 렌더링</td><td class="py-2 pr-4">육안 확인</td><td class="py-2">Pretendard 적용, word-break: keep-all</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. 결정 사항 -->
+    <section id="decision" class="py-24 border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all">7. 다음 단계 결정 사항</h2>
+          <p class="mt-4 text-zinc-400 leading-relaxed keep-all">아래 6가지 결정 후 Phase 2 구현을 진행합니다. 결정이 어려우면 "권장안으로 진행"이라고 답해주세요.</p>
+        </div>
+        <div class="mt-10 space-y-4">
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex gap-4">
+            <div class="text-accent font-bold shrink-0">1</div>
+            <div>
+              <div class="font-bold keep-all">악센트 컬러</div>
+              <div class="text-sm text-zinc-400 keep-all">Electric Blue (개발자 느낌) vs Emerald (성장/자연 느낌)</div>
+            </div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex gap-4">
+            <div class="text-accent font-bold shrink-0">2</div>
+            <div>
+              <div class="font-bold keep-all">호스팅 저장소 이름</div>
+              <div class="text-sm text-zinc-400 keep-all">Donian-kor.github.io (권장, URL 깔끔) vs homepage</div>
+            </div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex gap-4">
+            <div class="text-accent font-bold shrink-0">3</div>
+            <div>
+              <div class="font-bold keep-all">프로필 사진</div>
+              <div class="text-sm text-zinc-400 keep-all">사용할 사진이 있는지, 없으면 avatar placeholder</div>
+            </div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex gap-4">
+            <div class="text-accent font-bold shrink-0">4</div>
+            <div>
+              <div class="font-bold keep-all">프로젝트 스크린샷</div>
+              <div class="text-sm text-zinc-400 keep-all">각 프로젝트의 스크린샷 제공 가능 여부 (없으면 placeholder)</div>
+            </div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex gap-4">
+            <div class="text-accent font-bold shrink-0">5</div>
+            <div>
+              <div class="font-bold keep-all">디자인 톤</div>
+              <div class="text-sm text-zinc-400 keep-all">다크 모드 (권장) vs 라이트 모드 기본</div>
+            </div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex gap-4">
+            <div class="text-accent font-bold shrink-0">6</div>
+            <div>
+              <div class="font-bold keep-all">Phase 2 구현 진행 여부</div>
+              <div class="text-sm text-zinc-400 keep-all">디자인 시스템 확정 후 HTML 구현 시작 여부</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 p-6 rounded-2xl bg-accent/10 border border-accent/20">
+          <p class="text-sm keep-all"><strong class="text-white">권장안</strong>: 악센트 Electric Blue · 호스팅 Donian-kor.github.io · 프로필 placeholder · 스크린샷 placeholder · 다크 모드 · Phase 2 즉시 진행</p>
+          <p class="text-sm text-zinc-400 mt-2 keep-all">"권장안으로 진행"이라고 답해주시면 Phase 1 디자인 시스템 확정부터 바로 시작하겠습니다.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-zinc-500 keep-all">© 2026 Donian. All rights reserved.</div>
+      <div class="flex items-center gap-4 text-zinc-400">
+        <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="hover:text-white transition" aria-label="GitHub">
+          <iconify-icon icon="solar:github-bold" class="text-xl"></iconify-icon>
+        </a>
+        <a href="https://donian-kor.tistory.com/" target="_blank" rel="noopener" class="hover:text-white transition" aria-label="Blog">
+          <iconify-icon icon="solar:document-text-bold" class="text-xl"></iconify-icon>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // IntersectionObserver 스크롤 reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  </script>
+</body>
+</html>

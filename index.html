@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donian · 개인 포트폴리오</title>
+  <meta name="description" content="Python·Kotlin으로 프로그래밍을 공부하는 Donian의 개인 포트폴리오. 17개 오픈소스 프로젝트를 소개합니다.">
+  <meta property="og:title" content="Donian · 개인 포트폴리오">
+  <meta property="og:description" content="Python·Kotlin으로 프로그래밍을 공부하는 개발자의 포트폴리오. 17개 프로젝트 소개.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://donian-kor.github.io">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Pretendard', 'system-ui', 'sans-serif'] },
+          colors: { accent: '#2563EB' },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'Pretendard', system-ui, sans-serif; }
+    .keep-all { word-break: keep-all; }
+    html { scroll-behavior: smooth; }
+    .noise {
+      position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .scanlines {
+      position: fixed; inset: 0; z-index: 59; pointer-events: none; opacity: 0.04;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px);
+    }
+    .prompt::before { content: '> '; color: #2563EB; font-family: 'JetBrains Mono', monospace; }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(2rem); } to { opacity:1; transform:translateY(0); } }
+    .reveal { opacity:0; transform:translateY(2rem); }
+    .reveal.visible { animation: fadeInUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .float { animation: float 6s ease-in-out infinite; }
+    .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .card-hover { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(37,99,235,0.15); }
+    .screenshot { aspect-ratio: 16/10; object-fit: cover; }
+    .lang-badge { font-size: 0.7rem; }
+    ::selection { background: rgba(37,99,235,0.3); }
+    /* 모바일 메뉴 */
+    #mobile-menu { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+    #mobile-menu.hidden-menu { transform: translateX(100%); }
+    /* 포커스 링 */
+    a:focus-visible, button:focus-visible { outline: 2px solid #2563EB; outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .float { animation: none !important; opacity:1 !important; transform:none !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 antialiased">
+  <div class="noise"></div>
+  <div class="scanlines"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-40 glass bg-zinc-950/70 border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-2 font-bold text-lg">
+        <iconify-icon icon="solar:code-square-bold" class="text-accent text-2xl"></iconify-icon>
+        <span class="keep-all">Donian</span>
+      </a>
+      <div class="hidden md:flex items-center gap-6 text-sm text-zinc-400">
+        <a href="#about" class="hover:text-white transition">소개</a>
+        <a href="#projects" class="hover:text-white transition">프로젝트</a>
+        <a href="#stack" class="hover:text-white transition">기술 스택</a>
+        <a href="#contact" class="hover:text-white transition">연락처</a>
+        <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="hover:text-white transition" aria-label="GitHub">
+          <iconify-icon icon="solar:github-bold" class="text-xl"></iconify-icon>
+        </a>
+      </div>
+      <button id="menu-btn" class="md:hidden p-2 text-zinc-300" aria-label="메뉴 열기" aria-expanded="false">
+        <iconify-icon icon="solar:hamburger-menu-linear" class="text-2xl"></iconify-icon>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden-menu fixed top-16 right-0 bottom-0 w-64 bg-zinc-900/95 glass border-l border-white/5 z-30 p-6 md:hidden">
+    <div class="flex flex-col gap-4 text-zinc-300">
+      <a href="#about" class="hover:text-white transition py-2" onclick="closeMenu()">소개</a>
+      <a href="#projects" class="hover:text-white transition py-2" onclick="closeMenu()">프로젝트</a>
+      <a href="#stack" class="hover:text-white transition py-2" onclick="closeMenu()">기술 스택</a>
+      <a href="#contact" class="hover:text-white transition py-2" onclick="closeMenu()">연락처</a>
+      <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="hover:text-white transition py-2">GitHub</a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <header id="top" class="min-h-[100dvh] flex items-center pt-16 relative overflow-hidden">
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+      <!-- 홈페이지 제목 (맨위) -->
+      <div class="mb-12 reveal">
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight keep-all">
+          <span class="text-accent">Donian</span>
+        </h1>
+        <p class="mt-3 text-xl md:text-2xl text-zinc-400 keep-all">개인 포트폴리오</p>
+        <div class="mt-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-zinc-300">
+          <iconify-icon icon="solar:code-square-bold" class="text-accent"></iconify-icon>
+          <span class="keep-all">Python · Kotlin 개발자</span>
+        </div>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div class="reveal">
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="#projects" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white font-medium hover:bg-blue-500 transition card-hover">
+              <iconify-icon icon="solar:folder-with-files-bold"></iconify-icon>
+              <span class="keep-all">프로젝트 보기</span>
+            </a>
+            <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition">
+              <iconify-icon icon="solar:github-bold"></iconify-icon>
+              <span>GitHub</span>
+            </a>
+          </div>
+        </div>
+        <!-- 인터랙티브 터미널 (스트리밍 텍스트) -->
+        <div class="reveal">
+          <div class="rounded-2xl bg-zinc-900 border border-white/10 shadow-2xl overflow-hidden font-mono text-sm">
+            <div class="flex items-center gap-2 px-4 py-3 bg-zinc-800/80 border-b border-white/5">
+              <span class="w-3 h-3 rounded-full bg-red-500"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+              <span class="w-3 h-3 rounded-full bg-green-500"></span>
+              <span class="ml-2 text-xs text-zinc-400">donian@portfolio:~</span>
+            </div>
+            <div id="terminal-body" class="p-5 h-64 overflow-y-auto text-zinc-300 leading-relaxed space-y-1">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- About -->
+  <section id="about" class="py-24 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all reveal prompt">소개</h2>
+        <p class="mt-4 text-zinc-400 leading-relaxed keep-all reveal">
+          Android 앱, Python 데스크톱 도구, 웹 게임, Windows 유틸리티까지
+          다양한 플랫폼에서 직접 만들어보며 배우고 있습니다.
+          AI·OCR·음성인식·LLM 등 최신 기술을 활용한 실용적인 프로그램을 만드는 것을 좋아합니다.
+        </p>
+      </div>
+      <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/5 reveal">
+          <iconify-icon icon="solar:smartphone-bold" class="text-accent text-2xl mb-2"></iconify-icon>
+          <div class="font-bold keep-all">Android</div>
+          <div class="text-xs text-zinc-500 mt-1">Kotlin · Compose</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/5 reveal">
+          <iconify-icon icon="solar:code-square-bold" class="text-accent text-2xl mb-2"></iconify-icon>
+          <div class="font-bold keep-all">Python</div>
+          <div class="text-xs text-zinc-500 mt-1">Tkinter · PySide6</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/5 reveal">
+          <iconify-icon icon="solar:global-bold" class="text-accent text-2xl mb-2"></iconify-icon>
+          <div class="font-bold keep-all">Web</div>
+          <div class="text-xs text-zinc-500 mt-1">JS · WebAssembly · PWA</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/5 reveal">
+          <iconify-icon icon="solar:monitor-bold" class="text-accent text-2xl mb-2"></iconify-icon>
+          <div class="font-bold keep-all">Desktop</div>
+          <div class="text-xs text-zinc-500 mt-1">C# · .NET 10</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="py-24 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all reveal prompt">프로젝트</h2>
+        <p class="mt-4 text-zinc-400 leading-relaxed keep-all reveal">
+          GitHub에 공개된 17개 프로젝트입니다. 카테고리 탭으로 필터링할 수 있습니다.
+        </p>
+      </div>
+      <!-- Category tabs -->
+      <div id="category-tabs" class="mt-8 flex flex-wrap gap-2 reveal" role="tablist" aria-label="프로젝트 카테고리"></div>
+      <!-- Project grid -->
+      <div id="project-grid" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" aria-live="polite"></div>
+      <div id="empty-state" class="hidden mt-12 text-center text-zinc-500 keep-all">
+        해당 카테고리에 프로젝트가 없습니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section id="stack" class="py-24 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all reveal prompt">기술 스택</h2>
+      </div>
+      <div class="mt-10 flex flex-wrap gap-3 reveal">
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">Kotlin</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">Jetpack Compose</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">Python</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">Tkinter</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">PySide6</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">JavaScript</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">TypeScript</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">C# / .NET 10</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">Rust</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">WebAssembly</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">Room (SQLite)</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">PaddleOCR</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">ComfyUI</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">FFmpeg</span>
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm">LLM API</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="py-24 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="p-10 md:p-16 rounded-3xl bg-gradient-to-br from-accent/20 to-emerald-500/10 border border-white/10 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight keep-all prompt">연락처</h2>
+        <p class="mt-4 text-zinc-400 leading-relaxed keep-all max-w-xl mx-auto">
+          프로젝트에 관심이 있거나 협업을 원하시면 언제든 연락주세요.
+        </p>
+        <div class="mt-8 flex flex-wrap justify-center gap-4">
+          <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white font-medium hover:bg-blue-500 transition">
+            <iconify-icon icon="solar:github-bold"></iconify-icon>
+            <span>GitHub</span>
+          </a>
+          <a href="https://donian-kor.tistory.com/" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition">
+            <iconify-icon icon="solar:document-text-bold"></iconify-icon>
+            <span class="keep-all">블로그</span>
+          </a>
+          <a href="mailto:doniankhj@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition">
+            <iconify-icon icon="solar:letter-bold"></iconify-icon>
+            <span>doniankhj@gmail.com</span>
+          </a>
+          <a href="mailto:donian@naver.com" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition">
+            <iconify-icon icon="solar:letter-bold"></iconify-icon>
+            <span>donian@naver.com</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-zinc-500 keep-all">© 2026 Donian. All rights reserved.</div>
+      <div class="flex items-center gap-4 text-zinc-400">
+        <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="hover:text-white transition" aria-label="GitHub">
+          <iconify-icon icon="solar:github-bold" class="text-xl"></iconify-icon>
+        </a>
+        <a href="https://donian-kor.tistory.com/" target="_blank" rel="noopener" class="hover:text-white transition" aria-label="Blog">
+          <iconify-icon icon="solar:document-text-bold" class="text-xl"></iconify-icon>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---------- 모바일 메뉴 ----------
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    function closeMenu() { mobileMenu.classList.add('hidden-menu'); menuBtn.setAttribute('aria-expanded','false'); }
+    menuBtn.addEventListener('click', () => {
+      const isOpen = !mobileMenu.classList.contains('hidden-menu');
+      if (isOpen) closeMenu(); else { mobileMenu.classList.remove('hidden-menu'); menuBtn.setAttribute('aria-expanded','true'); }
+    });
+
+    // ---------- 프로젝트 렌더링 ----------
+    const grid = document.getElementById('project-grid');
+    const tabs = document.getElementById('category-tabs');
+    const empty = document.getElementById('empty-state');
+    let allProjects = [];
+    let currentCategory = 'all';
+
+    const langColor = {
+      'Kotlin': 'bg-purple-500/20 text-purple-300',
+      'Python': 'bg-yellow-500/20 text-yellow-300',
+      'JavaScript': 'bg-amber-500/20 text-amber-300',
+      'HTML': 'bg-orange-500/20 text-orange-300',
+      'C#': 'bg-green-500/20 text-green-300',
+      'Rust': 'bg-red-500/20 text-red-300',
+      'TypeScript': 'bg-blue-500/20 text-blue-300',
+    };
+
+    function renderTabs(categories) {
+      tabs.innerHTML = '';
+      categories.forEach((c) => {
+        const btn = document.createElement('button');
+        btn.className = 'px-4 py-2 rounded-full text-sm font-medium transition border ' +
+          (c.id === currentCategory ? 'bg-accent text-white border-accent' : 'bg-white/5 text-zinc-300 border-white/10 hover:bg-white/10');
+        btn.textContent = c.label;
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', c.id === currentCategory);
+        btn.addEventListener('click', () => { currentCategory = c.id; renderTabs(categories); renderGrid(); });
+        tabs.appendChild(btn);
+      });
+    }
+
+    function renderGrid() {
+      grid.innerHTML = '';
+      const filtered = currentCategory === 'all' ? allProjects : allProjects.filter(p => p.category === currentCategory);
+      if (filtered.length === 0) { empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      filtered.forEach((p, i) => {
+        const card = document.createElement('article');
+        card.className = 'card-hover rounded-2xl bg-white/5 border border-white/5 overflow-hidden reveal';
+        card.style.animationDelay = (i * 80) + 'ms';
+        const badgeClass = langColor[p.language] || 'bg-zinc-500/20 text-zinc-300';
+        const demoLink = p.demo ? `<a href="${p.demo}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs text-accent hover:underline"><iconify-icon icon="solar:play-circle-bold"></iconify-icon> 데모</a>` : '';
+        const forkLabel = p.forked ? `<span class="text-xs text-zinc-500">Forked${p.original ? ' from ' + p.original : ''}</span>` : '';
+        card.innerHTML = `
+          <div class="flex items-center gap-1.5 px-3 py-2 bg-zinc-800/80 border-b border-white/5">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500/80"></span>
+            <span class="ml-2 text-xs text-zinc-500 font-mono truncate">${p.id}</span>
+          </div>
+          <div class="screenshot bg-zinc-800 overflow-hidden">
+            <img src="${p.screenshot}" alt="${p.name} 스크린샷" loading="lazy" decoding="async"
+                 class="w-full h-full object-cover"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center h-full text-zinc-600&quot;><iconify-icon icon=&quot;solar:code-square-bold&quot; class=&quot;text-4xl&quot;></iconify-icon></div>';">
+          </div>
+          <div class="p-5">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <h3 class="font-bold text-lg keep-all">${p.name}</h3>
+              <span class="lang-badge px-2 py-0.5 rounded-full ${badgeClass}">${p.language}</span>
+            </div>
+            <p class="text-sm text-zinc-400 leading-relaxed keep-all mb-3">${p.description}</p>
+            <div class="flex flex-wrap gap-1.5 mb-3">
+              ${p.tech.map(t => `<span class="text-xs px-2 py-0.5 rounded bg-white/5 text-zinc-400">${t}</span>`).join('')}
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs text-zinc-300 hover:text-white transition" aria-label="${p.name} GitHub 저장소">
+                  <iconify-icon icon="solar:github-bold"></iconify-icon> GitHub
+                </a>
+                ${demoLink}
+              </div>
+              ${forkLabel}
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      // reveal 재적용
+      grid.querySelectorAll('.reveal').forEach(el => {
+        el.style.opacity = '0'; el.style.transform = 'translateY(2rem)';
+        observer.observe(el);
+      });
+    }
+
+    // ---------- IntersectionObserver ----------
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+    // ---------- 터미널 타이핑 애니메이션 ----------
+    (function () {
+      const body = document.getElementById('terminal-body');
+      if (!body) return;
+      const commands = [
+        { cmd: 'ai --intro', out: '◆ Initializing profile...\n▸ 안녕하세요, Donian 입니다.\n◆ 시골아재, 파이썬과 코틀린으로 프로그래밍을 공부하고 있습니다.\n→ 문제를 직접 만들고 해결하는 과정을 즐기며,\n✓ 오픈소스 프로젝트를 공개하고 있습니다.\n⚡ Done.' },
+      ];
+      let ci = 0;
+      function runCommand() {
+        if (ci >= commands.length) { ci = 0; setTimeout(() => { body.innerHTML = ''; setTimeout(runCommand, 600); }, 2200); return; }
+        const { cmd, out } = commands[ci];
+        const line = document.createElement('div');
+        line.innerHTML = '<span class="text-accent">$</span> <span class="typing-text"></span><span class="animate-pulse text-accent">█</span>';
+        body.appendChild(line);
+        const typingText = line.querySelector('.typing-text');
+        const cursor = line.querySelector('span:last-child');
+        let i = 0;
+        function typeChar() {
+          if (i < cmd.length) {
+            typingText.textContent += cmd[i++];
+            body.scrollTop = body.scrollHeight;
+            setTimeout(typeChar, 50 + Math.random() * 40);
+          } else {
+            cursor.remove();
+            setTimeout(() => {
+              let currentLine = document.createElement('div');
+              currentLine.className = 'text-zinc-400 pl-2';
+              body.appendChild(currentLine);
+              let oi = 0;
+              function streamChar() {
+                if (oi < out.length) {
+                  if (out[oi] === '\n') {
+                    currentLine = document.createElement('div');
+                    currentLine.className = 'text-zinc-400 pl-2';
+                    body.appendChild(currentLine);
+                  } else {
+                    currentLine.textContent += out[oi];
+                  }
+                  oi++;
+                  body.scrollTop = body.scrollHeight;
+                  setTimeout(streamChar, 25 + Math.random() * 25);
+                } else {
+                  ci++;
+                  const cursorLine = document.createElement('div');
+                  cursorLine.innerHTML = '<span class="text-accent">$</span> <span class="animate-pulse text-accent">█</span>';
+                  body.appendChild(cursorLine);
+                  body.scrollTop = body.scrollHeight;
+                }
+              }
+              streamChar();
+            }, 300);
+          }
+        }
+        setTimeout(typeChar, 200);
+      }
+      // 초기 라인 제거 후 시작
+      body.innerHTML = '';
+      setTimeout(runCommand, 500);
+    })();
+
+    // ---------- 데이터 로드 ----------
+    fetch('projects.json')
+      .then(r => r.json())
+      .then(data => {
+        allProjects = data.projects;
+        renderTabs(data.categories);
+        renderGrid();
+      })
+      .catch(err => {
+        console.error('projects.json 로드 실패:', err);
+        grid.innerHTML = '<p class="text-zinc-500 col-span-full text-center">프로젝트 데이터를 불러올 수 없습니다. 로컬 서버(python -m http.server)로 실행해 주세요.</p>';
+      });
+  </script>
+</body>
+</html>
