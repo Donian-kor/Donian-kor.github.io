@@ -206,8 +206,10 @@
             <iconify-icon icon="solar:play-circle-bold"></iconify-icon> youtube
           </a>
         </div>
-        <div id="music-list" class="space-y-3">
-          <div class="text-zinc-500 text-xs">Loading tracks...</div>
+        <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-3 sm:p-4 font-mono">
+          <div id="music-list" class="space-y-3">
+            <div class="text-zinc-500 text-xs">Loading tracks...</div>
+          </div>
         </div>
       </div>
     </section>
@@ -806,7 +808,7 @@ function isNewProject(p) {
           if (!res || !res.ok) throw new Error('fetch failed');
           const text = await res.text();
           const doc = new DOMParser().parseFromString(text, 'application/xml');
-          const entries = Array.from(doc.querySelectorAll('entry')).slice(0, 5);
+          const entries = Array.from(doc.querySelectorAll('entry')).slice(0, 15);
           if (!entries.length) throw new Error('no entries');
           const tracks = entries.map((e, i) => {
             const title = e.querySelector('title')?.textContent || 'Untitled';
