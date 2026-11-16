@@ -293,6 +293,11 @@
         <div class="flex items-center gap-3">
           <span>© 2026 Donian. All rights reserved.</span>
           <a href="https://sites.google.com/view/donian-privacy" target="_blank" rel="noopener" class="hover:text-zinc-200 transition underline-offset-2 hover:underline">개인정보처리방침</a>
+          <!-- 방문자 카운터 (Cloudflare Worker, IP당 하루 1회) -->
+          <span class="inline-flex items-center gap-1.5">
+            <span class="text-zinc-500">visitors:</span>
+            <span id="visitor-count" class="text-emerald-400 font-semibold">—</span>
+          </span>
         </div>
         <div class="flex items-center gap-3">
           <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="hover:text-zinc-200 transition" aria-label="GitHub">
@@ -1145,6 +1150,33 @@ function isNewProject(p) {
         window.addEventListener('scroll', onScroll, { passive: true });
         raf = requestAnimationFrame(step);
       }
+    })();
+  </script>
+
+  <!-- 방문자 카운터: Cloudflare Worker (IP당 하루 1회) -->
+  <script>
+    (function () {
+      // Cloudflare Worker 배포 후 URL 로 교체하세요.
+      // 예: 'https://visitor-counter.<your-subdomain>.workers.dev'
+      const VISITOR_COUNTER_URL = 'https://visitor-counter.donian.workers.dev';
+      const el = document.getElementById('visitor-count');
+      if (!el) return;
+      if (VISITOR_COUNTER_URL.indexOf('YOUR-SUBDOMAIN') !== -1) {
+        // 아직 Worker 미배포 → hits.sh 폴백 배지로 대체
+        const img = document.createElement('img');
+        img.src = 'https://hits.sh/donian-kor.github.io.svg?style=flat-square&label=visitors&color=22c55e&labelColor=18181b';
+        img.alt = '방문자 수';
+        img.loading = 'eager';
+        img.decoding = 'async';
+        img.style.height = '16px';
+        img.style.verticalAlign = 'middle';
+        el.replaceWith(img);
+        return;
+      }
+      fetch(VISITOR_COUNTER_URL, { cache: 'no-store' })
+        .then((r) => r.json())
+        .then((d) => { if (d && typeof d.count === 'number') el.textContent = d.count.toLocaleString(); })
+        .catch(() => { el.textContent = 'n/a'; });
     })();
   </script>
 </body>
