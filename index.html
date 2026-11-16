@@ -789,16 +789,24 @@ function isNewProject(p) {
       const RSS = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID;
       // 프록시 실패 시 폴백으로 보여줄 정적 트랙 목록
       const FALLBACK_TRACKS = [
-        { idx: 1, title: '함께 웃는 이 순간', vid: 'LzhClqrnYoE', published: '2026-11-09T07:03:13+00:00', thumb: 'https://i.ytimg.com/vi/LzhClqrnYoE/hqdefault.jpg' },
-        { idx: 2, title: "let's go", vid: 'S9_XqayW-wk', published: '2026-11-09T04:17:06+00:00', thumb: 'https://i.ytimg.com/vi/S9_XqayW-wk/hqdefault.jpg' },
-        { idx: 3, title: '웃으며 안녕, 이 밤', vid: 'CwvHUImuW-I', published: '2026-11-06T05:02:35+00:00', thumb: 'https://i.ytimg.com/vi/CwvHUImuW-I/hqdefault.jpg' },
-        { idx: 4, title: '도시의밤 - City night', vid: 'GxnSbsM7TqU', published: '2026-10-30T09:20:57+00:00', thumb: 'https://i.ytimg.com/vi/GxnSbsM7TqU/hqdefault.jpg' },
-        { idx: 5, title: '이별의 눈물', vid: 'w7oymTDn8jo', published: '2026-10-28T11:14:40+00:00', thumb: 'https://i.ytimg.com/vi/w7oymTDn8jo/hqdefault.jpg' }
+        { idx: 1, title: "함께 웃는 이 순간", vid: 'LzhClqrnYoE', published: '2026-11-09', thumb: 'https://i.ytimg.com/vi/LzhClqrnYoE/hqdefault.jpg' },
+        { idx: 2, title: "let's go", vid: 'S9_XqayW-wk', published: '2026-11-09', thumb: 'https://i.ytimg.com/vi/S9_XqayW-wk/hqdefault.jpg' },
+        { idx: 3, title: "웃으며 안녕, 이 밤", vid: 'CwvHUImuW-I', published: '2026-11-06', thumb: 'https://i.ytimg.com/vi/CwvHUImuW-I/hqdefault.jpg' },
+        { idx: 4, title: "도시의밤 - City night", vid: 'GxnSbsM7TqU', published: '2026-10-30', thumb: 'https://i.ytimg.com/vi/GxnSbsM7TqU/hqdefault.jpg' },
+        { idx: 5, title: "이별의 눈물", vid: 'w7oymTDn8jo', published: '2026-10-28', thumb: 'https://i.ytimg.com/vi/w7oymTDn8jo/hqdefault.jpg' },
+        { idx: 6, title: "비오는 창가에서", vid: 'b5rrxOS70H0', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/b5rrxOS70H0/hqdefault.jpg' },
+        { idx: 7, title: "달빛 아래 너를 만나", vid: 'LdIkZ70JfYM', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/LdIkZ70JfYM/hqdefault.jpg' },
+        { idx: 8, title: "아침 햇살", vid: 'n1su-d__gUI', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/n1su-d__gUI/hqdefault.jpg' },
+        { idx: 9, title: "아직도..", vid: 'TqzrP7DJDZQ', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/TqzrP7DJDZQ/hqdefault.jpg' },
+        { idx: 10, title: "그리운 밤", vid: 'wqZg3hOBO_c', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/wqZg3hOBO_c/hqdefault.jpg' },
+        { idx: 11, title: "햇살 가득", vid: 'AA9Y2IT8dZo', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/AA9Y2IT8dZo/hqdefault.jpg' },
       ];
 
       function fmtDate(iso) {
+        if (!iso) return '-';
         try {
           const d = new Date(iso);
+          if (isNaN(d.getTime())) return '-';
           const y = d.getFullYear();
           const m = String(d.getMonth() + 1).padStart(2, '0');
           const day = String(d.getDate()).padStart(2, '0');
