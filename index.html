@@ -838,13 +838,20 @@ function isNewProject(p) {
               return { idx: i + 1, title, vid, published, thumb };
             });
             render(tracks);
+            try { localStorage.setItem('music_tracks_cache', JSON.stringify(tracks)); } catch (e) {}
             return;
           } catch (e) {
             clearTimeout(timer);
             lastError = (e && e.message) ? e.message : String(e);
           }
         }
-        render(FALLBACK_TRACKS);
+        let cachedTracks = null;
+        try { cachedTracks = JSON.parse(localStorage.getItem('music_tracks_cache') || 'null'); } catch (e) { cachedTracks = null; }
+        if (Array.isArray(cachedTracks) && cachedTracks.length) {
+          render(cachedTracks);
+        } else {
+          render(FALLBACK_TRACKS);
+        }
         const note = document.createElement('div');
         note.className = 'mt-2 px-3 py-2 rounded-md border border-amber-400/40 bg-amber-500/10 text-white text-xs font-semibold leading-relaxed';
         note.textContent = '⚠️ 라이브 데이터 로드 실패 (' + lastError + ') — 저장된 목록을 불러왔습니다. (YouTube에서 직접 보기)';
