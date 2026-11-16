@@ -796,9 +796,9 @@ function isNewProject(p) {
       async function load() {
         let lastError = '알 수 없는 오류';
         const proxies = [
+          (u) => 'https://cors-proxy.donian.workers.dev/corsproxy/?apiurl=' + encodeURIComponent(u),
           (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
           (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
-          (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
         ];
         for (const makeUrl of proxies) {
           const controller = new AbortController();
