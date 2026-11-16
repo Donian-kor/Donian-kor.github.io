@@ -794,6 +794,7 @@ function isNewProject(p) {
       }
 
       async function load() {
+        let lastError = '알 수 없는 오류';
         const proxies = [
           (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
           (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
@@ -805,11 +806,11 @@ function isNewProject(p) {
           try {
             const res = await fetch(makeUrl(RSS), { signal: controller.signal });
             clearTimeout(timer);
-            if (!res || !res.ok) continue;
+            if (!res || !res.ok) { lastError = 'HTTP ' + (res ? res.status : 'no response'); continue; }
             const text = await res.text();
             const doc = new DOMParser().parseFromString(text, 'application/xml');
             const entries = Array.from(doc.querySelectorAll('entry')).slice(0, 15);
-            if (!entries.length) continue;
+            if (!entries.length) { lastError = '피드에 항목 없음'; continue; }
             const tracks = entries.map((e, i) => {
               const title = e.querySelector('title')?.textContent || 'Untitled';
               const vid = e.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015', 'videoId')[0]?.textContent
@@ -823,11 +824,17 @@ function isNewProject(p) {
             return;
           } catch (e) {
             clearTimeout(timer);
+            lastError = (e && e.message) ? e.message : String(e);
           }
         }
         render(FALLBACK_TRACKS);
+        const note = document.createElement('div');
+        note.className = 'text-zinc-600 text-[0.6rem] mt-1';
+        note.textContent = '라이브 데이터 로드 실패 (' + lastError + ') · 캐시된 목록 표시 (YouTube에서 직접 보기)';
+        note.style.cursor = 'pointer';
+        note.addEventListener('click', () => window.open('https://www.youtube.com/@songmakernightmusic', '_blank'));
+        listEl.appendChild(note);
       }
-
 
       function render(tracks) {
         listEl.innerHTML = tracks.map(t => `
