@@ -794,43 +794,40 @@ function isNewProject(p) {
       }
 
       async function load() {
-        let res = null;
-        for (let attempt = 0; attempt < 2; attempt++) {
+        const proxies = [
+          (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+          (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+          (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
+        ];
+        for (const makeUrl of proxies) {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 8000);
+          const timer = setTimeout(() => controller.abort(), 6000);
           try {
-            res = await fetch(PROXY + encodeURIComponent(RSS), { signal: controller.signal });
+            const res = await fetch(makeUrl(RSS), { signal: controller.signal });
             clearTimeout(timer);
-            if (res.ok) break;
-          } catch (e) { clearTimeout(timer); res = null; }
+            if (!res || !res.ok) continue;
+            const text = await res.text();
+            const doc = new DOMParser().parseFromString(text, 'application/xml');
+            const entries = Array.from(doc.querySelectorAll('entry')).slice(0, 15);
+            if (!entries.length) continue;
+            const tracks = entries.map((e, i) => {
+              const title = e.querySelector('title')?.textContent || 'Untitled';
+              const vid = e.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015', 'videoId')[0]?.textContent
+                       || (e.querySelector('id')?.textContent || '').split(':').pop();
+              const published = e.querySelector('published')?.textContent || '';
+              const thumb = e.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'thumbnail')[0]?.getAttribute('url')
+                         || 'https://i.ytimg.com/vi/' + vid + '/hqdefault.jpg';
+              return { idx: i + 1, title, vid, published, thumb };
+            });
+            render(tracks);
+            return;
+          } catch (e) {
+            clearTimeout(timer);
+          }
         }
-        try {
-          if (!res || !res.ok) throw new Error('fetch failed');
-          const text = await res.text();
-          const doc = new DOMParser().parseFromString(text, 'application/xml');
-          const entries = Array.from(doc.querySelectorAll('entry')).slice(0, 15);
-          if (!entries.length) throw new Error('no entries');
-          const tracks = entries.map((e, i) => {
-            const title = e.querySelector('title')?.textContent || 'Untitled';
-            const vid = e.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015', 'videoId')[0]?.textContent
-                     || (e.querySelector('id')?.textContent || '').split(':').pop();
-            const published = e.querySelector('published')?.textContent || '';
-            const thumb = e.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'thumbnail')[0]?.getAttribute('url')
-                       || 'https://i.ytimg.com/vi/' + vid + '/hqdefault.jpg';
-            return { idx: i + 1, title, vid, published, thumb };
-          });
-          render(tracks);
-        } catch (err) {
-          // 프록시 실패 시 정적 폴백 목록으로 표시
-          render(FALLBACK_TRACKS);
-          const note = document.createElement('div');
-          note.className = 'text-zinc-600 text-[0.6rem] mt-1';
-          note.textContent = '라이브 데이터 로드 실패 · 캐시된 목록 표시 (YouTube에서 직접 보기)';
-          note.style.cursor = 'pointer';
-          note.addEventListener('click', () => window.open('https://www.youtube.com/@songmakernightmusic', '_blank'));
-          listEl.appendChild(note);
-        }
+        render(FALLBACK_TRACKS);
       }
+
 
       function render(tracks) {
         listEl.innerHTML = tracks.map(t => `
