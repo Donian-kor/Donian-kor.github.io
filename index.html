@@ -648,6 +648,55 @@ function isNewProject(p) {
       });
     })();
 
+    // ---------- 업데이트 날짜 자동 갱신 (GitHub API, 커밋 기준) ----------
+    function fmtDateFromISO(iso) {
+      if (!iso) return null;
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return null;
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
+    }
+
+    async function refreshUpdatedDates() {
+      const now = Date.now();
+      const CACHE_KEY = 'gh_pushed_dates_v1';
+      const TTL = 12 * 60 * 60 * 1000; // 12시간
+      let cache = {};
+      try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch (e) { cache = {}; }
+
+      let changed = false;
+      await Promise.all(allProjects.map(async (p) => {
+        const m = (p.github || '').match(/github\.com\/([^/]+)\/([^/#?]+)/);
+        if (!m) return;
+        const repo = m[1] + '/' + m[2];
+        const c = cache[repo];
+        if (c && c.date && (now - (c.ts || 0)) < TTL) {
+          p.updated_at = c.date;
+          changed = true;
+          return;
+        }
+        try {
+          const res = await fetch('https://api.github.com/repos/' + repo, {
+            headers: { 'Accept': 'application/vnd.github+json' }
+          });
+          if (res.ok) {
+            const j = await res.json();
+            const date = fmtDateFromISO(j.pushed_at);
+            if (date) {
+              cache[repo] = { ts: now, date };
+              p.updated_at = date;
+              changed = true;
+            }
+          }
+        } catch (e) { /* 무시: 정적 날짜 유지 */ }
+      }));
+
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
+      if (changed) renderGrid();
+    }
+
     // ---------- 데이터 로드 ----------
     fetch('projects.json')
       .then(r => r.json())
@@ -655,6 +704,8 @@ function isNewProject(p) {
         allProjects = data.projects;
         renderTabs(data.categories);
         renderGrid();
+        // 커밋 기준 업데이트 날짜 자동 갱신 (백그라운드)
+        refreshUpdatedDates();
         // 범례 클릭으로 분류
         const legend = document.getElementById('platform-legend');
         if (legend) {
