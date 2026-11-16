@@ -842,8 +842,8 @@ function isNewProject(p) {
         }
         render(FALLBACK_TRACKS);
         const note = document.createElement('div');
-        note.className = 'text-zinc-600 text-[0.6rem] mt-1';
-        note.textContent = '라이브 데이터 로드 실패 (' + lastError + ') · 캐시된 목록 표시 (YouTube에서 직접 보기)';
+        note.className = 'mt-2 px-3 py-2 rounded-md border border-amber-400/40 bg-amber-500/10 text-white text-xs font-semibold leading-relaxed';
+        note.textContent = '⚠️ 라이브 데이터 로드 실패 (' + lastError + ') — 저장된 목록을 불러왔습니다. (YouTube에서 직접 보기)';
         note.style.cursor = 'pointer';
         note.addEventListener('click', () => window.open('https://www.youtube.com/@songmakernightmusic', '_blank'));
         listEl.appendChild(note);
