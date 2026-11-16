@@ -889,6 +889,11 @@ function isNewProject(p) {
               if (st) st.classList.remove('hidden');
               const ic = track.querySelector('.music-play-btn');
               if (ic) ic.setAttribute('icon', 'solar:pause-circle-bold');
+              // 재생 화면(유튜브 iframe)에 맞춰 카드 섹션 높이 확장
+              listEl.style.maxHeight = '900px';
+            } else {
+              // 닫을 때 원래 높이(약 4곡)로 복원
+              listEl.style.maxHeight = '';
             }
           });
         });
