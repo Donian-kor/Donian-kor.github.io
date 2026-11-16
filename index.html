@@ -215,6 +215,12 @@
           <div id="music-list" class="space-y-3 max-h-[360px] overflow-y-auto pr-2">
             <div class="text-zinc-500 text-xs">Loading tracks...</div>
           </div>
+          <div id="music-dock" class="hidden mt-3 rounded-lg border border-white/10 bg-zinc-900/90 overflow-hidden">
+            <div class="px-3 py-2 text-xs text-zinc-300 truncate music-dock-title">재생할 곡을 선택하세요</div>
+            <div class="aspect-video w-full bg-black">
+              <iframe class="w-full h-full" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -854,46 +860,40 @@ function isNewProject(p) {
               <span class="music-status text-zinc-600 text-[0.6rem] font-mono hidden">NOW</span>
               <iconify-icon icon="solar:play-circle-bold" class="music-play-btn text-green-400 text-2xl shrink-0"></iconify-icon>
             </button>
-            <div class="music-player hidden px-3 pb-3">
-              <div class="aspect-video rounded overflow-hidden bg-black">
-                <iframe loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-              </div>
-            </div>
           </div>
         `).join('');
 
         listEl.querySelectorAll('.music-row').forEach(btn => {
           btn.addEventListener('click', () => {
             const track = btn.closest('.music-track');
-            const player = track.querySelector('.music-player');
-            const iframe = player.querySelector('iframe');
             const vid = track.getAttribute('data-vid');
-            const isOpen = !player.classList.contains('hidden');
-            // close all
+            const dock = document.getElementById('music-dock');
+            const dockIframe = dock ? dock.querySelector('iframe') : null;
+            const dockTitle = dock ? dock.querySelector('.music-dock-title') : null;
+            const titleText = track.querySelector('.text-zinc-200')?.textContent || '';
+            const wasActive = track.classList.contains('is-open');
+            // reset all highlights
             listEl.querySelectorAll('.music-track').forEach(t => {
               t.classList.remove('is-open');
-              const p = t.querySelector('.music-player');
-              const f = p.querySelector('iframe');
-              p.classList.add('hidden');
-              if (f) f.removeAttribute('src');
               const st = t.querySelector('.music-status');
               if (st) st.classList.add('hidden');
               const ic = t.querySelector('.music-play-btn');
               if (ic) ic.setAttribute('icon', 'solar:play-circle-bold');
             });
-            if (!isOpen) {
+            if (wasActive) {
+              // stop
+              if (dockIframe) dockIframe.removeAttribute('src');
+              if (dock) dock.classList.add('hidden');
+              if (dockTitle) dockTitle.textContent = '재생할 곡을 선택하세요';
+            } else {
               track.classList.add('is-open');
-              iframe.setAttribute('src', 'https://www.youtube.com/embed/' + vid + '?autoplay=1&rel=0&loop=1&playlist=' + vid);
-              player.classList.remove('hidden');
               const st = track.querySelector('.music-status');
               if (st) st.classList.remove('hidden');
               const ic = track.querySelector('.music-play-btn');
               if (ic) ic.setAttribute('icon', 'solar:pause-circle-bold');
-              // 재생 화면(유튜브 iframe)에 맞춰 카드 섹션 높이 확장
-              listEl.style.maxHeight = '520px';
-            } else {
-              // 닫을 때 원래 높이(약 4곡)로 복원
-              listEl.style.maxHeight = '';
+              if (dockIframe) dockIframe.setAttribute('src', 'https://www.youtube.com/embed/' + vid + '?autoplay=1&rel=0&loop=1&playlist=' + vid);
+              if (dockTitle) dockTitle.textContent = titleText;
+              if (dock) dock.classList.remove('hidden');
             }
           });
         });
