@@ -19,6 +19,7 @@ IP당 하루 1회만 카운팅하는 방문자 카운터 백엔드입니다.
 - 클라이언트 IP 는 Cloudflare 가 제공하는 `cf-connecting-ip` 헤더로 확인
 - IP + UTC 날짜를 SHA-256 해시하여 저장 (원본 IP 미저장, 개인정보 보호)
 - 같은 IP 가 같은 UTC 날짜에 재접속하면 카운트 증가 없음
+- **봇/크롤러(User-Agent 기반)는 카운트하지 않음** — Googlebot, Bingbot, curl, python-requests 등 제외
 - KV 에 2일 TTL 로 저장되어 자동 만료
 - CORS 허용 (`*`) 으로 정적 사이트에서 fetch 가능
 
