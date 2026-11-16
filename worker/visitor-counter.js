@@ -1,4 +1,5 @@
 // Cloudflare Worker: IP 기반 일 1회 방문자 카운터 (봇/크롤러 제외)
+// 오늘 방문자 + 총 방문자 카운팅
 // 배포 방법:
 // 1. Cloudflare 대시보드 → Workers & Pages → Create → Worker
 // 2. 이 코드를 붙여넣고 Deploy
@@ -54,10 +55,14 @@ export default {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const date = new Date().toISOString().slice(0, 10);
 
-    // 봇/크롤러는 카운트하지 않음
+    const totalKey = 'total';
+    const todayKey = `daily:${date}`;
+
+    // 봇/크롤러는 카운트하지 않음 (현재 값만 반환)
     if (bot) {
-      const total = parseInt((await env.COUNTER_KV.get('total')) || '0', 10);
-      return new Response(JSON.stringify({ count: total, date, bot: true }), {
+      const total = parseInt((await env.COUNTER_KV.get(totalKey)) || '0', 10);
+      const today = parseInt((await env.COUNTER_KV.get(todayKey)) || '0', 10);
+      return new Response(JSON.stringify({ total, today, date, bot: true }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -74,18 +79,21 @@ export default {
       .slice(0, 32);
 
     const seenKey = `seen:${date}:${ipHash}`;
-    const totalKey = 'total';
 
     const seen = await env.COUNTER_KV.get(seenKey);
     let total = parseInt((await env.COUNTER_KV.get(totalKey)) || '0', 10);
+    let today = parseInt((await env.COUNTER_KV.get(todayKey)) || '0', 10);
 
     if (seen === null) {
+      // 오늘 처음 보는 IP → 오늘/총 모두 +1
       await env.COUNTER_KV.put(seenKey, '1', { expirationTtl: 172800 });
       total += 1;
+      today += 1;
       await env.COUNTER_KV.put(totalKey, String(total));
+      await env.COUNTER_KV.put(todayKey, String(today), { expirationTtl: 172800 });
     }
 
-    return new Response(JSON.stringify({ count: total, date, bot: false }), {
+    return new Response(JSON.stringify({ total, today, date, bot: false }), {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
