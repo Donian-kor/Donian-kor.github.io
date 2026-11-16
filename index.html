@@ -917,7 +917,6 @@ function isNewProject(p) {
         listEl.innerHTML = tracks.map(t => `
           <div class="music-track rounded-lg border border-white/10 bg-zinc-900/95 overflow-hidden" data-vid="${t.vid}">
             <button type="button" class="music-row w-full flex items-center gap-3 p-3 text-left" data-idx="${t.idx}">
-              <span class="text-zinc-600 text-xs w-5 text-right font-mono">${String(t.idx).padStart(2, '0')}</span>
               <img src="${t.thumb}" alt="" class="music-thumb w-12 h-12 rounded object-cover bg-zinc-800" loading="lazy" onerror="this.style.display='none'">
               <div class="flex-1 min-w-0">
                 <div class="text-zinc-200 text-sm truncate">${escapeHtml(t.title)}</div>
