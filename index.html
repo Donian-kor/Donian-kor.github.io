@@ -295,15 +295,9 @@
           <a href="https://sites.google.com/view/donian-privacy" target="_blank" rel="noopener" class="hover:text-zinc-200 transition underline-offset-2 hover:underline whitespace-nowrap">개인정보처리방침</a>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-3 whitespace-nowrap">
-          <!-- 방문자 카운터 (Cloudflare Worker, IP당 하루 1회) -->
-          <span class="inline-flex items-center gap-1">
-            <span class="text-zinc-500">오늘:</span>
-            <span id="visitor-today" class="text-emerald-400 font-semibold">—</span>
-          </span>
-          <span class="inline-flex items-center gap-1">
-            <span class="text-zinc-500">총:</span>
-            <span id="visitor-total" class="text-emerald-400 font-semibold">—</span>
-          </span>
+          <!-- 방문자 카운터 (Cloudflare Worker, IP당 하루 1회) : 오늘 / 총 -->
+          <span class="text-zinc-500">방문자:</span>
+          <span id="visitor-count" class="text-emerald-400 font-semibold">—</span>
         </div>
       </div>
     </footer>
@@ -1154,9 +1148,8 @@ function isNewProject(p) {
       // Cloudflare Worker 배포 후 URL 로 교체하세요.
       // 예: 'https://visitor-counter.<your-subdomain>.workers.dev'
       const VISITOR_COUNTER_URL = 'https://visitor-counter.donian.workers.dev';
-      const todayEl = document.getElementById('visitor-today');
-      const totalEl = document.getElementById('visitor-total');
-      if (!todayEl || !totalEl) return;
+      const el = document.getElementById('visitor-count');
+      if (!el) return;
       if (VISITOR_COUNTER_URL.indexOf('YOUR-SUBDOMAIN') !== -1) {
         // 아직 Worker 미배포 → hits.sh 폴백 배지로 대체
         const img = document.createElement('img');
@@ -1166,20 +1159,17 @@ function isNewProject(p) {
         img.decoding = 'async';
         img.style.height = '16px';
         img.style.verticalAlign = 'middle';
-        totalEl.textContent = '';
-        totalEl.replaceWith(img);
-        todayEl.parentElement.style.display = 'none';
+        el.replaceWith(img);
         return;
       }
       fetch(VISITOR_COUNTER_URL, { cache: 'no-store' })
         .then((r) => r.json())
         .then((d) => {
           if (d && typeof d.total === 'number') {
-            todayEl.textContent = (d.today || 0).toLocaleString();
-            totalEl.textContent = d.total.toLocaleString();
+            el.textContent = (d.today || 0).toLocaleString() + ' / ' + d.total.toLocaleString();
           }
         })
-        .catch(() => { todayEl.textContent = 'n/a'; totalEl.textContent = 'n/a'; });
+        .catch(() => { el.textContent = 'n/a'; });
     })();
   </script>
 </body>
