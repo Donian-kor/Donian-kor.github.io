@@ -1,0 +1,32 @@
+# 모든 크롤러/봇의 크롤링 차단
+User-agent: *
+Disallow: /
+
+# 검색엔진 색인도 차단 (noindex와 병행)
+# Google, Bing 등 주요 봇도 차단
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: Yandex
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: Twitterbot
+Disallow: /
+
+User-agent: LinkedInBot
+Disallow: /
