@@ -1400,7 +1400,7 @@
         canvas.style.width = w + 'px';
         canvas.style.height = h + 'px';
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const count = Math.min(400, Math.max(140, Math.floor((w * h) / 2200)));
+        const count = Math.min(1000, Math.max(140, Math.floor((w * h) / 2200)));
         items = [];
         for (let i = 0; i < count; i++) items.push(makeItem(w, h, true));
         render();
