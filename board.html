@@ -444,7 +444,7 @@
         }
         listEl.innerHTML = data.posts.map((p) => {
           const statusHtml = p.is_admin
-            ? '<span class="text-red-300 font-semibold">공지</span>'
+            ? '<span class="text-red-300 font-semibold">알림</span>'
             : (p.admin_replies > 0
               ? '<span class="text-yellow-200 font-semibold">완료</span>'
               : '<span class="text-zinc-300">대기</span>');
