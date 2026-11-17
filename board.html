@@ -737,6 +737,7 @@
         content: fd.get('content') || '',
         is_locked: fd.get('is_locked') ? 1 : 0,
         botcheck: fd.get('botcheck') || '',
+        'cf-turnstile-response': fd.get('cf-turnstile-response') || '',
       };
       try {
         await api('/posts', {
@@ -1006,6 +1007,7 @@
         password: fd.get('pw') || '',
         content: fd.get('content') || '',
         botcheck: fd.get('botcheck') || '',
+        'cf-turnstile-response': fd.get('cf-turnstile-response') || '',
       };
       try {
         await api('/posts/' + postId + '/comments', {
