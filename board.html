@@ -226,7 +226,7 @@
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     function renderName(name, isAdmin) {
-      if (isAdmin) return '<span class="text-emerald-400 font-semibold">Donian</span>';
+      if (isAdmin) return '<span class="px-1.5 py-0.5 rounded text-[0.65rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 align-middle">Donian</span>';
       return escapeHtml(name || '익명');
     }
     function fmtDate(iso) {
