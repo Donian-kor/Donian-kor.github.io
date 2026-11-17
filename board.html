@@ -108,7 +108,7 @@
       <button data-close="write-modal" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 flex items-center justify-center transition" aria-label="닫기">✕</button>
       <div class="p-5">
         <h3 id="write-title" class="font-bold text-lg text-zinc-100 mb-4">글쓰기</h3>
-        <form id="write-form" class="space-y-3 text-sm" autocomplete="off">
+        <form id="write-form" class="space-y-3 text-sm" autocomplete="off" novalidate>
           <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -298,7 +298,7 @@
       let pos = 0;
       for (const [start, end] of ranges) {
         html += esc(text.slice(pos, start));
-        html += `<mark class="bg-red-500/30 text-red-200 rounded px-0.5">${escapeHtml(text.slice(start, end))}</mark>`;
+        html += `<mark style="background:rgba(239,68,68,0.32);color:#fecaca;border-radius:2px;">${escapeHtml(text.slice(start, end))}</mark>`;
         pos = end;
       }
       html += esc(text.slice(pos));
@@ -569,7 +569,7 @@
               </div>
             `).join('') : '<div class="text-zinc-600 text-xs">댓글이 없습니다.</div>'}
           </div>
-          <form id="comment-form" class="space-y-2" autocomplete="off">
+          <form id="comment-form" class="space-y-2" autocomplete="off" novalidate>
             <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
             <div class="grid grid-cols-2 gap-2">
               <input type="text" name="name" maxlength="20" placeholder="이름 (선택)" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
