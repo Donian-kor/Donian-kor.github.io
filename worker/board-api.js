@@ -109,7 +109,13 @@ export default {
 
     // GET /profanity-list - 프론트 하이라이팅용 단어 목록
     if (method === 'GET' && path === '/profanity-list') {
-      return json({ words: PROFANITY });
+      return new Response(JSON.stringify({ words: PROFANITY }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
     }
 
     // POST /admin/verify - 관리자 비밀번호 확인 후 임시 토큰 발급
@@ -171,7 +177,13 @@ export default {
         .bind(...params, pageSize, offset)
         .all();
 
-      return json({ total, page, pageSize, posts: rows.results || [] });
+      return new Response(JSON.stringify({ total, page, pageSize, posts: rows.results || [] }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=30',
+        },
+      });
     }
 
     // GET /posts/:id - 상세보기 (조회수 증가)
