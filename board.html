@@ -505,16 +505,48 @@
       html += escapeHtml(text.slice(pos));
       return html;
     }
-    // 이름 입력 필드: 하이라이트 레이어 갱신 + 입력 즉시 폼 제출 차단
+    // 이름 입력 필드: 사칭+욕설 하이라이트 + 입력 즉시 폼 제출 차단
     function applyImpersonationHighlight(el, highlightEl) {
       if (!el) return;
-      const hit = findImpersonationRanges(el.value);
-      if (highlightEl) highlightEl.innerHTML = renderImpersonationHighlight(el.value);
-      if (hit.length) {
+      const val = el.value;
+      const impRanges = findImpersonationRanges(val);
+      let badRanges = impRanges.slice();
+      // 욕설/비속어도 이름에서 차단 (PROFANITY_SET 로드됐을 때)
+      let profanityHit = false;
+      try {
+        const pfRanges = findProfanityRanges(val);
+        profanityHit = pfRanges.length > 0;
+        badRanges = badRanges.concat(pfRanges);
+      } catch (e) {}
+      // 하이라이트 레이어: 사칭(진한 빨강) + 욕설(빨강) 모두 표시
+      if (highlightEl) {
+        badRanges.sort((a, b) => a[0] - b[0]);
+        const merged = [];
+        for (const r of badRanges) {
+          if (merged.length && r[0] <= merged[merged.length - 1][1]) {
+            merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], r[1]);
+          } else merged.push([r[0], r[1]]);
+        }
+        let html = '';
+        let pos = 0;
+        for (const [s, e] of merged) {
+          html += escapeHtml(val.slice(pos, s));
+          html += `<mark style="background:rgba(239,68,68,0.45);color:#fecaca;border-radius:2px;">${escapeHtml(val.slice(s, e))}</mark>`;
+          pos = e;
+        }
+        html += escapeHtml(val.slice(pos));
+        highlightEl.innerHTML = html;
+      }
+      if (impRanges.length) {
         el.style.borderColor = 'rgba(239,68,68,0.8)';
         el.style.backgroundColor = 'rgba(239,68,68,0.12)';
         el.title = '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.';
         el.setCustomValidity('관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.');
+      } else if (profanityHit) {
+        el.style.borderColor = 'rgba(239,68,68,0.8)';
+        el.style.backgroundColor = 'rgba(239,68,68,0.12)';
+        el.title = '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.';
+        el.setCustomValidity('이름에 욕설/비속어가 포함되어 사용할 수 없습니다.');
       } else {
         el.style.borderColor = '';
         el.style.backgroundColor = '';
@@ -532,6 +564,13 @@
       const norm = words.map((w) => String(w).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '')).filter(Boolean);
       PROFANITY_SET = new Set(norm);
       PROFANITY_MAXLEN = norm.reduce((m, w) => Math.max(m, [...w].length), 0);
+      // 욕설 목록 로드 완료 후, 이미 입력된 이름 필드 재검사
+      try {
+        const wn = document.querySelector('#write-form [name="name"]');
+        if (wn) applyImpersonationHighlight(wn, document.getElementById('write-name-highlight'));
+        const cn = document.querySelector('#comment-form [name="name"]');
+        if (cn) applyImpersonationHighlight(cn, document.getElementById('comment-name-highlight'));
+      } catch (e) {}
     }
 
     async function loadProfanity() {
@@ -868,6 +907,7 @@
       const nameVal = nameEl.value.trim();
       if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
       if (!isAdminMode() && isImpersonationName(nameVal)) { setFieldError(nameEl, '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.'); return; }
+      if (!isAdminMode() && findProfanityRanges(nameVal).length > 0) { setFieldError(nameEl, '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.'); return; }
       if (findProfanityRanges(titleVal).length > 0 || findProfanityRanges(contentVal).length > 0) {
         writeError.textContent = '욕설/비속어가 포함되어 있습니다. 입력창에 빨간색으로 표시된 부분을 수정한 후 다시 등록하세요.';
         writeError.classList.remove('hidden');
@@ -1166,6 +1206,7 @@
       const nameVal = nameEl.value.trim();
       if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
       if (!isAdminMode() && isImpersonationName(nameVal)) { setFieldError(nameEl, '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.'); return; }
+      if (!isAdminMode() && findProfanityRanges(nameVal).length > 0) { setFieldError(nameEl, '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.'); return; }
       const ranges = findProfanityRanges(contentVal);
       if (ranges.length > 0) {
         showToast('욕설/비속어를 수정한 후 다시 등록하세요.');
@@ -1252,6 +1293,10 @@
         const replyName = fd.get('name') || '';
         if (!isAdminMode() && isImpersonationName(replyName)) {
           showToast('관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.');
+          return;
+        }
+        if (!isAdminMode() && findProfanityRanges(replyName).length > 0) {
+          showToast('이름에 욕설/비속어가 포함되어 사용할 수 없습니다.');
           return;
         }
         try {

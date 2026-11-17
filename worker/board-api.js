@@ -432,6 +432,7 @@ export default {
       // 이름 사칭 검증을 봇 인증보다 먼저 (명확한 안내)
       const isAdmin = await isAdminToken(body.token);
       if (name && !isAdmin && isImpersonationName(name)) return json({ error: '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.' }, 400);
+      if (name && !isAdmin && hasProfanity(name)) return json({ error: '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.' }, 400);
       if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
       const ts = await verifyTurnstile(body['cf-turnstile-response'], ip, env);
       if (!ts.success) return json({ error: '봇 인증에 실패했습니다.', detail: ts.errorCodes || [] }, 403);
@@ -498,6 +499,7 @@ export default {
       const { name, password, content, parent_id } = body;
       const isAdmin = await isAdminToken(body.token);
       if (name && !isAdmin && isImpersonationName(name)) return json({ error: '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.' }, 400);
+      if (name && !isAdmin && hasProfanity(name)) return json({ error: '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.' }, 400);
       if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
       const ts = await verifyTurnstile(body['cf-turnstile-response'], ip, env);
       if (!ts.success) return json({ error: '봇 인증에 실패했습니다.', detail: ts.errorCodes || [] }, 403);
