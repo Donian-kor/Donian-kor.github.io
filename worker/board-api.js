@@ -161,9 +161,19 @@ export default {
 
       await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
       const comments = await env.donian_board
-        .prepare('SELECT id, name, content, created_at FROM comments WHERE post_id = ? ORDER BY created_at ASC')
+        .prepare('SELECT id, name, content, created_at, password_hash FROM comments WHERE post_id = ? ORDER BY created_at ASC')
         .bind(id)
         .all();
+      const anon = (n) => !n || n === '익명';
+      const authorName = anon(post.name) ? null : post.name;
+      const enriched = (comments.results || []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        content: c.content,
+        created_at: c.created_at,
+        is_author: (authorName !== null && !anon(c.name) && c.name === authorName)
+          || (c.password_hash && c.password_hash === post.password_hash),
+      }));
       return json({
         post: {
           id: post.id,
@@ -174,7 +184,7 @@ export default {
           views: post.views + 1,
           is_locked: post.is_locked,
         },
-        comments: comments.results || [],
+        comments: enriched,
       });
     }
 
