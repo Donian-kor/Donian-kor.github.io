@@ -462,6 +462,49 @@
       }
       return false;
     }
+    // 사칭 단어가 이름의 어떤 위치에 있는지 (하이라이트/툴팁용)
+    function findImpersonationRanges(name) {
+      const { norm, map } = normalizeWithMap(String(name));
+      if (!norm) return [];
+      const ranges = [];
+      for (const w of IMPERSONATION_SET) {
+        const wl = [...w].length;
+        let from = 0;
+        while (from <= norm.length - wl) {
+          const idx = norm.indexOf(w, from);
+          if (idx === -1) break;
+          if (wl >= 3 || norm.length === wl) {
+            ranges.push([map[idx], map[idx + wl - 1] + 1]);
+          }
+          from = idx + 1;
+        }
+      }
+      if (!ranges.length) return [];
+      ranges.sort((a, b) => a[0] - b[0]);
+      const merged = [];
+      for (const r of ranges) {
+        if (merged.length && r[0] <= merged[merged.length - 1][1]) {
+          merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], r[1]);
+        } else merged.push([r[0], r[1]]);
+      }
+      return merged;
+    }
+    // 이름 입력 필드에 사칭 하이라이트(테두리/배경) 적용
+    function applyImpersonationHighlight(el) {
+      if (!el) return;
+      const hit = findImpersonationRanges(el.value);
+      if (hit.length) {
+        el.style.borderColor = 'rgba(239,68,68,0.8)';
+        el.style.backgroundColor = 'rgba(239,68,68,0.12)';
+        el.style.color = '#fecaca';
+        el.title = '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.';
+      } else {
+        el.style.borderColor = '';
+        el.style.backgroundColor = '';
+        el.style.color = isAdminMode() ? '#6ee7b7' : '';
+        el.title = '';
+      }
+    }
 
     // ---------- 욕설/비속어 하이라이팅 ----------
     const PROFANITY_CACHE_KEY = 'board_profanity_v1';
@@ -747,6 +790,7 @@
     [writeForm.querySelector('[name="title"]'), writeForm.querySelector('[name="content"]'), writeForm.querySelector('[name="pw"]'), writeForm.querySelector('[name="name"]')].forEach((el) => {
       el.addEventListener('input', () => el.setCustomValidity(''));
     });
+    writeForm.querySelector('[name="name"]').addEventListener('input', (e) => applyImpersonationHighlight(e.target));
 
     // 글자 수 제한 적용
     (function setupWriteLimits() {
@@ -954,6 +998,7 @@
       commentNameEl.addEventListener('input', () => {
         const t = truncateChars(commentNameEl.value, 10);
         if (t !== commentNameEl.value) commentNameEl.value = t;
+        applyImpersonationHighlight(commentNameEl);
       });
       commentPwEl.addEventListener('input', () => {
         let v = [...commentPwEl.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
@@ -1171,6 +1216,8 @@
       node.appendChild(wrap);
       const formEl = wrap.querySelector('form');
       const textarea = wrap.querySelector('textarea');
+      const replyNameEl = formEl.querySelector('[name="name"]');
+      if (replyNameEl) replyNameEl.addEventListener('input', (e) => applyImpersonationHighlight(e.target));
       applyPwFallback();
       setupTurnstile();
       textarea.focus();
@@ -1284,6 +1331,8 @@
           cnameEl.classList.remove('font-semibold');
         }
       }
+      applyImpersonationHighlight(nameEl);
+      applyImpersonationHighlight(cnameEl);
     }
 
     // 관리자 세션 keepalive (활동 중 토큰 1시간 만료 방지) + 만료 UX
