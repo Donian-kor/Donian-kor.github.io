@@ -497,4 +497,12 @@ export default {
 
     return json({ error: 'not found' }, 404);
   },
+
+  // 매일 자동 정리 (Cron, 09:00 KST): 30일 지난 조회기록 / 만료된 카운터 삭제
+  async scheduled(event, env) {
+    const now = Date.now();
+    const cutoff30d = now - 30 * 24 * 60 * 60 * 1000;
+    await env.donian_board.prepare('DELETE FROM post_views WHERE viewed_at < ?').bind(cutoff30d).run();
+    await env.donian_board.prepare('DELETE FROM rate_limits WHERE expires_at < ?').bind(now).run();
+  },
 };
