@@ -210,8 +210,6 @@ export default {
         .prepare('SELECT id, name, content, created_at, password_hash, is_admin, parent_id FROM comments WHERE post_id = ? ORDER BY created_at ASC')
         .bind(id)
         .all();
-      const anon = (n) => !n || n === '익명';
-      const authorName = anon(post.name) ? null : post.name;
       const enriched = (comments.results || []).map((c) => ({
         id: c.id,
         name: c.name,
@@ -219,8 +217,8 @@ export default {
         created_at: c.created_at,
         is_admin: c.is_admin,
         parent_id: c.parent_id,
-        is_author: (authorName !== null && !anon(c.name) && c.name === authorName)
-          || (c.password_hash && c.password_hash === post.password_hash),
+        // 작성자 판별: 댓글 비밀번호 === 게시글 비밀번호 (이름 도용 방지)
+        is_author: (c.password_hash && c.password_hash === post.password_hash),
       }));
       return json({
         post: {
