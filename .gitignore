@@ -1,2 +1,11 @@
 # PNG assets are kept locally only
 *.png
+
+# 비밀번호/키/인증서 (커밋 금지)
+.admin-password.txt
+.env
+.dev.vars
+*.key
+*.pem
+*.jks
+*.keystore

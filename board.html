@@ -1279,7 +1279,7 @@
             updateAdminBtn();
             showToast('관리자 모드 활성화 — 레이트리밋이 면제됩니다.');
           } else {
-            showToast('비밀번호가 일치하지 않습니다.');
+            showToast(data.error || '비밀번호가 일치하지 않습니다.');
           }
         } catch (e) {
           showToast('확인 실패: ' + e.message);

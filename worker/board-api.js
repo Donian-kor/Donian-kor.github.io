@@ -108,10 +108,10 @@ export default {
 
     // IP 차단 (해킹/불법봇) - KV 저장
     async function isBanned() {
-      return !!(await env.COUNTER_KV.get('ban:' + ip));
+      try { return !!(await env.COUNTER_KV.get('ban:' + ip)); } catch (e) { return false; }
     }
     async function banIp() {
-      await env.COUNTER_KV.put('ban:' + ip, String(Date.now()), { expirationTtl: 90 * 24 * 60 * 60 }); // 90일
+      try { await env.COUNTER_KV.put('ban:' + ip, String(Date.now()), { expirationTtl: 90 * 24 * 60 * 60 }); } catch (e) {}
     }
     if (await isBanned()) return json({ error: '해킹 및 불법봇사용으로 차단되었습니다.' }, 403);
 
@@ -204,14 +204,35 @@ export default {
 
     // POST /admin/verify - 관리자 비밀번호 확인 후 임시 토큰 발급
     if (method === 'POST' && path === '/admin/verify') {
+      // brute-force 방어: IP당 10분에 5회 실패 시 차단
+      const alKey = `adminlogin:${ip}`;
+      const nowTs = Date.now();
+      const WINDOW = 10 * 60 * 1000; // 10분
+      const alRow = await env.donian_board
+        .prepare('SELECT count, expires_at FROM rate_limits WHERE key = ?')
+        .bind(alKey)
+        .first();
+      const alValid = alRow && alRow.expires_at > nowTs;
+      const fails = alValid ? alRow.count : 0;
+      if (fails >= 5) return json({ ok: false, error: '로그인 시도가 너무 많습니다. 10분 후 다시 시도하세요.' }, 429);
       const body = await request.json().catch(() => ({}));
       const pw = body.password || '';
       if (env.ADMIN_PASSWORD && pw === env.ADMIN_PASSWORD) {
+        // 성공 → 실패 카운터 초기화
+        await env.donian_board.prepare('DELETE FROM rate_limits WHERE key = ?').bind(alKey).run();
         const token = crypto.randomUUID().replace(/-/g, '').slice(0, 32);
         await env.COUNTER_KV.put('admin_token:' + token, 'admin', { expirationTtl: 3600 });
         return json({ ok: true, token });
       }
-      return json({ ok: false });
+      // 실패 → 누적
+      const next = fails + 1;
+      const expires = alValid ? alRow.expires_at : nowTs + WINDOW;
+      await env.donian_board
+        .prepare(`INSERT INTO rate_limits (key, count, expires_at) VALUES (?, ?, ?)
+                  ON CONFLICT(key) DO UPDATE SET count = excluded.count, expires_at = excluded.expires_at`)
+        .bind(alKey, next, expires)
+        .run();
+      return json({ ok: false, error: '비밀번호가 일치하지 않습니다.' });
     }
 
     // 토큰 유효성 검사

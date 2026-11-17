@@ -101,7 +101,9 @@ crons = ["0 0 * * *"]   # 매일 00:00 UTC = 09:00 KST
 - 글쓰기 시 `is_locked` 체크 → 작성자와 관리자만 열람 가능
 - 목록에 잠금 아이콘 표시
 - 상세보기 진입 시 비밀번호 입력 → 작성자 비밀번호 또는 관리자 비밀번호로 열람
-- 관리자 비밀번호는 Worker secret `ADMIN_PASSWORD` 로 설정 (기본값: `donian-admin-2026`)
+- 관리자 비밀번호는 Worker secret `ADMIN_PASSWORD` 로 설정하세요.
+  - 소스·README·Git 이력에 비밀번호를 적지 않습니다.
+  - 등록: `npx wrangler secret put ADMIN_PASSWORD` (값은 안전하게 직접 입력)
 
 ## 중첩 댓글(답글) 및 삭제 규칙
 
