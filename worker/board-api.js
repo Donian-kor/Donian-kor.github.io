@@ -183,6 +183,8 @@ export default {
       if (body.botcheck) return json({ error: 'bot' }, 400);
       const { name, password, title, content, is_locked } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
+      if (password.length < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
+      if (name && name.trim().length === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
       if (title.length > 200) return json({ error: '제목이 너무 깁니다' }, 400);
       if (content.length > 5000) return json({ error: '내용이 너무 깁니다' }, 400);
       if (content.trim().length < 2) return json({ error: '내용이 너무 짧습니다' }, 400);
@@ -222,6 +224,8 @@ export default {
       if (body.botcheck) return json({ error: 'bot' }, 400);
       const { name, password, content } = body;
       if (!password || !content) return json({ error: '필수 항목 누락' }, 400);
+      if (password.length < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
+      if (name && name.trim().length === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
       if (content.length > 1000) return json({ error: '댓글이 너무 깁니다' }, 400);
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(content);
