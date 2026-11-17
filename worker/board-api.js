@@ -112,6 +112,12 @@ export default {
       return json({ words: PROFANITY });
     }
 
+    // GET /admin/verify?pw= - 관리자 비밀번호 확인
+    if (method === 'GET' && path === '/admin/verify') {
+      const pw = url.searchParams.get('pw') || '';
+      return json({ ok: !!(env.ADMIN_PASSWORD && pw === env.ADMIN_PASSWORD) });
+    }
+
     // GET /posts?page=1&search= - 목록
     if (method === 'GET' && path === '/posts') {
       const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
@@ -194,6 +200,7 @@ export default {
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
+      const isAdmin = !!(body.admin_pw && env.ADMIN_PASSWORD && body.admin_pw === env.ADMIN_PASSWORD);
       const { password, title, content } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
       if (charLen(title) > 20) return json({ error: '제목은 20글자 이하여야 합니다.' }, 400);
@@ -201,7 +208,7 @@ export default {
       const spam = spamCheck(title + ' ' + content);
       if (spam) return json({ error: spam }, 400);
       if (hasProfanity(title + ' ' + content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
-      if (!(await rateLimitWrite('edit', 10))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
+      if (!(isAdmin || (await rateLimitWrite('edit', 10)))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
       const hash = await hashPassword(password);
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const post = await env.donian_board.prepare('SELECT password_hash FROM posts WHERE id = ?').bind(id).first();
@@ -216,6 +223,7 @@ export default {
       if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
+      const isAdmin = !!(body.admin_pw && env.ADMIN_PASSWORD && body.admin_pw === env.ADMIN_PASSWORD);
       const { name, password, title, content, is_locked } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
       if (charLen(password) < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
@@ -228,7 +236,7 @@ export default {
       const spam = spamCheck(title + ' ' + content);
       if (spam) return json({ error: spam }, 400);
       if (hasProfanity(title + ' ' + content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
-      if (!(await rateLimitWrite('post', 3))) return json({ error: '게시글은 시간당 3회까지 작성할 수 있습니다.' }, 429);
+      if (!(isAdmin || (await rateLimitWrite('post', 3)))) return json({ error: '게시글은 시간당 3회까지 작성할 수 있습니다.' }, 429);
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
       await env.donian_board
@@ -259,6 +267,7 @@ export default {
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
+      const isAdmin = !!(body.admin_pw && env.ADMIN_PASSWORD && body.admin_pw === env.ADMIN_PASSWORD);
       const { name, password, content } = body;
       if (!password || !content) return json({ error: '필수 항목 누락' }, 400);
       if (charLen(password) < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
@@ -270,7 +279,7 @@ export default {
       const spam = spamCheck(content);
       if (spam) return json({ error: spam }, 400);
       if (hasProfanity(content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
-      if (!(await rateLimitWrite('comment', 5))) return json({ error: '댓글은 시간당 5회까지 작성할 수 있습니다.' }, 429);
+      if (!(isAdmin || (await rateLimitWrite('comment', 5)))) return json({ error: '댓글은 시간당 5회까지 작성할 수 있습니다.' }, 429);
       const post = await env.donian_board.prepare('SELECT id FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
       const hash = await hashPassword(password);
