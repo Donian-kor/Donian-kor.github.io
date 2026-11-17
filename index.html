@@ -1008,7 +1008,7 @@ function isNewProject(p) {
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
       const digits = '0123456789';
       const IDLE_DELAY = 700;      // 스크롤이 멈춘 뒤 자동 낙하 시작까지(ms)
-      const DRIFT_PER_SEC = 26;    // 자동 낙하 속도(px/s)
+      const DRIFT_PER_SEC = 130;   // 자동 낙하 속도(px/s) — 보드와 동일 5배
       const IDLE_FPS = 30;         // 자동 낙하 시 렌더링 주기
       let items = [];
       let raf = 0;
@@ -1080,7 +1080,7 @@ function isNewProject(p) {
         canvas.style.width = w + 'px';
         canvas.style.height = h + 'px';
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const count = Math.min(400, Math.max(140, Math.floor((w * h) / 2200)));
+        const count = Math.min(2000, Math.max(140, Math.floor((w * h) / 2200)));
         items = [];
         for (let i = 0; i < count; i++) items.push(makeItem(w, h, true));
         render();
