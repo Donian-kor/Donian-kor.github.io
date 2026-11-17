@@ -131,13 +131,11 @@ export default {
       return (await getFailCount()) >= 3;
     }
 
-    // IP당 읽기 제한: 분당 60회 (스크래핑 방지)
+    // IP당 읽기 제한: 분당 60회 (Rate Limiting binding 사용 → KV 안 씀)
     async function rateLimitRead() {
-      const key = `rl:r:${ip}`;
-      const count = parseInt((await env.COUNTER_KV.get(key)) || '0', 10);
-      if (count >= 60) return false;
-      await env.COUNTER_KV.put(key, String(count + 1), { expirationTtl: 60 });
-      return true;
+      if (!env.RATE_LIMITER) return true; // binding 없으면 스킵
+      const { success } = await env.RATE_LIMITER.limit({ key: 'r:' + ip });
+      return success;
     }
 
     // 읽기 요청 전체에 레이트리밋 적용
@@ -267,7 +265,7 @@ export default {
       let views = post.views;
       if (!alreadyViewed) {
         await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
-        await env.COUNTER_KV.put(viewKey, '1', { expirationTtl: 3600 });
+        await env.COUNTER_KV.put(viewKey, '1', { expirationTtl: 86400 });
         views = post.views + 1;
       }
       const comments = await env.donian_board
