@@ -64,7 +64,7 @@ export default {
       return new Response(null, {
         headers: {
           'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
         },
       });
@@ -186,6 +186,29 @@ export default {
         },
         comments: enriched,
       });
+    }
+
+    // PUT /posts/:id - 글 수정 (비밀번호 인증)
+    if (method === 'PUT' && /^\/posts\/\d+$/.test(path)) {
+      if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
+      const id = parseInt(path.split('/')[2], 10);
+      const body = await request.json();
+      if (body.botcheck) return json({ error: 'bot' }, 400);
+      const { password, title, content } = body;
+      if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
+      if (charLen(title) > 20) return json({ error: '제목은 20글자 이하여야 합니다.' }, 400);
+      if (charLen(content) > 500) return json({ error: '내용은 500글자 이하여야 합니다.' }, 400);
+      const spam = spamCheck(title + ' ' + content);
+      if (spam) return json({ error: spam }, 400);
+      if (hasProfanity(title + ' ' + content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
+      if (!(await rateLimitWrite('edit', 10))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
+      const hash = await hashPassword(password);
+      const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
+      const post = await env.donian_board.prepare('SELECT password_hash FROM posts WHERE id = ?').bind(id).first();
+      if (!post) return json({ error: 'not found' }, 404);
+      if (post.password_hash !== hash && hash !== adminHash) return json({ error: '비밀번호가 일치하지 않습니다.' }, 403);
+      await env.donian_board.prepare('UPDATE posts SET title = ?, content = ? WHERE id = ?').bind(title, content, id).run();
+      return json({ ok: true });
     }
 
     // POST /posts - 글쓰기

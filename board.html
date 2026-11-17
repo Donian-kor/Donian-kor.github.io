@@ -158,6 +158,36 @@
     </div>
   </div>
 
+  <!-- Edit Modal -->
+  <div id="edit-modal" class="hidden fixed inset-0 z-[70] items-center justify-center p-4 modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+    <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-zinc-900 border border-white/10 shadow-2xl">
+      <button data-close="edit-modal" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 flex items-center justify-center transition" aria-label="닫기">✕</button>
+      <div class="p-5">
+        <h3 id="edit-title" class="font-bold text-lg text-zinc-100 mb-4">글 수정</h3>
+        <form id="edit-form" class="space-y-3 text-sm" autocomplete="off" novalidate>
+          <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
+          <div>
+            <label class="block text-zinc-400 mb-1 text-xs">제목</label>
+            <input type="text" name="title" required placeholder="최대 20글자" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+          </div>
+          <div>
+            <label class="block text-zinc-400 mb-1 text-xs">내용</label>
+            <textarea name="content" required rows="6" placeholder="최대 500글자" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+          </div>
+          <div>
+            <label class="block text-zinc-400 mb-1 text-xs">비밀번호 (작성 시 사용한 비밀번호)</label>
+            <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+          </div>
+          <p id="edit-error" class="hidden text-rose-400 text-xs"></p>
+          <div class="flex justify-end gap-2 pt-1">
+            <button type="button" data-close="edit-modal" class="px-4 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-300 text-sm hover:bg-zinc-700 transition">취소</button>
+            <button type="submit" class="px-4 py-2 rounded bg-blue-500/20 border border-blue-500/40 text-blue-300 text-sm hover:bg-blue-500/30 transition">수정 완료</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Detail Modal -->
   <div id="detail-modal" class="hidden fixed inset-0 z-[70] items-center justify-center p-4 modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="detail-title">
     <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-zinc-900 border border-white/10 shadow-2xl">
@@ -339,7 +369,7 @@
     document.querySelectorAll('[data-close]').forEach((btn) => {
       btn.addEventListener('click', () => closeModal(btn.dataset.close));
     });
-    ['write-modal', 'detail-modal'].forEach((id) => {
+    ['write-modal', 'edit-modal', 'detail-modal'].forEach((id) => {
       document.getElementById(id).addEventListener('click', (e) => {
         if (e.target.id === id) closeModal(id);
       });
@@ -347,6 +377,7 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeModal('write-modal');
+        closeModal('edit-modal');
         closeModal('detail-modal');
       }
     });
@@ -603,7 +634,8 @@
           <div class="text-zinc-300 text-sm leading-relaxed keep-all">${nl2br(p.content)}</div>
         </div>
         <div class="flex justify-end gap-2 mb-5">
-          <button id="delete-post-btn" class="px-3 py-1.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs hover:bg-rose-500/20 transition">글 삭제</button>
+          <button id="edit-post-btn" class="px-3 py-1.5 rounded bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs hover:bg-blue-500/20 transition">수정</button>
+          <button id="delete-post-btn" class="px-3 py-1.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs hover:bg-rose-500/20 transition">삭제</button>
         </div>
         <div class="border-t border-white/10 pt-4">
           <div class="text-zinc-400 text-sm mb-3">댓글 ${comments.length}</div>
@@ -638,6 +670,9 @@
           </form>
         </div>
       `;
+
+      // 글 수정
+      document.getElementById('edit-post-btn').addEventListener('click', () => openEdit(p));
 
       // 글 삭제
       document.getElementById('delete-post-btn').addEventListener('click', () => deletePost(p.id));
@@ -703,6 +738,70 @@
         showToast('삭제 실패: ' + err.message);
       }
     }
+
+    // ---------- 글 수정 ----------
+    let currentPost = null;
+    function openEdit(p) {
+      currentPost = p;
+      const form = document.getElementById('edit-form');
+      form.reset();
+      document.getElementById('edit-error').classList.add('hidden');
+      form.querySelector('[name="title"]').value = p.title;
+      form.querySelector('[name="content"]').value = p.content;
+      openModal('edit-modal');
+    }
+
+    const editForm = document.getElementById('edit-form');
+    const editError = document.getElementById('edit-error');
+    editForm.querySelector('[name="title"]').addEventListener('input', (e) => {
+      const t = truncateChars(e.target.value, 20);
+      if (t !== e.target.value) e.target.value = t;
+    });
+    editForm.querySelector('[name="content"]').addEventListener('input', (e) => {
+      const t = truncateChars(e.target.value, 500);
+      if (t !== e.target.value) e.target.value = t;
+    });
+    editForm.querySelector('[name="pw"]').addEventListener('input', (e) => {
+      let v = [...e.target.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
+      v = truncateChars(v, 8);
+      if (v !== e.target.value) e.target.value = v;
+    });
+
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      editError.classList.add('hidden');
+      if (!currentPost) return;
+      const fd = new FormData(editForm);
+      const body = {
+        password: fd.get('pw') || '',
+        title: fd.get('title') || '',
+        content: fd.get('content') || '',
+        botcheck: fd.get('botcheck') || '',
+      };
+      if (charLen(body.title) > 20) {
+        editError.textContent = '제목은 20글자 이하여야 합니다.';
+        editError.classList.remove('hidden');
+        return;
+      }
+      if (charLen(body.content) > 500) {
+        editError.textContent = '내용은 500글자 이하여야 합니다.';
+        editError.classList.remove('hidden');
+        return;
+      }
+      try {
+        await api('/posts/' + currentPost.id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        closeModal('edit-modal');
+        openDetail(currentPost.id);
+        showToast('글이 수정되었습니다.');
+      } catch (err) {
+        editError.textContent = err.message;
+        editError.classList.remove('hidden');
+      }
+    });
 
     async function submitComment(e, postId) {
       e.preventDefault();
