@@ -88,8 +88,8 @@ const IMPERSONATION_NORM = IMPERSONATION_NAMES.map(normalizeText).filter(Boolean
 function isImpersonationName(name) {
   const n = normalizeText(name);
   if (!n) return false;
-  // 3글자 이상: 포함 검사(예: 관리자123), 2글자 이하: 정확히 일치만(예: gm)
-  return IMPERSONATION_NORM.some((w) => ([...w].length >= 3 ? n.includes(w) : n === w));
+  // 2글자 이상 모두 포함 매칭 ("운영", "관리", "gm" 등이 섞여도 차단)
+  return IMPERSONATION_NORM.some((w) => [...w].length >= 2 && n.includes(w));
 }
 
 const charLen = (s) => [...String(s)].length;

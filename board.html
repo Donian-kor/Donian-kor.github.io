@@ -179,7 +179,10 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">이름 (선택)</label>
-              <input type="text" name="name" placeholder="최대 10글자" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+                <div id="write-name-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
+                <input type="text" name="name" placeholder="최대 10글자" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+              </div>
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">비밀번호</label>
@@ -458,24 +461,23 @@
       const n = String(name).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '');
       if (!n) return false;
       for (const w of IMPERSONATION_SET) {
-        if ([...w].length >= 3 ? n.includes(w) : n === w) return true;
+        if ([...w].length >= 2 && n.includes(w)) return true;
       }
       return false;
     }
-    // 사칭 단어가 이름의 어떤 위치에 있는지 (하이라이트/툴팁용)
+    // 사칭 단어가 이름의 어떤 위치에 있는지 (하이라이트용)
     function findImpersonationRanges(name) {
       const { norm, map } = normalizeWithMap(String(name));
       if (!norm) return [];
       const ranges = [];
       for (const w of IMPERSONATION_SET) {
         const wl = [...w].length;
+        if (wl < 2) continue;
         let from = 0;
         while (from <= norm.length - wl) {
           const idx = norm.indexOf(w, from);
           if (idx === -1) break;
-          if (wl >= 3 || norm.length === wl) {
-            ranges.push([map[idx], map[idx + wl - 1] + 1]);
-          }
+          ranges.push([map[idx], map[idx + wl - 1] + 1]);
           from = idx + 1;
         }
       }
@@ -489,20 +491,35 @@
       }
       return merged;
     }
-    // 이름 입력 필드에 사칭 하이라이트(테두리/배경) 적용
-    function applyImpersonationHighlight(el) {
+    // 사칭 하이라이트 HTML (제목/내용의 renderHighlighted와 동일한 mark 스타일)
+    function renderImpersonationHighlight(text) {
+      const ranges = findImpersonationRanges(text);
+      if (!ranges.length) return escapeHtml(text);
+      let html = '';
+      let pos = 0;
+      for (const [start, end] of ranges) {
+        html += escapeHtml(text.slice(pos, start));
+        html += `<mark style="background:rgba(239,68,68,0.45);color:#fecaca;border-radius:2px;">${escapeHtml(text.slice(start, end))}</mark>`;
+        pos = end;
+      }
+      html += escapeHtml(text.slice(pos));
+      return html;
+    }
+    // 이름 입력 필드: 하이라이트 레이어 갱신 + 입력 즉시 폼 제출 차단
+    function applyImpersonationHighlight(el, highlightEl) {
       if (!el) return;
       const hit = findImpersonationRanges(el.value);
+      if (highlightEl) highlightEl.innerHTML = renderImpersonationHighlight(el.value);
       if (hit.length) {
         el.style.borderColor = 'rgba(239,68,68,0.8)';
         el.style.backgroundColor = 'rgba(239,68,68,0.12)';
-        el.style.color = '#fecaca';
         el.title = '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.';
+        el.setCustomValidity('관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.');
       } else {
         el.style.borderColor = '';
         el.style.backgroundColor = '';
-        el.style.color = isAdminMode() ? '#6ee7b7' : '';
         el.title = '';
+        el.setCustomValidity('');
       }
     }
 
@@ -790,7 +807,7 @@
     [writeForm.querySelector('[name="title"]'), writeForm.querySelector('[name="content"]'), writeForm.querySelector('[name="pw"]'), writeForm.querySelector('[name="name"]')].forEach((el) => {
       el.addEventListener('input', () => el.setCustomValidity(''));
     });
-    writeForm.querySelector('[name="name"]').addEventListener('input', (e) => applyImpersonationHighlight(e.target));
+    writeForm.querySelector('[name="name"]').addEventListener('input', (e) => applyImpersonationHighlight(e.target, document.getElementById('write-name-highlight')));
 
     // 글자 수 제한 적용
     (function setupWriteLimits() {
@@ -949,7 +966,10 @@
           <form id="comment-form" class="space-y-2" autocomplete="off" novalidate>
             <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" name="name" placeholder="이름 (최대 10글자)" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+                <div id="comment-name-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
+                <input type="text" name="name" placeholder="이름 (최대 10글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+              </div>
               <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호 (최대 8글자, 한글 불가)" class="pw-mask px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
             <div class="flex items-center justify-between">
@@ -998,7 +1018,7 @@
       commentNameEl.addEventListener('input', () => {
         const t = truncateChars(commentNameEl.value, 10);
         if (t !== commentNameEl.value) commentNameEl.value = t;
-        applyImpersonationHighlight(commentNameEl);
+        applyImpersonationHighlight(commentNameEl, document.getElementById('comment-name-highlight'));
       });
       commentPwEl.addEventListener('input', () => {
         let v = [...commentPwEl.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
@@ -1202,7 +1222,10 @@
         <form class="rounded-lg border border-emerald-500/20 bg-zinc-800/50 p-2 space-y-1">
           <div class="text-[0.65rem] text-emerald-300 mb-1">↳ 답글</div>
           <div class="grid grid-cols-2 gap-2">
-            <input type="text" name="name" maxlength="10" placeholder="이름 (최대 10글자)" class="px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50">
+            <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+              <div class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-2 py-1 text-xs text-zinc-200 reply-name-highlight" aria-hidden="true"></div>
+              <input type="text" name="name" maxlength="10" placeholder="이름 (최대 10글자)" class="hl-input relative w-full px-2 py-1 text-xs bg-transparent focus:outline-none">
+            </div>
             <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호" class="pw-mask px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50">
           </div>
           <textarea name="content" required rows="2" maxlength="50" placeholder="답글 (최대 50글자)" class="w-full px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50 resize-y"></textarea>
@@ -1217,7 +1240,8 @@
       const formEl = wrap.querySelector('form');
       const textarea = wrap.querySelector('textarea');
       const replyNameEl = formEl.querySelector('[name="name"]');
-      if (replyNameEl) replyNameEl.addEventListener('input', (e) => applyImpersonationHighlight(e.target));
+      const replyNameHl = wrap.querySelector('.reply-name-highlight');
+      if (replyNameEl) replyNameEl.addEventListener('input', (e) => applyImpersonationHighlight(e.target, replyNameHl));
       applyPwFallback();
       setupTurnstile();
       textarea.focus();
@@ -1331,8 +1355,8 @@
           cnameEl.classList.remove('font-semibold');
         }
       }
-      applyImpersonationHighlight(nameEl);
-      applyImpersonationHighlight(cnameEl);
+      applyImpersonationHighlight(nameEl, document.getElementById('write-name-highlight'));
+      applyImpersonationHighlight(cnameEl, document.getElementById('comment-name-highlight'));
     }
 
     // 관리자 세션 keepalive (활동 중 토큰 1시간 만료 방지) + 만료 UX
