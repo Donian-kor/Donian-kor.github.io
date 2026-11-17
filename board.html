@@ -270,6 +270,7 @@
     applyPwFallback();
 
     // ---------- Turnstile 위젯 ----------
+    const turnstileWidgets = new Map();
     function setupTurnstile() {
       if (!TURNSTILE_SITE_KEY || TURNSTILE_SITE_KEY.indexOf('YOUR') !== -1) return;
       const render = () => {
@@ -278,8 +279,9 @@
           if (el.dataset.rendered) return;
           if (el.offsetParent === null) return; // 숨겨진 컨테이너는 건너뜀
           try {
-            turnstile.render(el, { sitekey: TURNSTILE_SITE_KEY, theme: 'dark' });
+            const id = turnstile.render(el, { sitekey: TURNSTILE_SITE_KEY, theme: 'dark' });
             el.dataset.rendered = '1';
+            turnstileWidgets.set(el, id);
           } catch (e) {}
         });
       };
@@ -289,6 +291,12 @@
       script.async = true;
       script.onload = render;
       document.head.appendChild(script);
+    }
+    function resetTurnstile() {
+      if (typeof turnstile === 'undefined') return;
+      turnstileWidgets.forEach((id) => {
+        try { turnstile.reset(id); } catch (e) {}
+      });
     }
     // ---------- 상태 ----------
     let currentPage = 1;
@@ -630,6 +638,7 @@
 
     writeBtn.addEventListener('click', () => {
       writeForm.reset();
+      resetTurnstile();
       writeError.classList.add('hidden');
       const tHl = document.getElementById('title-highlight');
       const cHl = document.getElementById('content-highlight');
