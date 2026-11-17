@@ -165,7 +165,8 @@ export default {
 
       const rows = await env.donian_board
         .prepare(`SELECT p.id, p.name, p.title, p.created_at, p.views, p.is_locked, p.is_admin,
-          (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id AND comments.is_admin = 1) as admin_replies
+          (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id AND comments.is_admin = 1) as admin_replies,
+          (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id) as comment_count
           FROM posts p ${where} ORDER BY p.created_at DESC LIMIT ? OFFSET ?`)
         .bind(...params, pageSize, offset)
         .all();
