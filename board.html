@@ -422,6 +422,15 @@
       const a = [...String(s)];
       return a.length > max ? a.slice(0, max).join('') : String(s);
     }
+    // 관리자 글쓰기용 랜덤 비밀번호 생성 (기본 20자)
+    function genRandomPassword(len = 20) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const arr = new Uint8Array(len);
+      crypto.getRandomValues(arr);
+      let s = '';
+      for (let i = 0; i < len; i++) s += chars[arr[i] % chars.length];
+      return s;
+    }
     const KOREAN_CHAR_RE = /[ㄱ-ㅎㅏ-ㅣ가-힣]/u;
 
     // ---------- 욕설/비속어 하이라이팅 ----------
@@ -684,6 +693,7 @@
       if (tHl) tHl.innerHTML = '';
       if (cHl) cHl.innerHTML = '';
       applyAdminName();
+      applyAdminWritePassword();
       openModal('write-modal');
       loadProfanity();
       setupTurnstile();
@@ -939,13 +949,19 @@
     }
 
     async function deletePost(id) {
-      const pw = prompt('글 삭제 비밀번호를 입력하세요.');
-      if (pw === null) return;
+      let body;
+      if (isAdminMode()) {
+        body = {}; // 관리자 토큰 자동 첨부 (api)
+      } else {
+        const pw = prompt('글 삭제 비밀번호를 입력하세요.');
+        if (pw === null) return;
+        body = { password: pw };
+      }
       try {
         await api('/posts/' + id, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: pw }),
+          body: JSON.stringify(body),
         });
         closeModal('detail-modal');
         clearListCache();
@@ -963,6 +979,17 @@
       const form = document.getElementById('edit-form');
       form.reset();
       document.getElementById('edit-error').classList.add('hidden');
+      const pwEl = form.querySelector('[name="pw"]');
+      if (isAdminMode()) {
+        pwEl.value = genRandomPassword(20);
+        pwEl.readOnly = true;
+        pwEl.placeholder = '관리자 (자동 생성)';
+        pwEl.style.color = '#6ee7b7';
+      } else {
+        pwEl.readOnly = false;
+        pwEl.placeholder = '비밀번호';
+        pwEl.style.color = '';
+      }
       form.querySelector('[name="title"]').value = p.title;
       form.querySelector('[name="content"]').value = p.content;
       closeModal('detail-modal');
@@ -1173,6 +1200,22 @@
       return !!sessionStorage.getItem('board_admin_token');
     }
 
+    // 관리자 모드: 글쓰기 비밀번호를 20자 랜덤으로 자동 생성(읽기전용)
+    function applyAdminWritePassword() {
+      const pwEl = writeForm.querySelector('[name="pw"]');
+      if (!pwEl) return;
+      if (isAdminMode()) {
+        if (!pwEl.value || !pwEl.readOnly) pwEl.value = genRandomPassword(20);
+        pwEl.readOnly = true;
+        pwEl.placeholder = '관리자 (자동 생성)';
+        pwEl.style.color = '#6ee7b7';
+      } else {
+        if (pwEl.readOnly) { pwEl.value = ''; pwEl.readOnly = false; }
+        pwEl.placeholder = '최대 8글자 (한글 불가)';
+        pwEl.style.color = '';
+      }
+    }
+
     function applyAdminName() {
       const on = isAdminMode();
       const nameEl = writeForm.querySelector('[name="name"]');
@@ -1208,6 +1251,7 @@
       adminBtn.classList.toggle('text-emerald-300', on);
       adminBtn.classList.toggle('text-zinc-400', !on);
       applyAdminName();
+      applyAdminWritePassword();
     }
 
     if (adminBtn) {
