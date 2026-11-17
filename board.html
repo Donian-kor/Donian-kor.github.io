@@ -228,7 +228,7 @@
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     function renderName(name, isAdmin) {
-      if (isAdmin) return '<span class="px-1.5 py-0.5 rounded text-[0.65rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 align-middle">Donian</span>';
+      if (isAdmin) return '<span class="px-2 py-0.5 rounded text-[0.85rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 align-middle">Donian</span>';
       return escapeHtml(name || '익명');
     }
     function fmtDate(iso) {
@@ -420,8 +420,8 @@
         }
         listEl.innerHTML = data.posts.map((p) => {
           const statusHtml = p.admin_replies > 0
-            ? '<span class="text-emerald-400 font-semibold">답변 완료</span>'
-            : '<span class="text-zinc-300">답변대기</span>';
+            ? '<span class="text-yellow-200 font-semibold">완료</span>'
+            : '<span class="text-zinc-300">대기</span>';
           return `
           <div class="board-row grid grid-cols-[2rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_5.5rem_6rem_5rem_4rem] gap-2 items-center px-4 py-3 cursor-pointer" data-id="${p.id}">
             <div class="text-zinc-600 text-[0.65rem] font-mono text-right">${String(p.id).padStart(2, '0')}</div>
