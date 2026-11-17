@@ -102,6 +102,11 @@
     @media (prefers-reduced-motion: reduce) {
       .music-now { animation: none !important; opacity: 1 !important; }
     }
+    /* 데스크톱: 플레이어 표시 시 목록 폭 축소 / 숨김 시 전체 폭 */
+    @media (min-width: 768px) {
+      #music-list { width: 100%; }
+      #music-dock:not(.hidden) ~ #music-list { width: 36%; }
+    }
     button, a, [role="button"], [tabindex] { touch-action: manipulation; }
     @media (prefers-reduced-motion: reduce) {
       .reveal { animation: none !important; opacity:1 !important; transform:none !important; }
@@ -229,14 +234,16 @@
           </a>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-3 sm:p-4 font-mono">
-          <div class="flex flex-col md:flex-row gap-3">
-            <div id="music-dock" class="hidden order-1 md:order-2 md:w-1/2 rounded-lg border border-white/10 bg-zinc-900/90 overflow-hidden">
-              <div class="px-3 py-2 text-xs text-zinc-300 truncate music-dock-title">재생할 곡을 선택하세요</div>
-              <div class="aspect-video w-full bg-black">
-                <iframe class="w-full h-full" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          <div class="flex flex-col md:flex-row gap-3 md:h-[360px]">
+            <div id="music-dock" class="hidden order-1 md:order-2 md:flex-1 md:h-full">
+              <div class="w-full h-full md:flex md:flex-col rounded-lg border border-white/10 bg-zinc-900/90 overflow-hidden">
+                <div class="px-3 py-2 text-xs text-zinc-300 truncate music-dock-title shrink-0">재생할 곡을 선택하세요</div>
+                <div class="aspect-video md:aspect-auto md:flex-1 w-full bg-black md:min-h-0">
+                  <iframe class="w-full h-full" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
               </div>
             </div>
-            <div id="music-list" class="order-2 md:order-1 md:w-1/2 space-y-3 max-h-[360px] overflow-y-auto pr-2">
+            <div id="music-list" class="order-2 md:order-1 md:h-full md:shrink-0 space-y-3 max-h-[360px] md:max-h-none overflow-y-auto pr-2">
               <div class="text-zinc-500 text-xs">Loading tracks...</div>
             </div>
           </div>
