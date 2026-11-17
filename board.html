@@ -239,12 +239,12 @@
     }
     async function api(path, options) {
       const opts = { ...(options || {}) };
-      // 관리자 모드면 POST/PUT/DELETE 요청에 admin_pw 자동 첨부
+      // 관리자 모드면 POST/PUT/DELETE 요청에 token 자동 첨부
       if (opts.body && typeof opts.body === 'string' && opts.method && opts.method !== 'GET') {
         try {
           const bodyObj = JSON.parse(opts.body);
-          const adminPw = sessionStorage.getItem('board_admin_pw');
-          if (adminPw && bodyObj.admin_pw === undefined) bodyObj.admin_pw = adminPw;
+          const token = sessionStorage.getItem('board_admin_token');
+          if (token && bodyObj.token === undefined) bodyObj.token = token;
           opts.body = JSON.stringify(bodyObj);
         } catch (e) {}
       }
@@ -482,6 +482,7 @@
       const cHl = document.getElementById('content-highlight');
       if (tHl) tHl.innerHTML = '';
       if (cHl) cHl.innerHTML = '';
+      applyAdminName();
       openModal('write-modal');
       loadProfanity();
     });
@@ -725,6 +726,7 @@
       });
       updateCommentCounter();
       loadProfanity();
+      applyAdminName();
 
       // 댓글 삭제
       detailContent.querySelectorAll('.delete-comment-btn').forEach((btn) => {
@@ -871,19 +873,54 @@
       }
     }
 
-    // ---------- 관리자 모드 (레이트리밋 면제) ----------
+    // ---------- 관리자 모드 (토큰 방식, 레이트리밋 면제) ----------
     const adminBtn = document.getElementById('admin-btn');
+
+    function isAdminMode() {
+      return !!sessionStorage.getItem('board_admin_token');
+    }
+
+    function applyAdminName() {
+      const on = isAdminMode();
+      const nameEl = writeForm.querySelector('[name="name"]');
+      if (nameEl) {
+        if (on) {
+          nameEl.value = 'Donian';
+          nameEl.style.color = '#6ee7b7';
+          nameEl.classList.add('font-semibold');
+        } else {
+          if (nameEl.value === 'Donian') nameEl.value = '';
+          nameEl.style.color = '';
+          nameEl.classList.remove('font-semibold');
+        }
+      }
+      const cnameEl = document.querySelector('#comment-form [name="name"]');
+      if (cnameEl) {
+        if (on) {
+          cnameEl.value = 'Donian';
+          cnameEl.style.color = '#6ee7b7';
+          cnameEl.classList.add('font-semibold');
+        } else {
+          if (cnameEl.value === 'Donian') cnameEl.value = '';
+          cnameEl.style.color = '';
+          cnameEl.classList.remove('font-semibold');
+        }
+      }
+    }
+
     function updateAdminBtn() {
       if (!adminBtn) return;
-      const on = !!sessionStorage.getItem('board_admin_pw');
+      const on = isAdminMode();
       adminBtn.textContent = on ? '관리자 ✓' : '관리자';
       adminBtn.classList.toggle('text-emerald-300', on);
       adminBtn.classList.toggle('text-zinc-400', !on);
+      applyAdminName();
     }
+
     if (adminBtn) {
       adminBtn.addEventListener('click', async () => {
-        if (sessionStorage.getItem('board_admin_pw')) {
-          sessionStorage.removeItem('board_admin_pw');
+        if (isAdminMode()) {
+          sessionStorage.removeItem('board_admin_token');
           updateAdminBtn();
           showToast('관리자 모드가 해제되었습니다.');
           return;
@@ -897,8 +934,8 @@
             body: JSON.stringify({ password: pw }),
           });
           const data = await res.json().catch(() => ({}));
-          if (data.ok) {
-            sessionStorage.setItem('board_admin_pw', pw);
+          if (data.ok && data.token) {
+            sessionStorage.setItem('board_admin_token', data.token);
             updateAdminBtn();
             showToast('관리자 모드 활성화 — 레이트리밋이 면제됩니다.');
           } else {

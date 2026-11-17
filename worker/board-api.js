@@ -112,11 +112,22 @@ export default {
       return json({ words: PROFANITY });
     }
 
-    // POST /admin/verify - 관리자 비밀번호 확인 (본문으로 전송, URL 노출 방지)
+    // POST /admin/verify - 관리자 비밀번호 확인 후 임시 토큰 발급
     if (method === 'POST' && path === '/admin/verify') {
       const body = await request.json().catch(() => ({}));
       const pw = body.password || '';
-      return json({ ok: !!(env.ADMIN_PASSWORD && pw === env.ADMIN_PASSWORD) });
+      if (env.ADMIN_PASSWORD && pw === env.ADMIN_PASSWORD) {
+        const token = crypto.randomUUID().replace(/-/g, '').slice(0, 32);
+        await env.COUNTER_KV.put('admin_token:' + token, 'admin', { expirationTtl: 3600 });
+        return json({ ok: true, token });
+      }
+      return json({ ok: false });
+    }
+
+    // 토큰 유효성 검사
+    async function isAdminToken(token) {
+      if (!token) return false;
+      return !!(await env.COUNTER_KV.get('admin_token:' + token));
     }
 
     // GET /posts?page=1&search= - 목록
@@ -201,7 +212,7 @@ export default {
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
-      const isAdmin = !!(body.admin_pw && env.ADMIN_PASSWORD && body.admin_pw === env.ADMIN_PASSWORD);
+      const isAdmin = await isAdminToken(body.token);
       const { password, title, content } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
       if (charLen(title) > 20) return json({ error: '제목은 20글자 이하여야 합니다.' }, 400);
@@ -224,7 +235,7 @@ export default {
       if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
-      const isAdmin = !!(body.admin_pw && env.ADMIN_PASSWORD && body.admin_pw === env.ADMIN_PASSWORD);
+      const isAdmin = await isAdminToken(body.token);
       const { name, password, title, content, is_locked } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
       if (charLen(password) < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
@@ -268,7 +279,7 @@ export default {
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
-      const isAdmin = !!(body.admin_pw && env.ADMIN_PASSWORD && body.admin_pw === env.ADMIN_PASSWORD);
+      const isAdmin = await isAdminToken(body.token);
       const { name, password, content } = body;
       if (!password || !content) return json({ error: '필수 항목 누락' }, 400);
       if (charLen(password) < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
