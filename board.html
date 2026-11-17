@@ -431,6 +431,15 @@
     writeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       writeError.classList.add('hidden');
+      // 욕설/비속어 감지 시 제출 차단 + 하이라이트 표시
+      updateWritePreview();
+      const titleVal = writeForm.querySelector('[name="title"]').value;
+      const contentVal = writeForm.querySelector('[name="content"]').value;
+      if (findProfanityRanges(titleVal).length > 0 || findProfanityRanges(contentVal).length > 0) {
+        writeError.textContent = '욕설/비속어가 포함되어 있습니다. 아래 빨간색으로 표시된 부분을 수정한 후 다시 등록하세요.';
+        writeError.classList.remove('hidden');
+        return;
+      }
       const fd = new FormData(writeForm);
       const body = {
         name: fd.get('name') || '',
@@ -588,6 +597,19 @@
     async function submitComment(e, postId) {
       e.preventDefault();
       const form = e.target;
+      // 욕설/비속어 감지 시 제출 차단
+      const contentVal = form.querySelector('[name="content"]').value;
+      const preview = document.getElementById('comment-preview');
+      const ranges = findProfanityRanges(contentVal);
+      if (ranges.length > 0) {
+        const c = renderHighlighted(contentVal);
+        if (preview) {
+          preview.innerHTML = '⚠ 감지된 표현 ' + c.count + '개 → ' + c.html;
+          preview.classList.remove('hidden');
+        }
+        showToast('욕설/비속어를 수정한 후 다시 등록하세요.');
+        return;
+      }
       const fd = new FormData(form);
       const body = {
         name: fd.get('name') || '',
