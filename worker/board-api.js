@@ -28,29 +28,21 @@ function isBot(ua) {
   return BOT_PATTERNS.some((re) => re.test(ua));
 }
 
-// 욕설/비속어 목록 (한글/영문)
-const PROFANITY = [
-  // 한글
-  '시발', '씨발', '시벌', '씨벌', '쉬발', '씨밸', '시발놈', '시발년',
-  '좆', '좃', '족', '좆같', '좆밥',
-  '병신', 'ㅂㅅ', 'ㅂ신', '병1신',
-  '지랄', 'ㅈㄹ', '지롤',
-  '개새끼', '개샛끼', '새끼', 'ㅅㄲ',
-  '미친놈', '미친년', '미친', 
-  '엿같', '쳐맞', '디질', '뒈질',
-  '걸레', '창녀', '매춘', '음란',
-  // 영문
-  'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'dumbass', 'cunt', 'slut',
-];
+// 욕설/비속어 목록 (korean-profanity-resources/slang.csv 기반, 오탐 단어 제외)
+import PROFANITY_RAW from './profanity-words.js';
+const PROFANITY = PROFANITY_RAW.split('\n').filter(Boolean);
 
 function normalizeText(s) {
   // 소문자화 + 공백/문장부호/기호 제거 (한글은 보존)
   return String(s).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '');
 }
 
+// 목록 사전 정규화 (요청마다 재계산 방지)
+const PROFANITY_NORM = PROFANITY.map((w) => normalizeText(w)).filter(Boolean);
+
 function hasProfanity(text) {
   const n = normalizeText(text);
-  return PROFANITY.some((w) => n.includes(normalizeText(w)));
+  return PROFANITY_NORM.some((w) => n.includes(w));
 }
 
 async function hashPassword(pw) {
