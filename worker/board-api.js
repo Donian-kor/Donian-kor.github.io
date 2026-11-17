@@ -82,6 +82,22 @@ export default {
       return true;
     }
 
+    // 비밀번호 실패 추적 (KST 일 단위, 일 3회 실패 시 차단)
+    const kstDate = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    async function getFailCount() {
+      return parseInt((await env.COUNTER_KV.get(`fail:${kstDate}:${ip}`)) || '0', 10);
+    }
+    async function recordFail() {
+      const key = `fail:${kstDate}:${ip}`;
+      const count = parseInt((await env.COUNTER_KV.get(key)) || '0', 10);
+      const next = count + 1;
+      await env.COUNTER_KV.put(key, String(next), { expirationTtl: 172800 });
+      return next;
+    }
+    async function isBlocked() {
+      return (await getFailCount()) >= 3;
+    }
+
     // IP당 읽기 제한: 분당 60회 (스크래핑 방지)
     async function rateLimitRead() {
       const key = `rl:r:${ip}`;
@@ -200,7 +216,14 @@ export default {
         if (!pw) return json({ error: 'locked', message: '비공개 게시글입니다. 비밀번호를 입력하세요.' }, 403);
         const hash = await hashPassword(pw);
         const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
-        if (hash !== post.password_hash && hash !== adminHash) {
+        const isAdmin = hash === adminHash;
+        if (!isAdmin && (await isBlocked())) {
+          return json({ error: '비밀번호를 3회 틀려 차단되었습니다. 내일 다시 시도하세요.' }, 429);
+        }
+        if (hash !== post.password_hash && !isAdmin) {
+          const n = await recordFail();
+          if (n >= 3) return json({ error: '비밀번호를 3회 틀려 차단되었습니다. 내일 다시 시도하세요.' }, 429);
+          if (n >= 2) return json({ error: '비밀번호를 2회 틀렸습니다. 1회 더 틀리면 차단됩니다.' }, 403);
           return json({ error: 'wrong_password', message: '비밀번호가 일치하지 않습니다.' }, 403);
         }
       }
@@ -300,7 +323,13 @@ export default {
       const isAdmin = hash === adminHash;
       const isAuthor = post.password_hash === hash;
       if (!isAdmin) {
-        if (!isAuthor) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
+        if (await isBlocked()) return json({ error: '비밀번호를 3회 틀려 차단되었습니다. 내일 다시 시도하세요.' }, 429);
+        if (!isAuthor) {
+          const n = await recordFail();
+          if (n >= 3) return json({ error: '비밀번호를 3회 틀려 차단되었습니다. 내일 다시 시도하세요.' }, 429);
+          if (n >= 2) return json({ error: '비밀번호를 2회 틀렸습니다. 1회 더 틀리면 차단됩니다.' }, 403);
+          return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
+        }
         // 관리자 답변이 달린(완료) 게시글은 관리자만 삭제 가능
         const adminComment = await env.donian_board
           .prepare('SELECT id FROM comments WHERE post_id = ? AND is_admin = 1 LIMIT 1')
@@ -362,7 +391,16 @@ export default {
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const comment = await env.donian_board.prepare('SELECT password_hash FROM comments WHERE id = ?').bind(id).first();
       if (!comment) return json({ error: 'not found' }, 404);
-      if (comment.password_hash !== hash && hash !== adminHash) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
+      const isAdmin = hash === adminHash;
+      if (!isAdmin) {
+        if (await isBlocked()) return json({ error: '비밀번호를 3회 틀려 차단되었습니다. 내일 다시 시도하세요.' }, 429);
+        if (comment.password_hash !== hash) {
+          const n = await recordFail();
+          if (n >= 3) return json({ error: '비밀번호를 3회 틀려 차단되었습니다. 내일 다시 시도하세요.' }, 429);
+          if (n >= 2) return json({ error: '비밀번호를 2회 틀렸습니다. 1회 더 틀리면 차단됩니다.' }, 403);
+          return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
+        }
+      }
       await env.donian_board
         .prepare(`WITH RECURSIVE descendants(id) AS (
           SELECT id FROM comments WHERE id = ?
