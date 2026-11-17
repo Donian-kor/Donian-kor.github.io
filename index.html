@@ -1008,8 +1008,10 @@ function isNewProject(p) {
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
       const digits = '0123456789';
       const IDLE_DELAY = 700;      // 스크롤이 멈춘 뒤 자동 낙하 시작까지(ms)
-      const DRIFT_PER_SEC = 130;   // 자동 낙하 속도(px/s) — 보드와 동일 5배
-      const IDLE_FPS = 30;         // 자동 낙하 시 렌더링 주기
+      // 모바일: 렉 방지를 위해 속도·FPS·글자수·해상도 완화 (데스크톱은 5배 유지)
+      const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && window.innerWidth < 1024);
+      const DRIFT_PER_SEC = isMobile ? 34 : 130;
+      const IDLE_FPS = isMobile ? 18 : 30;
       let items = [];
       let raf = 0;
       let pending = 0;
@@ -1073,14 +1075,17 @@ function isNewProject(p) {
       }
 
       function layout() {
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        // 모바일은 DPR 1로 제한 (실제 DPR 2~3의 픽셀 4~9배 그리기 방지)
+        dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
         const w = window.innerWidth, h = window.innerHeight;
         canvas.width = Math.floor(w * dpr);
         canvas.height = Math.floor(h * dpr);
         canvas.style.width = w + 'px';
         canvas.style.height = h + 'px';
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const count = Math.min(2000, Math.max(140, Math.floor((w * h) / 2200)));
+        const count = isMobile
+          ? Math.min(90, Math.max(50, Math.floor((w * h) / 4200)))  // 모바일은 글자 수 대폭 감소
+          : Math.min(2000, Math.max(140, Math.floor((w * h) / 2200)));
         items = [];
         for (let i = 0; i < count; i++) items.push(makeItem(w, h, true));
         render();
