@@ -428,7 +428,7 @@
             <div class="min-w-0 flex items-center gap-1.5">
               ${p.is_locked ? '<svg class="lock-icon text-amber-400" aria-label="잠금"><use href="#icon-lock"></use></svg>' : ''}
               <div class="text-zinc-200 text-sm truncate keep-all">${escapeHtml(p.title)}</div>
-              <span class="text-zinc-600 text-[0.65rem] sm:hidden">${renderName(p.name, p.is_admin)} · ${fmtDate(p.created_at)} · ${p.views} · ${statusHtml}</span>
+              <span class="text-zinc-600 text-[0.65rem] sm:hidden">${renderName(p.name, p.is_admin)} · ${statusHtml}</span>
             </div>
             <div class="hidden sm:block text-xs">${statusHtml}</div>
             <div class="hidden sm:block text-zinc-400 text-xs truncate">${renderName(p.name, p.is_admin)}</div>
