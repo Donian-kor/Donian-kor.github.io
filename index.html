@@ -133,10 +133,25 @@
         <a href="board.html" class="inline-block px-1 sm:px-2 py-1 hover:text-zinc-200 transition">contact</a>
         <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="inline-block px-1 sm:px-2 py-1 hover:text-zinc-200 transition">github</a>
         <a href="https://github.com/sponsors/Donian-kor" target="_blank" rel="noopener" aria-label="후원하기" title="후원하기" class="hidden sm:inline-flex items-center gap-1 px-1 sm:px-2 py-1 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>후원</a>
-        <a href="https://qr.kakaopay.com/FL8dh56raabe07620" target="_blank" rel="noopener" aria-label="후원하기" title="후원하기" class="inline-flex sm:hidden items-center gap-1 px-1 py-1 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>후원</a>
+        <a id="sponsor-kakao" href="https://qr.kakaopay.com/FL8dh56raabe07620" target="_blank" rel="noopener" aria-label="후원하기" title="후원하기" class="inline-flex sm:hidden items-center gap-1 px-1 py-1 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>후원</a>
       </div>
     </div>
   </div>
+
+  <script>
+    // 폴드 펼침·태블릿처럼 화면이 넓은 터치 기기에서는 카카오페이 후원 링크도 함께 표시
+    (function () {
+      function updateSponsorLinks() {
+        var coarse = window.matchMedia('(pointer: coarse)').matches; // 주 입력 수단이 손가락(터치)
+        var wide = window.matchMedia('(min-width: 640px)').matches;  // 화면 너비 640px 이상
+        var kakao = document.getElementById('sponsor-kakao');
+        if (kakao) kakao.style.display = (coarse && wide) ? 'inline-flex' : '';
+      }
+      window.updateSponsorLinks = updateSponsorLinks;
+      window.addEventListener('resize', updateSponsorLinks); // 폴드 접었다 펼칠 때 대응
+      updateSponsorLinks();
+    })();
+  </script>
 
   <!-- Project modal (모바일 확대 보기) -->
   <div id="project-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 backdrop-blur p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
