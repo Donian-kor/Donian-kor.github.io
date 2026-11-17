@@ -78,7 +78,7 @@
 
     <!-- List -->
     <div class="rounded-lg border border-white/10 bg-zinc-900/95 overflow-hidden">
-      <div class="grid grid-cols-[2rem_1fr_3.5rem_5rem_2.5rem] sm:grid-cols-[3rem_1fr_5.5rem_6rem_5rem_4rem] gap-2 px-4 py-2 border-b border-white/5 text-[0.65rem] text-zinc-500 font-mono">
+      <div class="grid grid-cols-[1.5rem_1fr_2.5rem_4.5rem_2rem] sm:grid-cols-[3rem_1fr_5.5rem_6rem_5rem_4rem] gap-1 sm:gap-2 px-2 sm:px-4 py-2 border-b border-white/5 text-[0.65rem] text-zinc-500 font-mono">
         <span class="text-left">번호</span>
         <span>제목</span>
         <span class="text-right sm:text-left">상태</span>
@@ -423,14 +423,14 @@
             ? '<span class="text-yellow-200 font-semibold">완료</span>'
             : '<span class="text-zinc-300">대기</span>';
           return `
-          <div class="board-row grid grid-cols-[2rem_1fr_3.5rem_5rem_2.5rem] sm:grid-cols-[3rem_1fr_5.5rem_6rem_5rem_4rem] gap-2 items-center px-4 py-3 cursor-pointer" data-id="${p.id}">
+          <div class="board-row grid grid-cols-[1.5rem_1fr_2.5rem_4.5rem_2rem] sm:grid-cols-[3rem_1fr_5.5rem_6rem_5rem_4rem] gap-1 sm:gap-2 items-center px-2 sm:px-4 py-3 cursor-pointer" data-id="${p.id}">
             <div class="text-zinc-600 text-[0.65rem] font-mono text-left">${String(p.id).padStart(2, '0')}</div>
             <div class="min-w-0 flex items-center gap-1.5">
               ${p.is_locked ? '<svg class="lock-icon text-amber-400" aria-label="잠금"><use href="#icon-lock"></use></svg>' : ''}
               <div class="text-zinc-200 text-sm truncate keep-all">${escapeHtml(p.title)}</div>
             </div>
             <div class="text-xs text-right sm:text-left">${statusHtml}</div>
-            <div class="text-zinc-400 text-xs whitespace-nowrap text-right sm:text-left">${renderName(p.name, p.is_admin)}</div>
+            <div class="text-zinc-400 text-xs truncate py-1 text-right sm:text-left">${renderName(p.name, p.is_admin)}</div>
             <div class="hidden sm:block text-zinc-500 text-xs">${fmtDate(p.created_at)}</div>
             <div class="text-right text-zinc-500 text-xs">${p.views}</div>
           </div>
