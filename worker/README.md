@@ -70,8 +70,8 @@ IP당 하루 1회만 카운팅하는 방문자 카운터 백엔드입니다.
 | GET | `/posts/:id?password=` | 잠금 게시글 열람 (본인/관리자 비밀번호) |
 | POST | `/posts` | 글쓰기 (name, password, title, content, is_locked) |
 | DELETE | `/posts/:id` | 글 삭제 (password) |
-| POST | `/posts/:id/comments` | 댓글 작성 |
-| DELETE | `/comments/:id` | 댓글 삭제 (password) |
+| POST | `/posts/:id/comments` | 댓글 작성 (parent_id 로 답글) |
+| DELETE | `/comments/:id` | 댓글 삭제 (password, 답글 포함 CASCADE) |
 
 ## 잠금(비공개) 기능
 
@@ -79,6 +79,14 @@ IP당 하루 1회만 카운팅하는 방문자 카운터 백엔드입니다.
 - 목록에 잠금 아이콘 표시
 - 상세보기 진입 시 비밀번호 입력 → 작성자 비밀번호 또는 관리자 비밀번호로 열람
 - 관리자 비밀번호는 Worker secret `ADMIN_PASSWORD` 로 설정 (기본값: `donian-admin-2026`)
+
+## 중첩 댓글(답글) 및 삭제 규칙
+
+- 댓글에 `parent_id` 를 지정하면 해당 댓글의 **답글**로 등록 (계층 표시)
+- 답글 삭제 시 **하위 답글도 함께 삭제** (CASCADE)
+- **관리자 답변이 달린 게시글(완료)은 관리자만 삭제 가능**
+  - 작성자 비밀번호로는 삭제 불가 (403)
+  - 관리자 비밀번호로만 삭제 가능
 
 ## 보안
 

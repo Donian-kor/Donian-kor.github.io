@@ -207,7 +207,7 @@ export default {
 
       await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
       const comments = await env.donian_board
-        .prepare('SELECT id, name, content, created_at, password_hash, is_admin FROM comments WHERE post_id = ? ORDER BY created_at ASC')
+        .prepare('SELECT id, name, content, created_at, password_hash, is_admin, parent_id FROM comments WHERE post_id = ? ORDER BY created_at ASC')
         .bind(id)
         .all();
       const anon = (n) => !n || n === '익명';
@@ -218,6 +218,7 @@ export default {
         content: c.content,
         created_at: c.created_at,
         is_admin: c.is_admin,
+        parent_id: c.parent_id,
         is_author: (authorName !== null && !anon(c.name) && c.name === authorName)
           || (c.password_hash && c.password_hash === post.password_hash),
       }));
@@ -298,7 +299,17 @@ export default {
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const post = await env.donian_board.prepare('SELECT password_hash FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
-      if (post.password_hash !== hash && hash !== adminHash) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
+      const isAdmin = hash === adminHash;
+      const isAuthor = post.password_hash === hash;
+      if (!isAdmin) {
+        if (!isAuthor) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
+        // 관리자 답변이 달린(완료) 게시글은 관리자만 삭제 가능
+        const adminComment = await env.donian_board
+          .prepare('SELECT id FROM comments WHERE post_id = ? AND is_admin = 1 LIMIT 1')
+          .bind(id)
+          .first();
+        if (adminComment) return json({ error: '관리자 답변이 달린 게시글은 관리자만 삭제할 수 있습니다.' }, 403);
+      }
       await env.donian_board.prepare('DELETE FROM comments WHERE post_id = ?').bind(id).run();
       await env.donian_board.prepare('DELETE FROM posts WHERE id = ?').bind(id).run();
       return json({ ok: true });
@@ -311,7 +322,7 @@ export default {
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
       const isAdmin = await isAdminToken(body.token);
-      const { name, password, content } = body;
+      const { name, password, content, parent_id } = body;
       if (!password || !content) return json({ error: '필수 항목 누락' }, 400);
       if (charLen(password) < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
       if (charLen(password) > 8) return json({ error: '비밀번호는 8글자 이하여야 합니다.' }, 400);
@@ -325,12 +336,21 @@ export default {
       if (!(isAdmin || (await rateLimitWrite('comment', 5)))) return json({ error: '댓글은 시간당 5회까지 작성할 수 있습니다.' }, 429);
       const post = await env.donian_board.prepare('SELECT id FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
+      let parentId = null;
+      if (parent_id) {
+        const parent = await env.donian_board
+          .prepare('SELECT id FROM comments WHERE id = ? AND post_id = ?')
+          .bind(parent_id, id)
+          .first();
+        if (!parent) return json({ error: 'parent not found' }, 404);
+        parentId = parent_id;
+      }
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
       const finalName = isAdmin ? 'Donian' : (name || '익명');
       await env.donian_board
-        .prepare('INSERT INTO comments (post_id, name, password_hash, content, created_at, is_admin) VALUES (?, ?, ?, ?, ?, ?)')
-        .bind(id, finalName, hash, content, now, isAdmin ? 1 : 0)
+        .prepare('INSERT INTO comments (post_id, name, password_hash, content, created_at, is_admin, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .bind(id, finalName, hash, content, now, isAdmin ? 1 : 0, parentId)
         .run();
       return json({ ok: true });
     }
@@ -345,7 +365,15 @@ export default {
       const comment = await env.donian_board.prepare('SELECT password_hash FROM comments WHERE id = ?').bind(id).first();
       if (!comment) return json({ error: 'not found' }, 404);
       if (comment.password_hash !== hash && hash !== adminHash) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
-      await env.donian_board.prepare('DELETE FROM comments WHERE id = ?').bind(id).run();
+      await env.donian_board
+        .prepare(`WITH RECURSIVE descendants(id) AS (
+          SELECT id FROM comments WHERE id = ?
+          UNION ALL
+          SELECT c.id FROM comments c JOIN descendants d ON c.parent_id = d.id
+        )
+        DELETE FROM comments WHERE id IN (SELECT id FROM descendants)`)
+        .bind(id)
+        .run();
       return json({ ok: true });
     }
 
