@@ -73,11 +73,11 @@ export default {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const ua = request.headers.get('user-agent') || '';
 
-    // IP당 쓰기 제한: 시간당 10회
-    async function rateLimitWrite(action) {
+    // IP당 쓰기 제한: 시간당 N회
+    async function rateLimitWrite(action, limit) {
       const key = `rl:w:${action}:${ip}`;
       const count = parseInt((await env.COUNTER_KV.get(key)) || '0', 10);
-      if (count >= 10) return false;
+      if (count >= limit) return false;
       await env.COUNTER_KV.put(key, String(count + 1), { expirationTtl: 3600 });
       return true;
     }
@@ -190,12 +190,12 @@ export default {
       if (name && charLen(name.trim()) === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
       if (name && charLen(name) > 10) return json({ error: '이름은 10글자 이하여야 합니다.' }, 400);
       if (charLen(title) > 20) return json({ error: '제목은 20글자 이하여야 합니다.' }, 400);
-      if (charLen(content) > 300) return json({ error: '내용은 300글자 이하여야 합니다.' }, 400);
+      if (charLen(content) > 500) return json({ error: '내용은 500글자 이하여야 합니다.' }, 400);
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(title + ' ' + content);
       if (spam) return json({ error: spam }, 400);
       if (hasProfanity(title + ' ' + content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
-      if (!(await rateLimitWrite('post'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
+      if (!(await rateLimitWrite('post', 3))) return json({ error: '게시글은 시간당 3회까지 작성할 수 있습니다.' }, 429);
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
       await env.donian_board
@@ -232,12 +232,12 @@ export default {
       if (charLen(password) > 8) return json({ error: '비밀번호는 8글자 이하여야 합니다.' }, 400);
       if (name && charLen(name.trim()) === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
       if (name && charLen(name) > 10) return json({ error: '이름은 10글자 이하여야 합니다.' }, 400);
-      if (charLen(content) > 1000) return json({ error: '댓글이 너무 깁니다' }, 400);
+      if (charLen(content) > 50) return json({ error: '댓글은 50글자 이하여야 합니다.' }, 400);
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(content);
       if (spam) return json({ error: spam }, 400);
       if (hasProfanity(content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
-      if (!(await rateLimitWrite('comment'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
+      if (!(await rateLimitWrite('comment', 5))) return json({ error: '댓글은 시간당 5회까지 작성할 수 있습니다.' }, 429);
       const post = await env.donian_board.prepare('SELECT id FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
       const hash = await hashPassword(password);
