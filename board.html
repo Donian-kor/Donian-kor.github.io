@@ -625,7 +625,10 @@
           const typeEl = document.getElementById('search-type');
           if (typeEl) params.set('search_type', typeEl.value);
         }
-        const data = await api('/posts?' + params.toString(), forceFresh ? { cache: 'reload' } : undefined);
+        let reqPath = '/posts?' + params.toString();
+        // 강제 새로고침: 캐시를 확실히 우회하도록 고유 파라미터 추가
+        if (forceFresh) reqPath += '&_=' + Date.now();
+        const data = await api(reqPath);
         renderListData(data);
         try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
       } catch (err) {
