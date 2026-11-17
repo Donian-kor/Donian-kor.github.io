@@ -140,7 +140,7 @@ export default {
       let where = '';
       let params = [];
       if (search) {
-        where = 'WHERE title LIKE ? OR content LIKE ?';
+        where = 'WHERE p.title LIKE ? OR p.content LIKE ?';
         params = [`%${search}%`, `%${search}%`];
       }
 
@@ -151,7 +151,9 @@ export default {
       const total = totalRow ? totalRow.total : 0;
 
       const rows = await env.donian_board
-        .prepare(`SELECT id, name, title, created_at, views, is_locked, is_admin FROM posts ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+        .prepare(`SELECT p.id, p.name, p.title, p.created_at, p.views, p.is_locked, p.is_admin,
+          (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id AND comments.is_admin = 1) as admin_replies
+          FROM posts p ${where} ORDER BY p.created_at DESC LIMIT ? OFFSET ?`)
         .bind(...params, pageSize, offset)
         .all();
 
