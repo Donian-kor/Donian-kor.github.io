@@ -85,7 +85,7 @@ IP당 하루 1회만 카운팅하는 방문자 카운터 백엔드입니다.
 - **비밀번호**: SHA-256 해시 저장 (원본 비밀번호 미저장)
 - **봇/크롤러 차단**: User-Agent 기반으로 Googlebot, curl, python-requests 등 쓰기 요청 차단
 - **스팸 필터**: 링크 4개 이상, 같은 문자 20회 이상 반복, 2자 미만 내용 차단
-- **욕설/비속어 필터**: [korean-profanity-resources](https://github.com/Tanat05/korean-profanity-resources) + [bad_word_list](https://github.com/hlog2e/bad_word_list) + LoL 필터링 리스트 기반 **7,012개 단어**
+- **욕설/비속어 필터**: [korean-profanity-resources](https://github.com/Tanat05/korean-profanity-resources) + [bad_word_list](https://github.com/hlog2e/bad_word_list) + LoL 필터링 리스트 + [Curse-detection-data](https://github.com/2runo/Curse-detection-data) 기반 **7,025개 단어**
   - `profanity-words.js` 파일에 목록 저장
   - 공백·특수문자로 우회한 변형도 탐지 (정규화 후 매칭)
   - 정상 단어 오탐 방지: 1글자 단어 및 "시간·박사·씹다·고추·망가·같은·먹은·대준다·좀만·전만·십팔·팔년" 등 자연어 제외
