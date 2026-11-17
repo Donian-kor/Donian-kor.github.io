@@ -505,7 +505,7 @@
             <div class="text-xs text-center">${statusHtml}</div>
             <div class="min-w-0 flex items-center gap-1.5">
               ${p.is_locked ? '<svg class="lock-icon text-amber-400" aria-label="잠금"><use href="#icon-lock"></use></svg>' : ''}
-              <div class="text-zinc-200 text-sm truncate keep-all flex-1">${escapeHtml(p.title)}</div>
+              <div class="text-zinc-200 text-sm truncate keep-all min-w-0">${escapeHtml(p.title)}</div>
               ${p.comment_count > 0 ? `<span class="text-emerald-400 text-xs shrink-0">+ ${p.comment_count}</span>` : ''}
             </div>
             <div class="text-zinc-100 font-semibold text-xs truncate py-1 text-center">${renderName(p.name, p.is_admin)}</div>
