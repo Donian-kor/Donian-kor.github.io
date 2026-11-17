@@ -1207,10 +1207,19 @@
         return;
       }
       const nameVal = nameEl.value.trim();
-      if (!nameVal) { setFieldError(nameEl, '이름을 입력하세요.'); return; }
+      const nameMsg = document.getElementById('write-name-filter-msg');
+      if (!nameVal) {
+        if (nameMsg) { nameMsg.textContent = '이름을 입력하세요.'; nameMsg.classList.remove('hidden'); }
+        setFieldError(nameEl, '이름을 입력하세요.');
+        return;
+      }
       if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
-      if (!isAdminMode() && isImpersonationName(nameVal)) { setFieldError(nameEl, '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.'); return; }
-      if (!isAdminMode() && findProfanityRanges(nameVal).length > 0) { setFieldError(nameEl, '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.'); return; }
+      if (!isAdminMode() && (isImpersonationName(nameVal) || findProfanityRanges(nameVal).length > 0)) {
+        if (nameMsg) { nameMsg.textContent = FILTER_MSG; nameMsg.classList.remove('hidden'); }
+        setFieldError(nameEl, FILTER_MSG);
+        return;
+      }
+      if (nameMsg) nameMsg.classList.add('hidden');
       const ranges = findProfanityRanges(contentVal);
       if (ranges.length > 0) {
         showToast('욕설/비속어를 수정한 후 다시 등록하세요.');
