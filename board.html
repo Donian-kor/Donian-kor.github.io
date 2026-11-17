@@ -225,6 +225,10 @@
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
+    function renderName(name, isAdmin) {
+      if (isAdmin) return '<span class="text-emerald-400 font-semibold">Donian</span>';
+      return escapeHtml(name || '익명');
+    }
     function fmtDate(iso) {
       if (!iso) return '-';
       const d = new Date(iso);
@@ -417,9 +421,9 @@
             <div class="min-w-0 flex items-center gap-1.5">
               ${p.is_locked ? '<svg class="lock-icon text-amber-400" aria-label="잠금"><use href="#icon-lock"></use></svg>' : ''}
               <div class="text-zinc-200 text-sm truncate keep-all">${escapeHtml(p.title)}</div>
-              <span class="text-zinc-600 text-[0.65rem] sm:hidden">${escapeHtml(p.name || '익명')} · ${fmtDate(p.created_at)} · ${p.views}</span>
+              <span class="text-zinc-600 text-[0.65rem] sm:hidden">${renderName(p.name, p.is_admin)} · ${fmtDate(p.created_at)} · ${p.views}</span>
             </div>
-            <div class="hidden sm:block text-zinc-400 text-xs truncate">${escapeHtml(p.name || '익명')}</div>
+            <div class="hidden sm:block text-zinc-400 text-xs truncate">${renderName(p.name, p.is_admin)}</div>
             <div class="hidden sm:block text-zinc-500 text-xs">${fmtDate(p.created_at)}</div>
             <div class="text-right text-zinc-500 text-xs">${p.views}</div>
           </div>
@@ -642,7 +646,7 @@
             ${p.is_locked ? '<svg class="lock-icon text-amber-400" aria-label="잠금"><use href="#icon-lock"></use></svg>' : ''}
             <h3 id="detail-title" class="font-bold text-lg text-zinc-100 keep-all">${escapeHtml(p.title)}</h3>
           </div>
-          <div class="text-zinc-500 text-xs font-mono mb-3">${escapeHtml(p.name || '익명')} · ${fmtDate(p.created_at)} · 조회 ${p.views}</div>
+          <div class="text-zinc-500 text-xs font-mono mb-3">${renderName(p.name, p.is_admin)} · ${fmtDate(p.created_at)} · 조회 ${p.views}</div>
           <div class="text-zinc-300 text-sm leading-relaxed keep-all">${nl2br(p.content)}</div>
         </div>
         <div class="flex justify-end gap-2 mb-5">
@@ -655,7 +659,7 @@
             ${comments.length ? comments.map((c) => `
               <div class="rounded-lg border border-white/10 bg-zinc-800/50 p-3" data-cid="${c.id}">
                 <div class="flex items-center justify-between gap-2 mb-1">
-                  <span class="text-zinc-300 text-xs">${escapeHtml(c.name || '익명')}${c.is_author ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 align-middle">작성자</span>' : ''} <span class="text-zinc-600">· ${fmtDate(c.created_at)}</span></span>
+                  <span class="text-zinc-300 text-xs">${renderName(c.name, c.is_admin)}${c.is_author ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 align-middle">작성자</span>' : ''} <span class="text-zinc-600">· ${fmtDate(c.created_at)}</span></span>
                   <button class="delete-comment-btn text-zinc-600 hover:text-rose-400 text-xs" data-cid="${c.id}">삭제</button>
                 </div>
                 <div class="text-zinc-300 text-sm keep-all">${nl2br(c.content)}</div>

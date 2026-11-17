@@ -151,7 +151,7 @@ export default {
       const total = totalRow ? totalRow.total : 0;
 
       const rows = await env.donian_board
-        .prepare(`SELECT id, name, title, created_at, views, is_locked FROM posts ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+        .prepare(`SELECT id, name, title, created_at, views, is_locked, is_admin FROM posts ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
         .bind(...params, pageSize, offset)
         .all();
 
@@ -162,7 +162,7 @@ export default {
     if (method === 'GET' && /^\/posts\/\d+$/.test(path)) {
       const id = parseInt(path.split('/')[2], 10);
       const post = await env.donian_board
-        .prepare('SELECT id, name, title, content, created_at, views, is_locked, password_hash FROM posts WHERE id = ?')
+        .prepare('SELECT id, name, title, content, created_at, views, is_locked, password_hash, is_admin FROM posts WHERE id = ?')
         .bind(id)
         .first();
       if (!post) return json({ error: 'not found' }, 404);
@@ -179,7 +179,7 @@ export default {
 
       await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
       const comments = await env.donian_board
-        .prepare('SELECT id, name, content, created_at, password_hash FROM comments WHERE post_id = ? ORDER BY created_at ASC')
+        .prepare('SELECT id, name, content, created_at, password_hash, is_admin FROM comments WHERE post_id = ? ORDER BY created_at ASC')
         .bind(id)
         .all();
       const anon = (n) => !n || n === '익명';
@@ -189,6 +189,7 @@ export default {
         name: c.name,
         content: c.content,
         created_at: c.created_at,
+        is_admin: c.is_admin,
         is_author: (authorName !== null && !anon(c.name) && c.name === authorName)
           || (c.password_hash && c.password_hash === post.password_hash),
       }));
@@ -201,6 +202,7 @@ export default {
           created_at: post.created_at,
           views: post.views + 1,
           is_locked: post.is_locked,
+          is_admin: post.is_admin,
         },
         comments: enriched,
       });
@@ -251,9 +253,10 @@ export default {
       if (!(isAdmin || (await rateLimitWrite('post', 3)))) return json({ error: '게시글은 시간당 3회까지 작성할 수 있습니다.' }, 429);
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
+      const finalName = isAdmin ? 'Donian' : (name || '익명');
       await env.donian_board
-        .prepare('INSERT INTO posts (name, password_hash, title, content, created_at, is_locked) VALUES (?, ?, ?, ?, ?, ?)')
-        .bind(name || '익명', hash, title, content, now, is_locked ? 1 : 0)
+        .prepare('INSERT INTO posts (name, password_hash, title, content, created_at, is_locked, is_admin) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .bind(finalName, hash, title, content, now, is_locked ? 1 : 0, isAdmin ? 1 : 0)
         .run();
       return json({ ok: true });
     }
@@ -296,9 +299,10 @@ export default {
       if (!post) return json({ error: 'not found' }, 404);
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
+      const finalName = isAdmin ? 'Donian' : (name || '익명');
       await env.donian_board
-        .prepare('INSERT INTO comments (post_id, name, password_hash, content, created_at) VALUES (?, ?, ?, ?, ?)')
-        .bind(id, name || '익명', hash, content, now)
+        .prepare('INSERT INTO comments (post_id, name, password_hash, content, created_at, is_admin) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(id, finalName, hash, content, now, isAdmin ? 1 : 0)
         .run();
       return json({ ok: true });
     }
