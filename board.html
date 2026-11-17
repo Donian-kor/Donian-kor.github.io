@@ -446,7 +446,7 @@
       const titleVal = writeForm.querySelector('[name="title"]').value;
       const contentVal = writeForm.querySelector('[name="content"]').value;
       if (findProfanityRanges(titleVal).length > 0 || findProfanityRanges(contentVal).length > 0) {
-        writeError.textContent = '욕설/비속어가 포함되어 있습니다. 아래 빨간색으로 표시된 부분을 수정한 후 다시 등록하세요.';
+        writeError.textContent = '욕설/비속어가 포함되어 있습니다. 입력창에 빨간색으로 표시된 부분을 수정한 후 다시 등록하세요.';
         writeError.classList.remove('hidden');
         return;
       }
