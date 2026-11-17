@@ -29,6 +29,24 @@
     .board-row:hover { background-color: rgba(255,255,255,0.03); border-color: rgba(34,197,94,0.35); }
     .modal-backdrop { background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
     .lock-icon { width: 14px; height: 14px; flex-shrink: 0; }
+    /* 관리자 Donian 뱃지 애니메이션 (메인 DONIAN 라벨 효과 축소) */
+    @keyframes donianBadgeGlow {
+      0%, 100% { text-shadow: 0 0 6px rgba(52, 211, 153, 0.45); }
+      50% { text-shadow: 0 0 14px rgba(52, 211, 153, 0.85); }
+    }
+    .donian-badge {
+      animation: donianBadgeGlow 2.4s ease-in-out infinite;
+      transition: text-shadow 0.15s ease, transform 0.15s ease;
+      display: inline-block;
+    }
+    .donian-badge:hover {
+      text-shadow: 2px 0 0 #22d3ee, -2px 0 0 #f472b6, 0 0 14px rgba(52, 211, 153, 0.9);
+      transform: skewX(-6deg);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .donian-badge { animation: none; text-shadow: 0 0 6px rgba(52, 211, 153, 0.45); }
+      .donian-badge:hover { transform: none; text-shadow: 0 0 6px rgba(52, 211, 153, 0.45); }
+    }
     .pw-mask { -webkit-text-security: disc; text-security: disc; }
     /* 입력창 내부 하이라이팅 (투명 텍스트 + 하이라이트 레이어) */
     .hl-wrap { position: relative; }
@@ -228,7 +246,7 @@
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     function renderName(name, isAdmin) {
-      if (isAdmin) return '<span class="px-1.5 py-0.5 rounded text-[0.75rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 align-middle">Donian</span>';
+      if (isAdmin) return '<span class="donian-badge px-1.5 py-0.5 rounded text-[0.75rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 align-middle">Donian</span>';
       return escapeHtml(name || '익명');
     }
     function fmtDate(iso) {
