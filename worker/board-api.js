@@ -28,6 +28,31 @@ function isBot(ua) {
   return BOT_PATTERNS.some((re) => re.test(ua));
 }
 
+// 욕설/비속어 목록 (한글/영문)
+const PROFANITY = [
+  // 한글
+  '시발', '씨발', '시벌', '씨벌', '쉬발', '씨밸', '시발놈', '시발년',
+  '좆', '좃', '족', '좆같', '좆밥',
+  '병신', 'ㅂㅅ', 'ㅂ신', '병1신',
+  '지랄', 'ㅈㄹ', '지롤',
+  '개새끼', '개샛끼', '새끼', 'ㅅㄲ',
+  '미친놈', '미친년', '미친', 
+  '엿같', '쳐맞', '디질', '뒈질',
+  '걸레', '창녀', '매춘', '음란',
+  // 영문
+  'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'dumbass', 'cunt', 'slut',
+];
+
+function normalizeText(s) {
+  // 소문자화 + 공백/문장부호/기호 제거 (한글은 보존)
+  return String(s).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '');
+}
+
+function hasProfanity(text) {
+  const n = normalizeText(text);
+  return PROFANITY.some((w) => n.includes(normalizeText(w)));
+}
+
 async function hashPassword(pw) {
   const salt = 'donian-board-v1';
   const data = new TextEncoder().encode(salt + ':' + pw);
@@ -168,6 +193,7 @@ export default {
       if (content.trim().length < 2) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(title + ' ' + content);
       if (spam) return json({ error: spam }, 400);
+      if (hasProfanity(title + ' ' + content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
       if (!(await rateLimitWrite('post'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
@@ -205,6 +231,7 @@ export default {
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(content);
       if (spam) return json({ error: spam }, 400);
+      if (hasProfanity(content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
       if (!(await rateLimitWrite('comment'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
       const post = await env.donian_board.prepare('SELECT id FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
