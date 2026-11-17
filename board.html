@@ -120,25 +120,28 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">이름 (선택)</label>
-              <input type="text" name="name" maxlength="20" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="name" placeholder="최대 10글자" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">비밀번호 (삭제·잠금해제용)</label>
-              <input type="text" name="pw" required autocomplete="new-password" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="pw" required autocomplete="new-password" placeholder="최대 8글자 (한글 불가)" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">제목</label>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="title-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
-              <input type="text" name="title" required maxlength="200" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+              <input type="text" name="title" required placeholder="최대 20글자" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
             </div>
           </div>
           <div>
-            <label class="block text-zinc-400 mb-1 text-xs">내용</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-zinc-400 text-xs">내용</label>
+              <span id="content-counter" class="text-[0.65rem] text-zinc-500 font-mono">0 / 300</span>
+            </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="content-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
-              <textarea name="content" required rows="6" maxlength="5000" class="hl-input relative w-full px-3 py-2 text-sm leading-relaxed bg-transparent focus:outline-none resize-y"></textarea>
+              <textarea name="content" required rows="6" placeholder="최대 300글자" class="hl-input relative w-full px-3 py-2 text-sm leading-relaxed bg-transparent focus:outline-none resize-y"></textarea>
             </div>
           </div>
           <label class="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
@@ -229,6 +232,14 @@
     function clearFieldErrors(...inputs) {
       inputs.forEach((i) => { if (i) i.setCustomValidity(''); });
     }
+
+    // ---------- 글자 수 제한 (한글 기준 코드포인트) ----------
+    function charLen(s) { return [...String(s)].length; }
+    function truncateChars(s, max) {
+      const a = [...String(s)];
+      return a.length > max ? a.slice(0, max).join('') : String(s);
+    }
+    const KOREAN_CHAR_RE = /[ㄱ-ㅎㅏ-ㅣ가-힣]/u;
 
     // ---------- 욕설/비속어 하이라이팅 ----------
     const PROFANITY_CACHE_KEY = 'board_profanity_v1';
@@ -448,6 +459,37 @@
     [writeForm.querySelector('[name="title"]'), writeForm.querySelector('[name="content"]'), writeForm.querySelector('[name="pw"]'), writeForm.querySelector('[name="name"]')].forEach((el) => {
       el.addEventListener('input', () => el.setCustomValidity(''));
     });
+
+    // 글자 수 제한 적용
+    (function setupWriteLimits() {
+      const nameEl = writeForm.querySelector('[name="name"]');
+      const pwEl = writeForm.querySelector('[name="pw"]');
+      const titleEl = writeForm.querySelector('[name="title"]');
+      const contentEl = writeForm.querySelector('[name="content"]');
+      const counter = document.getElementById('content-counter');
+      const updateCounter = () => {
+        if (counter) counter.textContent = charLen(contentEl.value) + ' / 300';
+      };
+      nameEl.addEventListener('input', () => {
+        const t = truncateChars(nameEl.value, 10);
+        if (t !== nameEl.value) nameEl.value = t;
+      });
+      pwEl.addEventListener('input', () => {
+        let v = [...pwEl.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
+        v = truncateChars(v, 8);
+        if (v !== pwEl.value) pwEl.value = v;
+      });
+      titleEl.addEventListener('input', () => {
+        const t = truncateChars(titleEl.value, 20);
+        if (t !== titleEl.value) titleEl.value = t;
+      });
+      contentEl.addEventListener('input', () => {
+        const t = truncateChars(contentEl.value, 300);
+        if (t !== contentEl.value) contentEl.value = t;
+        updateCounter();
+      });
+      updateCounter();
+    })();
     writeForm.querySelector('[name="title"]').addEventListener('scroll', (e) => {
       const hl = document.getElementById('title-highlight');
       if (hl) hl.scrollLeft = e.target.scrollLeft;
