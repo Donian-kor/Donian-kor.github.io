@@ -67,10 +67,18 @@ IP당 하루 1회만 카운팅하는 방문자 카운터 백엔드입니다.
 |---|---|---|
 | GET | `/posts?page=1&search=` | 목록 (페이지네이션, 검색) |
 | GET | `/posts/:id` | 상세보기 (조회수 증가, 댓글 포함) |
-| POST | `/posts` | 글쓰기 (name, password, title, content) |
+| GET | `/posts/:id?password=` | 잠금 게시글 열람 (본인/관리자 비밀번호) |
+| POST | `/posts` | 글쓰기 (name, password, title, content, is_locked) |
 | DELETE | `/posts/:id` | 글 삭제 (password) |
 | POST | `/posts/:id/comments` | 댓글 작성 |
 | DELETE | `/comments/:id` | 댓글 삭제 (password) |
+
+## 잠금(비공개) 기능
+
+- 글쓰기 시 `is_locked` 체크 → 작성자와 관리자만 열람 가능
+- 목록에 잠금 아이콘 표시
+- 상세보기 진입 시 비밀번호 입력 → 작성자 비밀번호 또는 관리자 비밀번호로 열람
+- 관리자 비밀번호는 Worker secret `ADMIN_PASSWORD` 로 설정 (기본값: `donian-admin-2026`)
 
 ## 보안
 

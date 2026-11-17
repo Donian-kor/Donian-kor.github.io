@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS posts (
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   created_at TEXT NOT NULL,
-  views INTEGER DEFAULT 0
+  views INTEGER DEFAULT 0,
+  is_locked INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS comments (

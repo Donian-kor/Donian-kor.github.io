@@ -1,5 +1,6 @@
 // 게시판 API Worker (Cloudflare Workers + D1)
 // 비회원제: 이름(선택) + 비밀번호(삭제용)
+// 잠금(비공개): 작성자 또는 관리자만 열람 가능
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ export default {
       const total = totalRow ? totalRow.total : 0;
 
       const rows = await env.donian_board
-        .prepare(`SELECT id, name, title, created_at, views FROM posts ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+        .prepare(`SELECT id, name, title, created_at, views, is_locked FROM posts ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
         .bind(...params, pageSize, offset)
         .all();
 
@@ -77,26 +78,50 @@ export default {
     }
 
     // GET /posts/:id - 상세보기 (조회수 증가)
+    // 잠금 게시글: ?password= 로 본인 또는 관리자 인증 필요
     if (method === 'GET' && /^\/posts\/\d+$/.test(path)) {
       const id = parseInt(path.split('/')[2], 10);
-      await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
       const post = await env.donian_board
-        .prepare('SELECT id, name, title, content, created_at, views FROM posts WHERE id = ?')
+        .prepare('SELECT id, name, title, content, created_at, views, is_locked, password_hash FROM posts WHERE id = ?')
         .bind(id)
         .first();
       if (!post) return json({ error: 'not found' }, 404);
+
+      // 잠금 처리
+      if (post.is_locked) {
+        const pw = url.searchParams.get('password') || '';
+        if (!pw) return json({ error: 'locked', message: '비공개 게시글입니다. 비밀번호를 입력하세요.' }, 403);
+        const hash = await hashPassword(pw);
+        const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
+        if (hash !== post.password_hash && hash !== adminHash) {
+          return json({ error: 'wrong_password', message: '비밀번호가 일치하지 않습니다.' }, 403);
+        }
+      }
+
+      await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
       const comments = await env.donian_board
         .prepare('SELECT id, name, content, created_at FROM comments WHERE post_id = ? ORDER BY created_at ASC')
         .bind(id)
         .all();
-      return json({ post, comments: comments.results || [] });
+      return json({
+        post: {
+          id: post.id,
+          name: post.name,
+          title: post.title,
+          content: post.content,
+          created_at: post.created_at,
+          views: post.views + 1,
+          is_locked: post.is_locked,
+        },
+        comments: comments.results || [],
+      });
     }
 
     // POST /posts - 글쓰기
     if (method === 'POST' && path === '/posts') {
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
-      const { name, password, title, content } = body;
+      const { name, password, title, content, is_locked } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
       if (title.length > 200) return json({ error: '제목이 너무 깁니다' }, 400);
       if (content.length > 5000) return json({ error: '내용이 너무 깁니다' }, 400);
@@ -104,8 +129,8 @@ export default {
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
       await env.donian_board
-        .prepare('INSERT INTO posts (name, password_hash, title, content, created_at) VALUES (?, ?, ?, ?, ?)')
-        .bind(name || '익명', hash, title, content, now)
+        .prepare('INSERT INTO posts (name, password_hash, title, content, created_at, is_locked) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(name || '익명', hash, title, content, now, is_locked ? 1 : 0)
         .run();
       return json({ ok: true });
     }
@@ -115,9 +140,10 @@ export default {
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       const hash = await hashPassword(body.password || '');
+      const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const post = await env.donian_board.prepare('SELECT password_hash FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
-      if (post.password_hash !== hash) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
+      if (post.password_hash !== hash && hash !== adminHash) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
       await env.donian_board.prepare('DELETE FROM comments WHERE post_id = ?').bind(id).run();
       await env.donian_board.prepare('DELETE FROM posts WHERE id = ?').bind(id).run();
       return json({ ok: true });
@@ -148,9 +174,10 @@ export default {
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       const hash = await hashPassword(body.password || '');
+      const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const comment = await env.donian_board.prepare('SELECT password_hash FROM comments WHERE id = ?').bind(id).first();
       if (!comment) return json({ error: 'not found' }, 404);
-      if (comment.password_hash !== hash) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
+      if (comment.password_hash !== hash && hash !== adminHash) return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
       await env.donian_board.prepare('DELETE FROM comments WHERE id = ?').bind(id).run();
       return json({ ok: true });
     }
