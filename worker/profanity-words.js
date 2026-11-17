@@ -3158,7 +3158,6 @@ wtf
 ahole
 ashole
 ashole
-admin
 fosaon
 orgasmus
 sega
@@ -3391,7 +3390,6 @@ tmd
 梓霖
 娄义
 gameon
-test
 kao
 sf募集
 smプレイ

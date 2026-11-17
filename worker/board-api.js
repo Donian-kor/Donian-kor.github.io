@@ -1,11 +1,13 @@
 // 게시판 API Worker (Cloudflare Workers + D1)
 // 비회원제: 이름(선택) + 비밀번호(삭제용)
 // 잠금(비공개): 작성자 또는 관리자만 열람 가능
-// 보안: 봇/크롤러 차단, IP 레이트리밋, 스팸 필터
+// 보안: 봇/크롤러 차단, IP 레이트리밋, 스팸 필터, Turnstile, Origin 검증
+
+const ALLOWED_ORIGIN = 'https://donian-kor.github.io';
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
   'Cache-Control': 'no-store',
 };
 
@@ -26,6 +28,31 @@ const BOT_PATTERNS = [
 function isBot(ua) {
   if (!ua) return true;
   return BOT_PATTERNS.some((re) => re.test(ua));
+}
+
+// Cloudflare Turnstile 검증
+async function verifyTurnstile(token, ip, env) {
+  if (!env.TURNSTILE_SECRET_KEY) return true; // secret 미설정 시 스킵
+  if (!token) return false;
+  const body = new URLSearchParams({
+    secret: env.TURNSTILE_SECRET_KEY,
+    response: token,
+    remoteip: ip,
+  });
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  const data = await res.json();
+  return data.success === true;
+}
+
+// 엣지 Rate Limiting binding (폭주 방어)
+async function rateLimitEdge(ip, env) {
+  if (!env.RATE_LIMITER) return true; // binding 없으면 스킵
+  const { success } = await env.RATE_LIMITER.limit({ key: ip });
+  return success;
 }
 
 // 욕설/비속어 목록 (프론트 하이라이팅용 /profanity-list, 서버 차단용)
@@ -63,11 +90,19 @@ export default {
     if (method === 'OPTIONS') {
       return new Response(null, {
         headers: {
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
         },
       });
+    }
+
+    // Origin 검증: POST/PUT/DELETE 는 허용된 출처만
+    if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
+      const origin = request.headers.get('Origin');
+      if (origin !== ALLOWED_ORIGIN) {
+        return json({ error: '허용되지 않은 출처입니다.' }, 403);
+      }
     }
 
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
@@ -128,7 +163,7 @@ export default {
       return new Response(JSON.stringify({ words: PROFANITY }), {
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
           'Cache-Control': 'public, max-age=3600',
         },
       });
@@ -196,7 +231,7 @@ export default {
       return new Response(JSON.stringify({ total, page, pageSize, posts: rows.results || [] }), {
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
           'Cache-Control': 'public, max-age=30',
         },
       });
@@ -287,6 +322,8 @@ export default {
       if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
+      if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
+      if (!(await verifyTurnstile(body['cf-turnstile-response'], ip, env))) return json({ error: '봇 인증에 실패했습니다.' }, 403);
       const isAdmin = await isAdminToken(body.token);
       const { name, password, title, content, is_locked } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
@@ -348,6 +385,8 @@ export default {
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
+      if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
+      if (!(await verifyTurnstile(body['cf-turnstile-response'], ip, env))) return json({ error: '봇 인증에 실패했습니다.' }, 403);
       const isAdmin = await isAdminToken(body.token);
       const { name, password, content, parent_id } = body;
       if (!password || !content) return json({ error: '필수 항목 누락' }, 400);

@@ -107,4 +107,6 @@ IP당 하루 1회만 카운팅하는 방문자 카운터 백엔드입니다.
 - **honeypot**: 숨은 필드(`botcheck`)로 봇 차단
 - **DDoS**: Cloudflare 엣지에서 기본 DDoS 방어 + 위 레이트리밋
 - **크롤링**: board.html `noindex` + API 읽기 레이트리밋
-- **CORS**: `*` 허용 (공개 API)
+- **CORS Origin 검증**: `https://donian-kor.github.io` 만 허용 (그 외 출처 403)
+- **Turnstile**: Cloudflare Turnstile 토큰 검증 (`TURNSTILE_SECRET_KEY` secret, 미설정 시 스킵)
+- **Rate Limiting binding**: 엣지 폭주 방어 (60회/60초, KV 조회 없이 즉시 차단)
