@@ -235,6 +235,17 @@ export default {
       return json({ ok: false, error: '비밀번호가 일치하지 않습니다.' });
     }
 
+    // POST /admin/keepalive - 관리자 토큰 TTL 연장 (활동 중 세션 유지)
+    if (method === 'POST' && path === '/admin/keepalive') {
+      const body = await request.json().catch(() => ({}));
+      const tk = body.token || '';
+      if (tk && (await isAdminToken(tk))) {
+        await env.COUNTER_KV.put('admin_token:' + tk, 'admin', { expirationTtl: 3600 });
+        return json({ ok: true });
+      }
+      return json({ ok: false });
+    }
+
     // 토큰 유효성 검사
     async function isAdminToken(token) {
       if (!token) return false;

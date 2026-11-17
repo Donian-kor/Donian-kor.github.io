@@ -954,6 +954,7 @@
     async function deletePost(id) {
       let body;
       if (isAdminMode()) {
+        if (!(await adminKeepAlive())) return; // 세션 만료 시 재로그인 안내
         body = {}; // 관리자 토큰 자동 첨부 (api)
       } else {
         const pw = prompt('글 삭제 비밀번호를 입력하세요.');
@@ -1036,6 +1037,7 @@
         editError.classList.remove('hidden');
         return;
       }
+      if (isAdminMode() && !(await adminKeepAlive())) return; // 세션 만료 시 재로그인 안내
       try {
         await api('/posts/' + currentPost.id, {
           method: 'PUT',
@@ -1247,6 +1249,31 @@
       }
     }
 
+    // 관리자 세션 keepalive (활동 중 토큰 1시간 만료 방지) + 만료 UX
+    let adminKeepAliveTimer = null;
+    function startAdminKeepAlive() {
+      if (adminKeepAliveTimer) return;
+      adminKeepAliveTimer = setInterval(() => { adminKeepAlive(); }, 25 * 60 * 1000); // 25분마다 갱신
+    }
+    function stopAdminKeepAlive() {
+      if (adminKeepAliveTimer) { clearInterval(adminKeepAliveTimer); adminKeepAliveTimer = null; }
+    }
+    function handleAdminExpiry() {
+      sessionStorage.removeItem('board_admin_token');
+      stopAdminKeepAlive();
+      updateAdminBtn();
+      showToast('관리자 세션이 만료되었습니다. 관리자 버튼으로 다시 로그인하세요.');
+    }
+    async function adminKeepAlive() {
+      if (!isAdminMode()) return true;
+      try {
+        const data = await api('/admin/keepalive', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+        if (data.ok) return true;
+      } catch (e) {}
+      handleAdminExpiry();
+      return false;
+    }
+
     function updateAdminBtn() {
       if (!adminBtn) return;
       const on = isAdminMode();
@@ -1255,6 +1282,7 @@
       adminBtn.classList.toggle('text-zinc-400', !on);
       applyAdminName();
       applyAdminWritePassword();
+      if (on) startAdminKeepAlive(); else stopAdminKeepAlive();
     }
 
     if (adminBtn) {
@@ -1287,6 +1315,7 @@
       });
     }
     updateAdminBtn();
+    if (isAdminMode()) adminKeepAlive(); // 재접속 시 토큰 유효성 즉시 확인(만료 시 안내)
 
     // ---------- 시작 ----------
     loadList();
