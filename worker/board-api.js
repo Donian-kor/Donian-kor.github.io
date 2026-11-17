@@ -1,6 +1,7 @@
 // 게시판 API Worker (Cloudflare Workers + D1)
 // 비회원제: 이름(선택) + 비밀번호(삭제용)
 // 잠금(비공개): 작성자 또는 관리자만 열람 가능
+// 보안: 봇/크롤러 차단, IP 레이트리밋, 스팸 필터
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
@@ -10,6 +11,21 @@ const JSON_HEADERS = {
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
+}
+
+// 봇/크롤러 User-Agent 패턴
+const BOT_PATTERNS = [
+  /bot/i, /crawler/i, /spider/i, /slurp/i, /facebookexternalhit/i,
+  /twitterbot/i, /linkedinbot/i, /whatsapp/i, /telegrambot/i, /discordbot/i,
+  /googlebot/i, /bingbot/i, /yandex/i, /baidu/i, /duckduck/i, /applebot/i,
+  /petalbot/i, /semrush/i, /ahrefs/i, /mj12/i, /dotbot/i, /rogerbot/i,
+  /headless/i, /phantom/i, /wget/i, /curl/i, /python-requests/i,
+  /go-http-client/i, /java\//i,
+];
+
+function isBot(ua) {
+  if (!ua) return true;
+  return BOT_PATTERNS.some((re) => re.test(ua));
 }
 
 async function hashPassword(pw) {
@@ -27,7 +43,6 @@ export default {
     const path = url.pathname;
     const method = request.method;
 
-    // CORS preflight
     if (method === 'OPTIONS') {
       return new Response(null, {
         headers: {
@@ -39,14 +54,40 @@ export default {
     }
 
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+    const ua = request.headers.get('user-agent') || '';
 
-    // IP당 시간당 10회 쓰기 제한
-    async function rateLimit(action) {
-      const key = `rl:${action}:${ip}`;
+    // IP당 쓰기 제한: 시간당 10회
+    async function rateLimitWrite(action) {
+      const key = `rl:w:${action}:${ip}`;
       const count = parseInt((await env.COUNTER_KV.get(key)) || '0', 10);
       if (count >= 10) return false;
       await env.COUNTER_KV.put(key, String(count + 1), { expirationTtl: 3600 });
       return true;
+    }
+
+    // IP당 읽기 제한: 분당 60회 (스크래핑 방지)
+    async function rateLimitRead() {
+      const key = `rl:r:${ip}`;
+      const count = parseInt((await env.COUNTER_KV.get(key)) || '0', 10);
+      if (count >= 60) return false;
+      await env.COUNTER_KV.put(key, String(count + 1), { expirationTtl: 60 });
+      return true;
+    }
+
+    // 읽기 요청 전체에 레이트리밋 적용
+    if (method === 'GET' && !(await rateLimitRead())) {
+      return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
+    }
+
+    // 스팸 내용 검사
+    function spamCheck(text) {
+      if (!text) return null;
+      // URL 개수 (http/https/www)
+      const urls = text.match(/https?:\/\/|www\./gi) || [];
+      if (urls.length > 3) return '링크가 너무 많습니다.';
+      // 같은 문자 20회 이상 반복
+      if (/(.)\1{19,}/.test(text)) return '비정상적인 반복 문자열입니다.';
+      return null;
     }
 
     // GET /posts?page=1&search= - 목록
@@ -78,7 +119,6 @@ export default {
     }
 
     // GET /posts/:id - 상세보기 (조회수 증가)
-    // 잠금 게시글: ?password= 로 본인 또는 관리자 인증 필요
     if (method === 'GET' && /^\/posts\/\d+$/.test(path)) {
       const id = parseInt(path.split('/')[2], 10);
       const post = await env.donian_board
@@ -87,7 +127,6 @@ export default {
         .first();
       if (!post) return json({ error: 'not found' }, 404);
 
-      // 잠금 처리
       if (post.is_locked) {
         const pw = url.searchParams.get('password') || '';
         if (!pw) return json({ error: 'locked', message: '비공개 게시글입니다. 비밀번호를 입력하세요.' }, 403);
@@ -119,13 +158,17 @@ export default {
 
     // POST /posts - 글쓰기
     if (method === 'POST' && path === '/posts') {
+      if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
       const { name, password, title, content, is_locked } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
       if (title.length > 200) return json({ error: '제목이 너무 깁니다' }, 400);
       if (content.length > 5000) return json({ error: '내용이 너무 깁니다' }, 400);
-      if (!(await rateLimit('post'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
+      if (content.trim().length < 2) return json({ error: '내용이 너무 짧습니다' }, 400);
+      const spam = spamCheck(title + ' ' + content);
+      if (spam) return json({ error: spam }, 400);
+      if (!(await rateLimitWrite('post'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
       await env.donian_board
@@ -137,6 +180,7 @@ export default {
 
     // DELETE /posts/:id - 글 삭제 (비밀번호)
     if (method === 'DELETE' && /^\/posts\/\d+$/.test(path)) {
+      if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       const hash = await hashPassword(body.password || '');
@@ -151,13 +195,17 @@ export default {
 
     // POST /posts/:id/comments - 댓글 작성
     if (method === 'POST' && /^\/posts\/\d+\/comments$/.test(path)) {
+      if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
       const { name, password, content } = body;
       if (!password || !content) return json({ error: '필수 항목 누락' }, 400);
       if (content.length > 1000) return json({ error: '댓글이 너무 깁니다' }, 400);
-      if (!(await rateLimit('comment'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
+      if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
+      const spam = spamCheck(content);
+      if (spam) return json({ error: spam }, 400);
+      if (!(await rateLimitWrite('comment'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
       const post = await env.donian_board.prepare('SELECT id FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
       const hash = await hashPassword(password);
@@ -171,6 +219,7 @@ export default {
 
     // DELETE /comments/:id - 댓글 삭제 (비밀번호)
     if (method === 'DELETE' && /^\/comments\/\d+$/.test(path)) {
+      if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       const hash = await hashPassword(body.password || '');
