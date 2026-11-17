@@ -507,7 +507,7 @@
               ${p.is_locked ? '<svg class="lock-icon text-amber-400" aria-label="잠금"><use href="#icon-lock"></use></svg>' : ''}
               <div class="text-zinc-200 text-sm truncate keep-all">${escapeHtml(p.title)}</div>
             </div>
-            <div class="text-zinc-400 text-xs truncate py-1 text-center">${renderName(p.name, p.is_admin)}</div>
+            <div class="text-zinc-100 font-semibold text-xs truncate py-1 text-center">${renderName(p.name, p.is_admin)}</div>
             <div class="hidden sm:block text-zinc-500 text-xs text-center">${fmtPostDate(p.created_at)}</div>
             <div class="text-center text-zinc-500 text-xs">${p.views}</div>
           </div>
@@ -750,7 +750,7 @@
             ${comments.length ? comments.map((c) => `
               <div class="rounded-lg border border-white/10 bg-zinc-800/50 p-3" data-cid="${c.id}">
                 <div class="flex items-center justify-between gap-2 mb-1">
-                  <span class="text-zinc-300 text-xs">${renderName(c.name, c.is_admin)}${!c.is_admin && c.is_author ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 align-middle">작성자</span>' : ''} <span class="text-zinc-600">· ${fmtPostDate(c.created_at)}</span></span>
+                  <span class="text-zinc-100 font-semibold text-xs">${renderName(c.name, c.is_admin)}${!c.is_admin && c.is_author ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 align-middle">작성자</span>' : ''} <span class="text-zinc-600">· ${fmtPostDate(c.created_at)}</span></span>
                   <button class="delete-comment-btn text-zinc-600 hover:text-rose-400 text-xs" data-cid="${c.id}">삭제</button>
                 </div>
                 <div class="text-zinc-300 text-sm keep-all">${nl2br(c.content)}</div>
