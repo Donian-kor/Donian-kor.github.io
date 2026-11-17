@@ -31,3 +31,50 @@ IP당 하루 1회만 카운팅하는 방문자 카운터 백엔드입니다.
 ## 배포 전 (미배포 상태)
 
 `VISITOR_COUNTER_URL` 에 `YOUR-SUBDOMAIN` 이 포함되어 있으면 자동으로 hits.sh 배지로 폴백 표시됩니다.
+
+---
+
+# 게시판 API (Cloudflare Worker + D1)
+
+비회원제 문의 게시판 백엔드입니다. `board-api.js` + `board-schema.sql` 사용.
+
+## 배포 절차
+
+1. D1 데이터베이스 생성:
+   ```bash
+   npx wrangler d1 create donian-board
+   ```
+2. 스키마 적용:
+   ```bash
+   npx wrangler d1 execute donian-board --remote --file=board-schema.sql
+   ```
+3. `wrangler.toml` 에 D1 바인딩 추가:
+   ```toml
+   [[d1_databases]]
+   binding = "donian_board"
+   database_name = "donian-board"
+   database_id = "<생성된 ID>"
+   ```
+4. Worker 배포:
+   ```bash
+   npx wrangler deploy
+   ```
+5. `board.html` 의 `API_BASE` 상수를 배포된 Worker URL 로 교체
+
+## API 엔드포인트
+
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| GET | `/posts?page=1&search=` | 목록 (페이지네이션, 검색) |
+| GET | `/posts/:id` | 상세보기 (조회수 증가, 댓글 포함) |
+| POST | `/posts` | 글쓰기 (name, password, title, content) |
+| DELETE | `/posts/:id` | 글 삭제 (password) |
+| POST | `/posts/:id/comments` | 댓글 작성 |
+| DELETE | `/comments/:id` | 댓글 삭제 (password) |
+
+## 보안
+
+- 비밀번호는 SHA-256 해시로 저장 (원본 비밀번호 미저장)
+- honeypot 필드(`botcheck`)로 봇 차단
+- IP당 시간당 10회 쓰기 제한 (KV 기반)
+- CORS 허용 (`*`)

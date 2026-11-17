@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Donian · 게시판</title>
+  <meta name="description" content="Donian 포트폴리오 문의 게시판. 누구나 글을 남길 수 있습니다.">
+  <meta name="robots" content="noindex, nofollow">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Pretendard', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'Pretendard', 'monospace'] },
+          colors: { accent: '#2563EB' },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'JetBrains Mono', 'Pretendard', monospace; background: #0a0a0a; }
+    .keep-all { word-break: keep-all; overflow-wrap: break-word; }
+    .term-border { border: 1px solid rgba(255,255,255,0.08); }
+    .board-row { transition: background-color 0.15s, border-color 0.15s; }
+    .board-row:hover { background-color: rgba(255,255,255,0.03); border-color: rgba(34,197,94,0.35); }
+    .modal-backdrop { background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+  </style>
+</head>
+<body class="bg-[#0a0a0a] text-zinc-200 antialiased min-h-screen">
+
+  <!-- Terminal window chrome (sticky) -->
+  <div class="fixed top-0 left-0 right-0 z-40 bg-zinc-900/90 backdrop-blur border-b border-white/5">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-10 flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-red-500"></span>
+      <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+      <span class="w-3 h-3 rounded-full bg-green-500"></span>
+      <span class="ml-3 text-xs font-mono"><span class="text-white">Terminal</span><span class="text-zinc-400 hidden sm:inline"> — Donian Board</span></span>
+      <div class="ml-auto flex items-center gap-3 text-xs text-zinc-400 font-mono">
+        <a href="index.html" class="px-2 py-1 hover:text-zinc-200 transition">← portfolio</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pt-14 pb-12">
+
+    <!-- Header -->
+    <div class="mb-5">
+      <div class="font-mono text-sm">
+        <div class="text-zinc-400 mb-2"># Donian Board — 문의 게시판</div>
+        <div class="flex items-center gap-2">
+          <span class="text-green-400 font-bold text-lg">C:\></span>
+          <span class="text-zinc-200 text-lg">dir board\</span>
+        </div>
+        <p class="text-zinc-500 text-xs mt-1 keep-all">누구나 자유롭게 글을 남길 수 있습니다. (비회원제 · 비밀번호로 삭제)</p>
+      </div>
+    </div>
+
+    <!-- Search + Write -->
+    <div class="flex flex-col sm:flex-row gap-2 mb-4">
+      <input id="search-input" type="text" placeholder="검색 (제목 + 내용)"
+        class="flex-1 px-3 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+      <button id="search-btn" class="px-4 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm hover:bg-zinc-700 transition">검색</button>
+      <button id="write-btn" class="px-4 py-2 rounded bg-green-500/20 border border-green-500/40 text-green-300 text-sm hover:bg-green-500/30 transition whitespace-nowrap">글쓰기</button>
+    </div>
+
+    <!-- List -->
+    <div class="rounded-lg border border-white/10 bg-zinc-900/95 overflow-hidden">
+      <div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_6rem_5rem_4rem] gap-2 px-4 py-2 border-b border-white/5 text-[0.65rem] text-zinc-500 font-mono">
+        <span>제목</span>
+        <span class="hidden sm:block">작성자</span>
+        <span class="hidden sm:block">날짜</span>
+        <span class="text-right">조회</span>
+      </div>
+      <div id="board-list" class="divide-y divide-white/5">
+        <div class="px-4 py-8 text-center text-zinc-500 text-sm">Loading...</div>
+      </div>
+      <div id="empty-state" class="hidden px-4 py-10 text-center text-zinc-500 text-sm">게시글이 없습니다.</div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex items-center justify-center gap-2 mt-4"></div>
+  </main>
+
+  <!-- Write Modal -->
+  <div id="write-modal" class="hidden fixed inset-0 z-[70] items-center justify-center p-4 modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="write-title">
+    <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-zinc-900 border border-white/10 shadow-2xl">
+      <button data-close="write-modal" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 flex items-center justify-center transition" aria-label="닫기">✕</button>
+      <div class="p-5">
+        <h3 id="write-title" class="font-bold text-lg text-zinc-100 mb-4">글쓰기</h3>
+        <form id="write-form" class="space-y-3 text-sm">
+          <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-zinc-400 mb-1 text-xs">이름 (선택)</label>
+              <input type="text" name="name" maxlength="20" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+            </div>
+            <div>
+              <label class="block text-zinc-400 mb-1 text-xs">비밀번호 (삭제용)</label>
+              <input type="password" name="password" required class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+            </div>
+          </div>
+          <div>
+            <label class="block text-zinc-400 mb-1 text-xs">제목</label>
+            <input type="text" name="title" required maxlength="200" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+          </div>
+          <div>
+            <label class="block text-zinc-400 mb-1 text-xs">내용</label>
+            <textarea name="content" required rows="6" maxlength="5000" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+          </div>
+          <p id="write-error" class="hidden text-rose-400 text-xs"></p>
+          <div class="flex justify-end gap-2 pt-1">
+            <button type="button" data-close="write-modal" class="px-4 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-300 text-sm hover:bg-zinc-700 transition">취소</button>
+            <button type="submit" class="px-4 py-2 rounded bg-green-500/20 border border-green-500/40 text-green-300 text-sm hover:bg-green-500/30 transition">등록</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detail-modal" class="hidden fixed inset-0 z-[70] items-center justify-center p-4 modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-zinc-900 border border-white/10 shadow-2xl">
+      <button data-close="detail-modal" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 flex items-center justify-center transition" aria-label="닫기">✕</button>
+      <div class="p-5">
+        <div id="detail-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- 설정 ----------
+    const API_BASE = 'https://board-api.donian.workers.dev';
+    const PAGE_SIZE = 10;
+
+    // ---------- 상태 ----------
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentSearch = '';
+    let currentPostId = null;
+
+    // ---------- 유틸 ----------
+    function escapeHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function fmtDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '-';
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return y + '.' + m + '.' + day;
+    }
+    function nl2br(s) {
+      return escapeHtml(s).replace(/\n/g, '<br>');
+    }
+    async function api(path, options) {
+      const res = await fetch(API_BASE + path, options);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      return data;
+    }
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 z-[80] px-4 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm shadow-lg';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2200);
+    }
+
+    // ---------- 모달 ----------
+    function openModal(id) {
+      const m = document.getElementById(id);
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+    document.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => closeModal(btn.dataset.close));
+    });
+    ['write-modal', 'detail-modal'].forEach((id) => {
+      document.getElementById(id).addEventListener('click', (e) => {
+        if (e.target.id === id) closeModal(id);
+      });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal('write-modal');
+        closeModal('detail-modal');
+      }
+    });
+
+    // ---------- 목록 ----------
+    const listEl = document.getElementById('board-list');
+    const emptyEl = document.getElementById('empty-state');
+    const paginationEl = document.getElementById('pagination');
+
+    async function loadList() {
+      listEl.innerHTML = '<div class="px-4 py-8 text-center text-zinc-500 text-sm">Loading...</div>';
+      emptyEl.classList.add('hidden');
+      try {
+        const params = new URLSearchParams({ page: currentPage });
+        if (currentSearch) params.set('search', currentSearch);
+        const data = await api('/posts?' + params.toString());
+        totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
+        if (!data.posts.length) {
+          listEl.innerHTML = '';
+          emptyEl.classList.remove('hidden');
+          paginationEl.innerHTML = '';
+          return;
+        }
+        listEl.innerHTML = data.posts.map((p) => `
+          <div class="board-row grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_6rem_5rem_4rem] gap-2 items-center px-4 py-3 cursor-pointer" data-id="${p.id}">
+            <div class="min-w-0">
+              <div class="text-zinc-200 text-sm truncate keep-all">${escapeHtml(p.title)}</div>
+              <div class="text-zinc-500 text-[0.65rem] sm:hidden mt-0.5">${escapeHtml(p.name || '익명')} · ${fmtDate(p.created_at)} · ${p.views}</div>
+            </div>
+            <div class="hidden sm:block text-zinc-400 text-xs truncate">${escapeHtml(p.name || '익명')}</div>
+            <div class="hidden sm:block text-zinc-500 text-xs">${fmtDate(p.created_at)}</div>
+            <div class="text-right text-zinc-500 text-xs">${p.views}</div>
+          </div>
+        `).join('');
+        listEl.querySelectorAll('.board-row').forEach((row) => {
+          row.addEventListener('click', () => openDetail(parseInt(row.dataset.id, 10)));
+        });
+        renderPagination();
+      } catch (err) {
+        listEl.innerHTML = `<div class="px-4 py-8 text-center text-rose-400 text-sm">불러오기 실패: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function renderPagination() {
+      if (totalPages <= 1) { paginationEl.innerHTML = ''; return; }
+      let html = '';
+      const prev = Math.max(1, currentPage - 1);
+      const next = Math.min(totalPages, currentPage + 1);
+      html += `<button data-page="${prev}" class="px-3 py-1.5 rounded bg-zinc-800 border border-white/10 text-zinc-300 text-xs hover:bg-zinc-700 transition ${currentPage === 1 ? 'opacity-40 pointer-events-none' : ''}">이전</button>`;
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+          html += `<button data-page="${i}" class="px-3 py-1.5 rounded text-xs transition ${i === currentPage ? 'bg-green-500/20 text-green-300 border border-green-500/40' : 'bg-zinc-800 border border-white/10 text-zinc-300 hover:bg-zinc-700'}">${i}</button>`;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+          html += '<span class="text-zinc-600 text-xs px-1">…</span>';
+        }
+      }
+      html += `<button data-page="${next}" class="px-3 py-1.5 rounded bg-zinc-800 border border-white/10 text-zinc-300 text-xs hover:bg-zinc-700 transition ${currentPage === totalPages ? 'opacity-40 pointer-events-none' : ''}">다음</button>`;
+      paginationEl.innerHTML = html;
+      paginationEl.querySelectorAll('button[data-page]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          currentPage = parseInt(btn.dataset.page, 10);
+          loadList();
+        });
+      });
+    }
+
+    // ---------- 검색 ----------
+    document.getElementById('search-btn').addEventListener('click', () => {
+      currentSearch = document.getElementById('search-input').value.trim();
+      currentPage = 1;
+      loadList();
+    });
+    document.getElementById('search-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        currentSearch = e.target.value.trim();
+        currentPage = 1;
+        loadList();
+      }
+    });
+
+    // ---------- 글쓰기 ----------
+    const writeBtn = document.getElementById('write-btn');
+    const writeForm = document.getElementById('write-form');
+    const writeError = document.getElementById('write-error');
+
+    writeBtn.addEventListener('click', () => {
+      writeForm.reset();
+      writeError.classList.add('hidden');
+      openModal('write-modal');
+    });
+
+    writeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      writeError.classList.add('hidden');
+      const fd = new FormData(writeForm);
+      const body = {
+        name: fd.get('name') || '',
+        password: fd.get('password') || '',
+        title: fd.get('title') || '',
+        content: fd.get('content') || '',
+        botcheck: fd.get('botcheck') || '',
+      };
+      try {
+        await api('/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        closeModal('write-modal');
+        currentPage = 1;
+        loadList();
+        showToast('글이 등록되었습니다.');
+      } catch (err) {
+        writeError.textContent = err.message;
+        writeError.classList.remove('hidden');
+      }
+    });
+
+    // ---------- 상세보기 ----------
+    const detailContent = document.getElementById('detail-content');
+
+    async function openDetail(id) {
+      currentPostId = id;
+      detailContent.innerHTML = '<div class="text-zinc-500 text-sm py-8 text-center">Loading...</div>';
+      openModal('detail-modal');
+      try {
+        const data = await api('/posts/' + id);
+        const p = data.post;
+        const comments = data.comments || [];
+        detailContent.innerHTML = `
+          <div class="mb-4">
+            <h3 id="detail-title" class="font-bold text-lg text-zinc-100 keep-all mb-2">${escapeHtml(p.title)}</h3>
+            <div class="text-zinc-500 text-xs font-mono mb-3">${escapeHtml(p.name || '익명')} · ${fmtDate(p.created_at)} · 조회 ${p.views}</div>
+            <div class="text-zinc-300 text-sm leading-relaxed keep-all">${nl2br(p.content)}</div>
+          </div>
+          <div class="flex justify-end gap-2 mb-5">
+            <button id="delete-post-btn" class="px-3 py-1.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs hover:bg-rose-500/20 transition">글 삭제</button>
+          </div>
+          <div class="border-t border-white/10 pt-4">
+            <div class="text-zinc-400 text-sm mb-3">댓글 ${comments.length}</div>
+            <div id="comment-list" class="space-y-3 mb-4">
+              ${comments.length ? comments.map((c) => `
+                <div class="rounded-lg border border-white/10 bg-zinc-800/50 p-3" data-cid="${c.id}">
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    <span class="text-zinc-300 text-xs">${escapeHtml(c.name || '익명')} <span class="text-zinc-600">· ${fmtDate(c.created_at)}</span></span>
+                    <button class="delete-comment-btn text-zinc-600 hover:text-rose-400 text-xs" data-cid="${c.id}">삭제</button>
+                  </div>
+                  <div class="text-zinc-300 text-sm keep-all">${nl2br(c.content)}</div>
+                </div>
+              `).join('') : '<div class="text-zinc-600 text-xs">댓글이 없습니다.</div>'}
+            </div>
+            <form id="comment-form" class="space-y-2">
+              <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" name="name" maxlength="20" placeholder="이름 (선택)" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+                <input type="password" name="password" required placeholder="비밀번호" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              </div>
+              <textarea name="content" required rows="2" maxlength="1000" placeholder="댓글 내용" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+              <div class="flex justify-end">
+                <button type="submit" class="px-4 py-2 rounded bg-green-500/20 border border-green-500/40 text-green-300 text-sm hover:bg-green-500/30 transition">댓글 등록</button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        // 글 삭제
+        document.getElementById('delete-post-btn').addEventListener('click', () => deletePost(id));
+
+        // 댓글 등록
+        document.getElementById('comment-form').addEventListener('submit', (e) => submitComment(e, id));
+
+        // 댓글 삭제
+        detailContent.querySelectorAll('.delete-comment-btn').forEach((btn) => {
+          btn.addEventListener('click', () => deleteComment(parseInt(btn.dataset.cid, 10), id));
+        });
+      } catch (err) {
+        detailContent.innerHTML = `<div class="text-rose-400 text-sm py-8 text-center">불러오기 실패: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    async function deletePost(id) {
+      const pw = prompt('글 삭제 비밀번호를 입력하세요.');
+      if (pw === null) return;
+      try {
+        await api('/posts/' + id, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw }),
+        });
+        closeModal('detail-modal');
+        loadList();
+        showToast('글이 삭제되었습니다.');
+      } catch (err) {
+        showToast('삭제 실패: ' + err.message);
+      }
+    }
+
+    async function submitComment(e, postId) {
+      e.preventDefault();
+      const form = e.target;
+      const fd = new FormData(form);
+      const body = {
+        name: fd.get('name') || '',
+        password: fd.get('password') || '',
+        content: fd.get('content') || '',
+        botcheck: fd.get('botcheck') || '',
+      };
+      try {
+        await api('/posts/' + postId + '/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        openDetail(postId);
+        showToast('댓글이 등록되었습니다.');
+      } catch (err) {
+        showToast('댓글 등록 실패: ' + err.message);
+      }
+    }
+
+    async function deleteComment(commentId, postId) {
+      const pw = prompt('댓글 삭제 비밀번호를 입력하세요.');
+      if (pw === null) return;
+      try {
+        await api('/comments/' + commentId, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw }),
+        });
+        openDetail(postId);
+        showToast('댓글이 삭제되었습니다.');
+      } catch (err) {
+        showToast('삭제 실패: ' + err.message);
+      }
+    }
+
+    // ---------- 시작 ----------
+    loadList();
+  </script>
+</body>
+</html>
