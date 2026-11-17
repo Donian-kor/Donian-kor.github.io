@@ -28,22 +28,9 @@ function isBot(ua) {
   return BOT_PATTERNS.some((re) => re.test(ua));
 }
 
-// 욕설/비속어 목록 (korean-profanity-resources/slang.csv 기반, 오탐 단어 제외)
+// 욕설/비속어 목록 (프론트 하이라이팅용으로 /profanity-list 에서 제공)
 import PROFANITY_RAW from './profanity-words.js';
 const PROFANITY = PROFANITY_RAW.split('\n').filter(Boolean);
-
-function normalizeText(s) {
-  // 소문자화 + 공백/문장부호/기호 제거 (한글은 보존)
-  return String(s).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '');
-}
-
-// 목록 사전 정규화 (요청마다 재계산 방지)
-const PROFANITY_NORM = PROFANITY.map((w) => normalizeText(w)).filter(Boolean);
-
-function hasProfanity(text) {
-  const n = normalizeText(text);
-  return PROFANITY_NORM.some((w) => n.includes(w));
-}
 
 async function hashPassword(pw) {
   const salt = 'donian-board-v1';
@@ -105,6 +92,11 @@ export default {
       // 같은 문자 20회 이상 반복
       if (/(.)\1{19,}/.test(text)) return '비정상적인 반복 문자열입니다.';
       return null;
+    }
+
+    // GET /profanity-list - 프론트 하이라이팅용 단어 목록
+    if (method === 'GET' && path === '/profanity-list') {
+      return json({ words: PROFANITY });
     }
 
     // GET /posts?page=1&search= - 목록
@@ -185,7 +177,6 @@ export default {
       if (content.trim().length < 2) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(title + ' ' + content);
       if (spam) return json({ error: spam }, 400);
-      if (hasProfanity(title + ' ' + content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
       if (!(await rateLimitWrite('post'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
@@ -223,7 +214,6 @@ export default {
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(content);
       if (spam) return json({ error: spam }, 400);
-      if (hasProfanity(content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
       if (!(await rateLimitWrite('comment'))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
       const post = await env.donian_board.prepare('SELECT id FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
