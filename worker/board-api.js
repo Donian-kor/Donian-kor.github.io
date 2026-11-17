@@ -436,7 +436,7 @@ export default {
       if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
       const ts = await verifyTurnstile(body['cf-turnstile-response'], ip, env);
       if (!ts.success) return json({ error: '봇 인증에 실패했습니다.', detail: ts.errorCodes || [] }, 403);
-      if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
+      if (!password || !title || !content || !name) return json({ error: '이름, 비밀번호, 제목, 내용은 필수 항목입니다.' }, 400);
       if (charLen(password) < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
       if (!isAdmin && charLen(password) > 8) return json({ error: '비밀번호는 8글자 이하여야 합니다.' }, 400);
       if (name && charLen(name.trim()) === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
@@ -450,7 +450,7 @@ export default {
       if (!(isAdmin || (await rateLimitWrite('post', 3)))) return json({ error: '게시글은 시간당 3회까지 작성할 수 있습니다.' }, 429);
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
-      const finalName = isAdmin ? 'Donian' : (name || '익명');
+      const finalName = isAdmin ? 'Donian' : name;
       await env.donian_board
         .prepare('INSERT INTO posts (name, password_hash, title, content, created_at, is_locked, is_admin) VALUES (?, ?, ?, ?, ?, ?, ?)')
         .bind(finalName, hash, title, content, now, is_locked ? 1 : 0, isAdmin ? 1 : 0)
@@ -503,7 +503,7 @@ export default {
       if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
       const ts = await verifyTurnstile(body['cf-turnstile-response'], ip, env);
       if (!ts.success) return json({ error: '봇 인증에 실패했습니다.', detail: ts.errorCodes || [] }, 403);
-      if (!password || !content) return json({ error: '필수 항목 누락' }, 400);
+      if (!password || !content || !name) return json({ error: '이름, 비밀번호, 내용은 필수 항목입니다.' }, 400);
       if (charLen(password) < 2) return json({ error: '비밀번호는 2글자 이상이어야 합니다.' }, 400);
       if (charLen(password) > 8) return json({ error: '비밀번호는 8글자 이하여야 합니다.' }, 400);
       if (name && charLen(name.trim()) === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
@@ -532,7 +532,7 @@ export default {
         return json({ error: '해킹 및 불법봇사용으로 차단되었습니다.' }, 403);
       }
       const now = new Date().toISOString();
-      const finalName = isAdmin ? 'Donian' : (name || '익명');
+      const finalName = isAdmin ? 'Donian' : name;
       await env.donian_board
         .prepare('INSERT INTO comments (post_id, name, password_hash, content, created_at, is_admin, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?)')
         .bind(id, finalName, hash, content, now, isAdmin ? 1 : 0, parentId)
