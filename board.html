@@ -307,7 +307,7 @@
       if (y === todayY && m === todayM && day === todayD) {
         const hh = String(kst.getUTCHours()).padStart(2, '0');
         const mm = String(kst.getUTCMinutes()).padStart(2, '0');
-        return hh + ':' + mm;
+        return '<span class="text-emerald-400 font-semibold">' + hh + ':' + mm + '</span>';
       }
       return y + '.' + m + '.' + day;
     }
