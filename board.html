@@ -93,6 +93,7 @@
       <input id="search-input" type="text" placeholder="검색"
         class="flex-1 min-w-0 px-3 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
       <button id="search-btn" class="px-4 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm hover:bg-zinc-700 transition whitespace-nowrap">검색</button>
+      <button id="reset-search-btn" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-400 text-sm hover:bg-zinc-700 hover:text-zinc-200 transition whitespace-nowrap">전체</button>
     </div>
 
     <!-- List -->
@@ -503,6 +504,12 @@
         currentPage = 1;
         loadList();
       }
+    });
+    document.getElementById('reset-search-btn').addEventListener('click', () => {
+      document.getElementById('search-input').value = '';
+      currentSearch = '';
+      currentPage = 1;
+      loadList();
     });
 
     // ---------- 글쓰기 ----------
