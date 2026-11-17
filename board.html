@@ -602,7 +602,7 @@
       renderPagination();
     }
 
-    async function loadList() {
+    async function loadList(forceFresh) {
       const key = listCacheKey();
       let cacheHit = false;
       // 1) 저장된 목록이 있으면 즉시 표시 (네트워크 대기 0ms)
@@ -625,7 +625,7 @@
           const typeEl = document.getElementById('search-type');
           if (typeEl) params.set('search_type', typeEl.value);
         }
-        const data = await api('/posts?' + params.toString());
+        const data = await api('/posts?' + params.toString(), forceFresh ? { cache: 'reload' } : undefined);
         renderListData(data);
         try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
       } catch (err) {
@@ -797,7 +797,7 @@
         closeModal('write-modal');
         clearListCache();
         currentPage = 1;
-        loadList();
+        loadList(true);
         showToast('글이 등록되었습니다.');
       } catch (err) {
         writeError.textContent = err.message;
@@ -965,7 +965,7 @@
         });
         closeModal('detail-modal');
         clearListCache();
-        loadList();
+        loadList(true);
         showToast('글이 삭제되었습니다.');
       } catch (err) {
         showToast('삭제 실패: ' + err.message);
