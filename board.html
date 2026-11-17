@@ -291,6 +291,26 @@
       const day = String(d.getDate()).padStart(2, '0');
       return y + '.' + m + '.' + day;
     }
+    // 게시글 작성일: 오늘이면 KST 시간(HH:MM), 아니면 날짜(YYYY.MM.DD)
+    function fmtPostDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '-';
+      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      const y = kst.getUTCFullYear();
+      const m = String(kst.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(kst.getUTCDate()).padStart(2, '0');
+      const todayY = now.getUTCFullYear();
+      const todayM = String(now.getUTCMonth() + 1).padStart(2, '0');
+      const todayD = String(now.getUTCDate()).padStart(2, '0');
+      if (y === todayY && m === todayM && day === todayD) {
+        const hh = String(kst.getUTCHours()).padStart(2, '0');
+        const mm = String(kst.getUTCMinutes()).padStart(2, '0');
+        return hh + ':' + mm;
+      }
+      return y + '.' + m + '.' + day;
+    }
     function nl2br(s) {
       return escapeHtml(s).replace(/\n/g, '<br>');
     }
@@ -488,7 +508,7 @@
               <div class="text-zinc-200 text-sm truncate keep-all">${escapeHtml(p.title)}</div>
             </div>
             <div class="text-zinc-400 text-xs truncate py-1 text-center">${renderName(p.name, p.is_admin)}</div>
-            <div class="hidden sm:block text-zinc-500 text-xs text-center">${fmtDate(p.created_at)}</div>
+            <div class="hidden sm:block text-zinc-500 text-xs text-center">${fmtPostDate(p.created_at)}</div>
             <div class="text-center text-zinc-500 text-xs">${p.views}</div>
           </div>
           `;
@@ -717,7 +737,7 @@
             ${p.is_locked ? '<svg class="lock-icon text-amber-400" aria-label="잠금"><use href="#icon-lock"></use></svg>' : ''}
             <h3 id="detail-title" class="font-bold text-lg text-zinc-100 keep-all">${escapeHtml(p.title)}</h3>
           </div>
-          <div class="text-zinc-500 text-xs font-mono mb-3">${renderName(p.name, p.is_admin)} · ${fmtDate(p.created_at)} · 조회 ${p.views}</div>
+          <div class="text-zinc-500 text-xs font-mono mb-3">${renderName(p.name, p.is_admin)} · ${fmtPostDate(p.created_at)} · 조회 ${p.views}</div>
           <div class="text-zinc-300 text-sm leading-relaxed keep-all">${nl2br(p.content)}</div>
         </div>
         <div class="flex justify-end gap-2 mb-5">
@@ -730,7 +750,7 @@
             ${comments.length ? comments.map((c) => `
               <div class="rounded-lg border border-white/10 bg-zinc-800/50 p-3" data-cid="${c.id}">
                 <div class="flex items-center justify-between gap-2 mb-1">
-                  <span class="text-zinc-300 text-xs">${renderName(c.name, c.is_admin)}${!c.is_admin && c.is_author ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 align-middle">작성자</span>' : ''} <span class="text-zinc-600">· ${fmtDate(c.created_at)}</span></span>
+                  <span class="text-zinc-300 text-xs">${renderName(c.name, c.is_admin)}${!c.is_admin && c.is_author ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 align-middle">작성자</span>' : ''} <span class="text-zinc-600">· ${fmtPostDate(c.created_at)}</span></span>
                   <button class="delete-comment-btn text-zinc-600 hover:text-rose-400 text-xs" data-cid="${c.id}">삭제</button>
                 </div>
                 <div class="text-zinc-300 text-sm keep-all">${nl2br(c.content)}</div>
