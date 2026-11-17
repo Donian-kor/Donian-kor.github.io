@@ -112,9 +112,10 @@ export default {
       return json({ words: PROFANITY });
     }
 
-    // GET /admin/verify?pw= - 관리자 비밀번호 확인
-    if (method === 'GET' && path === '/admin/verify') {
-      const pw = url.searchParams.get('pw') || '';
+    // POST /admin/verify - 관리자 비밀번호 확인 (본문으로 전송, URL 노출 방지)
+    if (method === 'POST' && path === '/admin/verify') {
+      const body = await request.json().catch(() => ({}));
+      const pw = body.password || '';
       return json({ ok: !!(env.ADMIN_PASSWORD && pw === env.ADMIN_PASSWORD) });
     }
 

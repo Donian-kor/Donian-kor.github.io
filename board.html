@@ -891,7 +891,12 @@
         const pw = prompt('관리자 비밀번호를 입력하세요.');
         if (pw === null) return;
         try {
-          const data = await api('/admin/verify?pw=' + encodeURIComponent(pw));
+          const res = await fetch(API_BASE + '/admin/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pw }),
+          });
+          const data = await res.json().catch(() => ({}));
           if (data.ok) {
             sessionStorage.setItem('board_admin_pw', pw);
             updateAdminBtn();
