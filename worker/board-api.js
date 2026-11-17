@@ -68,6 +68,30 @@ function hasProfanity(text) {
   return PROFANITY_NORM.some((w) => n.includes(w));
 }
 
+// 작성자 이름 사칭 방지 (관리자/운영자 등) — 욕설 목록과 분리해 이름에만 적용
+const IMPERSONATION_NAMES = [
+  '관리자','운영자','사이트관리자','사이트관리','운영매니저','매니저','총감독','감독자',
+  '관리','운영','운영진','운영팀','관리팀','관리자님','운영자님','슈퍼관리자','최고관리자',
+  '총관리자','수석관리자','웹마스터','마스터','관리원','감독','감독관','총감독관','매니저님',
+  '사이트운영자','시스템관리자','관리계정','운영계정','공식',
+  'admin','administrator','gm','siteadmin','superadmin','manager','operator','moderator',
+  'mod','owner','webmaster','root','system','staff','support','supervisor','director',
+  'generalmanager','sitemanager','operationsmanager','adminteam','official','sysadmin',
+  'sysop','superuser','siteowner','siteoperator','headadmin','headmod','leadmod','gamemaster',
+  // 관리자 이름 'Donian' 혼동 유발 변형 (타이포스쿼팅)
+  'donian','monian','nonian','ponian','donnian','dunian','bonian','conian','gonian','honian',
+  'jonian','lonian','ronian','sonian','tonian','vonian','wonian','xonian','yonian','zonian',
+  'doonian','doniian','doniaan','doniann','donia','dnian','doian','donien','doniun','donaian',
+  '도니안'
+];
+const IMPERSONATION_NORM = IMPERSONATION_NAMES.map(normalizeText).filter(Boolean);
+function isImpersonationName(name) {
+  const n = normalizeText(name);
+  if (!n) return false;
+  // 3글자 이상: 포함 검사(예: 관리자123), 2글자 이하: 정확히 일치만(예: gm)
+  return IMPERSONATION_NORM.some((w) => ([...w].length >= 3 ? n.includes(w) : n === w));
+}
+
 const charLen = (s) => [...String(s)].length;
 
 async function hashPassword(pw) {
@@ -414,6 +438,7 @@ export default {
       if (!isAdmin && charLen(password) > 8) return json({ error: '비밀번호는 8글자 이하여야 합니다.' }, 400);
       if (name && charLen(name.trim()) === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
       if (name && charLen(name) > 10) return json({ error: '이름은 10글자 이하여야 합니다.' }, 400);
+      if (name && !isAdmin && isImpersonationName(name)) return json({ error: '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.' }, 400);
       if (charLen(title) > 20) return json({ error: '제목은 20글자 이하여야 합니다.' }, 400);
       if (charLen(content) > 500) return json({ error: '내용은 500글자 이하여야 합니다.' }, 400);
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
@@ -479,6 +504,7 @@ export default {
       if (charLen(password) > 8) return json({ error: '비밀번호는 8글자 이하여야 합니다.' }, 400);
       if (name && charLen(name.trim()) === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
       if (name && charLen(name) > 10) return json({ error: '이름은 10글자 이하여야 합니다.' }, 400);
+      if (name && !isAdmin && isImpersonationName(name)) return json({ error: '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.' }, 400);
       if (charLen(content) > 50) return json({ error: '댓글은 50글자 이하여야 합니다.' }, 400);
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(content);

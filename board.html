@@ -438,6 +438,31 @@
     }
     const KOREAN_CHAR_RE = /[ㄱ-ㅎㅏ-ㅣ가-힣]/u;
 
+    // ---------- 작성자 이름 사칭 방지 ----------
+    const IMPERSONATION_NAMES = [
+      '관리자','운영자','사이트관리자','사이트관리','운영매니저','매니저','총감독','감독자',
+      '관리','운영','운영진','운영팀','관리팀','관리자님','운영자님','슈퍼관리자','최고관리자',
+      '총관리자','수석관리자','웹마스터','마스터','관리원','감독','감독관','총감독관','매니저님',
+      '사이트운영자','시스템관리자','관리계정','운영계정','공식',
+      'admin','administrator','gm','siteadmin','superadmin','manager','operator','moderator',
+      'mod','owner','webmaster','root','system','staff','support','supervisor','director',
+      'generalmanager','sitemanager','operationsmanager','adminteam','official','sysadmin',
+      'sysop','superuser','siteowner','siteoperator','headadmin','headmod','leadmod','gamemaster',
+      'donian','monian','nonian','ponian','donnian','dunian','bonian','conian','gonian','honian',
+      'jonian','lonian','ronian','sonian','tonian','vonian','wonian','xonian','yonian','zonian',
+      'doonian','doniian','doniaan','doniann','donia','dnian','doian','donien','doniun','donaian',
+      '도니안'
+    ];
+    const IMPERSONATION_SET = new Set(IMPERSONATION_NAMES.map((w) => String(w).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '')).filter(Boolean));
+    function isImpersonationName(name) {
+      const n = String(name).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '');
+      if (!n) return false;
+      for (const w of IMPERSONATION_SET) {
+        if ([...w].length >= 3 ? n.includes(w) : n === w) return true;
+      }
+      return false;
+    }
+
     // ---------- 욕설/비속어 하이라이팅 ----------
     const PROFANITY_CACHE_KEY = 'board_profanity_v1';
     let PROFANITY_SET = null;
@@ -781,6 +806,7 @@
       }
       const nameVal = nameEl.value.trim();
       if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
+      if (!isAdminMode() && isImpersonationName(nameVal)) { setFieldError(nameEl, '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.'); return; }
       if (findProfanityRanges(titleVal).length > 0 || findProfanityRanges(contentVal).length > 0) {
         writeError.textContent = '욕설/비속어가 포함되어 있습니다. 입력창에 빨간색으로 표시된 부분을 수정한 후 다시 등록하세요.';
         writeError.classList.remove('hidden');
@@ -1074,6 +1100,7 @@
       }
       const nameVal = nameEl.value.trim();
       if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
+      if (!isAdminMode() && isImpersonationName(nameVal)) { setFieldError(nameEl, '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.'); return; }
       const ranges = findProfanityRanges(contentVal);
       if (ranges.length > 0) {
         showToast('욕설/비속어를 수정한 후 다시 등록하세요.');
@@ -1151,6 +1178,11 @@
       formEl.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(formEl);
+        const replyName = fd.get('name') || '';
+        if (!isAdminMode() && isImpersonationName(replyName)) {
+          showToast('관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.');
+          return;
+        }
         try {
           await api('/posts/' + currentPostId + '/comments', {
             method: 'POST',
