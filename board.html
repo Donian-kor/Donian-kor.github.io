@@ -108,16 +108,16 @@
       <button data-close="write-modal" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 flex items-center justify-center transition" aria-label="닫기">✕</button>
       <div class="p-5">
         <h3 id="write-title" class="font-bold text-lg text-zinc-100 mb-4">글쓰기</h3>
-        <form id="write-form" class="space-y-3 text-sm" autocomplete="off" novalidate>
+        <form id="write-form" class="space-y-3 text-sm" autocomplete="off">
           <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">이름 (선택)</label>
-              <input type="text" name="name" maxlength="20" minlength="2" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="name" maxlength="20" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">비밀번호 (삭제·잠금해제용)</label>
-              <input type="text" name="pw" required minlength="2" autocomplete="new-password" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="pw" required autocomplete="new-password" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
           </div>
           <div>
@@ -212,6 +212,15 @@
       t.textContent = msg;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 2200);
+    }
+
+    // 입력창에 브라우저 기본 팝업 스타일로 경고 표시
+    function setFieldError(input, msg) {
+      input.setCustomValidity(msg);
+      input.reportValidity();
+    }
+    function clearFieldErrors(...inputs) {
+      inputs.forEach((i) => { if (i) i.setCustomValidity(''); });
     }
 
     // ---------- 욕설/비속어 하이라이팅 ----------
@@ -429,6 +438,9 @@
     }
     writeForm.querySelector('[name="title"]').addEventListener('input', updateWritePreview);
     writeForm.querySelector('[name="content"]').addEventListener('input', updateWritePreview);
+    [writeForm.querySelector('[name="title"]'), writeForm.querySelector('[name="content"]'), writeForm.querySelector('[name="pw"]'), writeForm.querySelector('[name="name"]')].forEach((el) => {
+      el.addEventListener('input', () => el.setCustomValidity(''));
+    });
     writeForm.querySelector('[name="title"]').addEventListener('scroll', (e) => {
       const hl = document.getElementById('title-highlight');
       if (hl) hl.scrollLeft = e.target.scrollLeft;
@@ -441,34 +453,24 @@
     writeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       writeError.classList.add('hidden');
-      // 욕설/비속어 감지 시 제출 차단 + 하이라이트 표시
       updateWritePreview();
-      const titleVal = writeForm.querySelector('[name="title"]').value;
-      const contentVal = writeForm.querySelector('[name="content"]').value;
+      const titleEl = writeForm.querySelector('[name="title"]');
+      const contentEl = writeForm.querySelector('[name="content"]');
+      const pwEl = writeForm.querySelector('[name="pw"]');
+      const nameEl = writeForm.querySelector('[name="name"]');
+      clearFieldErrors(titleEl, contentEl, pwEl, nameEl);
+      const titleVal = titleEl.value;
+      const contentVal = contentEl.value;
+      if (!titleVal.trim()) { setFieldError(titleEl, '제목을 입력하세요.'); return; }
+      if (!contentVal.trim()) { setFieldError(contentEl, '내용을 입력하세요.'); return; }
+      if (pwEl.value.length < 2) {
+        setFieldError(pwEl, pwEl.value.length === 0 ? '비밀번호를 입력하세요.' : '비밀번호는 2글자 이상이어야 합니다.');
+        return;
+      }
+      const nameVal = nameEl.value.trim();
+      if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
       if (findProfanityRanges(titleVal).length > 0 || findProfanityRanges(contentVal).length > 0) {
         writeError.textContent = '욕설/비속어가 포함되어 있습니다. 입력창에 빨간색으로 표시된 부분을 수정한 후 다시 등록하세요.';
-        writeError.classList.remove('hidden');
-        return;
-      }
-      const pwVal = writeForm.querySelector('[name="pw"]').value;
-      const nameVal = writeForm.querySelector('[name="name"]').value.trim();
-      if (!titleVal.trim()) {
-        writeError.textContent = '제목을 입력하세요.';
-        writeError.classList.remove('hidden');
-        return;
-      }
-      if (!contentVal.trim()) {
-        writeError.textContent = '내용을 입력하세요.';
-        writeError.classList.remove('hidden');
-        return;
-      }
-      if (pwVal.length < 2) {
-        writeError.textContent = '비밀번호는 2글자 이상이어야 합니다.';
-        writeError.classList.remove('hidden');
-        return;
-      }
-      if (nameVal.length === 1) {
-        writeError.textContent = '이름은 2글자 이상이어야 합니다.';
         writeError.classList.remove('hidden');
         return;
       }
@@ -567,11 +569,11 @@
               </div>
             `).join('') : '<div class="text-zinc-600 text-xs">댓글이 없습니다.</div>'}
           </div>
-          <form id="comment-form" class="space-y-2" autocomplete="off" novalidate>
+          <form id="comment-form" class="space-y-2" autocomplete="off">
             <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" name="name" maxlength="20" minlength="2" placeholder="이름 (선택)" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
-              <input type="text" name="pw" required minlength="2" autocomplete="new-password" placeholder="비밀번호" class="pw-mask px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="name" maxlength="20" placeholder="이름 (선택)" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호" class="pw-mask px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="comment-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
@@ -598,6 +600,9 @@
       };
       commentContentEl.addEventListener('input', updateCommentPreview);
       commentContentEl.addEventListener('scroll', () => { commentHl.scrollTop = commentContentEl.scrollTop; });
+      [commentContentEl, commentForm.querySelector('[name="pw"]'), commentForm.querySelector('[name="name"]')].forEach((el) => {
+        el.addEventListener('input', () => el.setCustomValidity(''));
+      });
       loadProfanity();
 
       // 댓글 삭제
@@ -627,25 +632,22 @@
     async function submitComment(e, postId) {
       e.preventDefault();
       const form = e.target;
-      // 욕설/비속어 감지 시 제출 차단
-      const contentVal = form.querySelector('[name="content"]').value;
+      const contentEl = form.querySelector('[name="content"]');
+      const pwEl = form.querySelector('[name="pw"]');
+      const nameEl = form.querySelector('[name="name"]');
+      clearFieldErrors(contentEl, pwEl, nameEl);
+      const contentVal = contentEl.value;
+      if (!contentVal.trim()) { setFieldError(contentEl, '댓글 내용을 입력하세요.'); return; }
+      const pwVal = pwEl.value;
+      if (pwVal.length < 2) {
+        setFieldError(pwEl, pwVal.length === 0 ? '비밀번호를 입력하세요.' : '비밀번호는 2글자 이상이어야 합니다.');
+        return;
+      }
+      const nameVal = nameEl.value.trim();
+      if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
       const ranges = findProfanityRanges(contentVal);
       if (ranges.length > 0) {
         showToast('욕설/비속어를 수정한 후 다시 등록하세요.');
-        return;
-      }
-      if (!contentVal.trim()) {
-        showToast('댓글 내용을 입력하세요.');
-        return;
-      }
-      const pwVal = form.querySelector('[name="pw"]').value;
-      const nameVal = form.querySelector('[name="name"]').value.trim();
-      if (pwVal.length < 2) {
-        showToast('비밀번호는 2글자 이상이어야 합니다.');
-        return;
-      }
-      if (nameVal.length === 1) {
-        showToast('이름은 2글자 이상이어야 합니다.');
         return;
       }
       const fd = new FormData(form);
