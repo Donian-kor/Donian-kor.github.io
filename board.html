@@ -155,8 +155,10 @@
         <p class="text-zinc-500 text-xs mt-1">게시판에 글을 남기기 어려운 경우 이 폼으로 문의하세요.</p>
       </div>
       <div class="rounded-lg bg-zinc-900/95 border border-white/10 p-4">
-        <form action="https://api.web3forms.com/submit" method="POST" class="space-y-3 text-sm" onsubmit="var b=this.querySelector('button[type=submit]'); if(b){b.disabled=true;b.textContent='전송 중...';}">
+        <form id="contact-form" action="https://api.web3forms.com/submit" method="POST" class="space-y-3 text-sm">
           <input type="hidden" name="access_key" value="86ed093a-3831-49d5-af59-51b56c5cfeb9">
+          <input type="hidden" name="from_name" value="Donian 웹사이트 문의">
+          <input type="hidden" name="subject" value="Donian 게시판 1:1 문의">
           <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -172,8 +174,9 @@
             <label class="block text-zinc-400 mb-1 text-xs">내용</label>
             <textarea name="message" required rows="4" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
           </div>
-          <div class="flex justify-end">
-            <button type="submit" class="px-4 py-2 rounded bg-green-500/20 border border-green-500/40 text-green-300 text-sm hover:bg-green-500/30 transition">보내기</button>
+          <div class="flex items-center justify-between gap-2">
+            <p id="contact-status" class="hidden font-mono text-xs"></p>
+            <button type="submit" class="ml-auto px-4 py-2 rounded bg-green-500/20 border border-green-500/40 text-green-300 text-sm hover:bg-green-500/30 transition">보내기</button>
           </div>
         </form>
       </div>
@@ -1656,6 +1659,86 @@
         window.addEventListener('scroll', onScroll, { passive: true });
         raf = requestAnimationFrame(step);
       }
+    })();
+  </script>
+
+  <script>
+    // 1:1 문의 폼 — fetch(AJAX) 전송: 페이지 이동 없이 결과를 인라인으로 표시
+    // (기존 네이티브 POST는 전송 후 web3forms 성공 페이지로 이동하고,
+    //  뒤로가기 복원 시 '전송 중...' 버튼이 멈춘 것처럼 보이는 문제가 있었음)
+    (function () {
+      const form = document.getElementById('contact-form');
+      if (!form) return;
+      const btn = form.querySelector('button[type=submit]');
+      const statusEl = document.getElementById('contact-status');
+      const btnDefault = btn ? btn.textContent : '보내기';
+
+      function showStatus(text, kind) {
+        if (!statusEl) return;
+        statusEl.textContent = text;
+        statusEl.classList.remove('hidden', 'text-green-400', 'text-rose-400', 'text-zinc-400');
+        statusEl.classList.add(kind === 'ok' ? 'text-green-400' : 'text-rose-400');
+      }
+      function resetButton() {
+        if (btn) { btn.disabled = false; btn.textContent = btnDefault; }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = Object.fromEntries(new FormData(form).entries());
+        if (payload.botcheck === undefined) payload.botcheck = ''; // honeypot 빈 값 유지
+        if (payload.botcheck) return; // 봇으로 판단되면 조용히 중단
+
+        if (btn) { btn.disabled = true; btn.textContent = '전송 중...'; }
+        if (statusEl) {
+          statusEl.textContent = '전송 중... 잠시만 기다려주세요.';
+          statusEl.classList.remove('hidden', 'text-green-400', 'text-rose-400');
+          statusEl.classList.add('text-zinc-400');
+        }
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 20000); // 20초 타임아웃
+        try {
+          const res = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          clearTimeout(timer);
+          if (res.ok) {
+            if (statusEl) {
+              statusEl.textContent = '문의가 전송되었습니다. 빠르게 답변드리겠습니다. 감사합니다!';
+              statusEl.classList.remove('hidden', 'text-rose-400', 'text-zinc-400');
+              statusEl.classList.add('text-green-400');
+            }
+            form.reset();
+          } else {
+            if (statusEl) {
+              statusEl.textContent = '전송에 실패했습니다 (' + res.status + '). 잠시 후 다시 시도해 주세요.';
+              statusEl.classList.remove('hidden', 'text-green-400', 'text-zinc-400');
+              statusEl.classList.add('text-rose-400');
+            }
+          }
+        } catch (err) {
+          const aborted = err && err.name === 'AbortError';
+          if (statusEl) {
+            statusEl.textContent = aborted
+              ? '응답이 지연되어 시간 초과되었습니다. 잠시 후 다시 시도해 주세요.'
+              : '네트워크 오류로 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+            statusEl.classList.remove('hidden', 'text-green-400', 'text-zinc-400');
+            statusEl.classList.add('text-rose-400');
+          }
+        } finally {
+          clearTimeout(timer);
+          resetButton();
+        }
+      });
+
+      // 뒤로가기(bfcache) 복원 시 멈춘 버튼 상태 초기화
+      window.addEventListener('pageshow', (ev) => {
+        if (ev.persisted) resetButton();
+      });
     })();
   </script>
 </body>
