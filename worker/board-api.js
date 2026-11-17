@@ -32,20 +32,18 @@ function isBot(ua) {
 
 // Cloudflare Turnstile 검증
 async function verifyTurnstile(token, ip, env) {
-  if (!env.TURNSTILE_SECRET_KEY) return true; // secret 미설정 시 스킵
-  if (!token) return false;
+  if (!env.TURNSTILE_SECRET_KEY) return { success: true };
+  if (!token) return { success: false, errorCodes: ['missing-input-response'] };
   const body = new URLSearchParams({
     secret: env.TURNSTILE_SECRET_KEY,
     response: token,
-    remoteip: ip,
   });
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   });
-  const data = await res.json();
-  return data.success === true;
+  return await res.json(); // { success, error-codes }
 }
 
 // 엣지 Rate Limiting binding (폭주 방어)
@@ -263,7 +261,15 @@ export default {
         }
       }
 
-      await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
+      // 조회수: IP당 1시간 1회만 증가 (KV 중복 체크 → D1 쓰기 절감)
+      const viewKey = `viewed:${id}:${ip}`;
+      const alreadyViewed = await env.COUNTER_KV.get(viewKey);
+      let views = post.views;
+      if (!alreadyViewed) {
+        await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
+        await env.COUNTER_KV.put(viewKey, '1', { expirationTtl: 3600 });
+        views = post.views + 1;
+      }
       const comments = await env.donian_board
         .prepare('SELECT id, name, content, created_at, password_hash, is_admin, parent_id FROM comments WHERE post_id = ? ORDER BY created_at ASC')
         .bind(id)
@@ -285,7 +291,7 @@ export default {
           title: post.title,
           content: post.content,
           created_at: post.created_at,
-          views: post.views + 1,
+          views: views,
           is_locked: post.is_locked,
           is_admin: post.is_admin,
         },
@@ -323,7 +329,8 @@ export default {
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
       if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
-      if (!(await verifyTurnstile(body['cf-turnstile-response'], ip, env))) return json({ error: '봇 인증에 실패했습니다.' }, 403);
+      const ts = await verifyTurnstile(body['cf-turnstile-response'], ip, env);
+      if (!ts.success) return json({ error: '봇 인증에 실패했습니다.', detail: ts.errorCodes || [] }, 403);
       const isAdmin = await isAdminToken(body.token);
       const { name, password, title, content, is_locked } = body;
       if (!password || !title || !content) return json({ error: '필수 항목 누락' }, 400);
@@ -386,7 +393,8 @@ export default {
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
       if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
-      if (!(await verifyTurnstile(body['cf-turnstile-response'], ip, env))) return json({ error: '봇 인증에 실패했습니다.' }, 403);
+      const ts = await verifyTurnstile(body['cf-turnstile-response'], ip, env);
+      if (!ts.success) return json({ error: '봇 인증에 실패했습니다.', detail: ts.errorCodes || [] }, 403);
       const isAdmin = await isAdminToken(body.token);
       const { name, password, content, parent_id } = body;
       if (!password || !content) return json({ error: '필수 항목 누락' }, 400);
