@@ -106,25 +106,53 @@ export default {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const ua = request.headers.get('user-agent') || '';
 
-    // IP당 쓰기 제한: 시간당 N회
+    // IP당 쓰기 제한: 시간당 N회 (D1 저장 → KV 안 씀)
     async function rateLimitWrite(action, limit) {
-      const key = `rl:w:${action}:${ip}`;
-      const count = parseInt((await env.COUNTER_KV.get(key)) || '0', 10);
+      const key = `w:${action}:${ip}`;
+      const now = Date.now();
+      const WINDOW = 60 * 60 * 1000; // 1시간
+      const row = await env.donian_board
+        .prepare('SELECT count, expires_at FROM rate_limits WHERE key = ?')
+        .bind(key)
+        .first();
+      const valid = row && row.expires_at > now;
+      const count = valid ? row.count : 0;
       if (count >= limit) return false;
-      await env.COUNTER_KV.put(key, String(count + 1), { expirationTtl: 3600 });
+      const next = count + 1;
+      const expires = valid ? row.expires_at : now + WINDOW;
+      await env.donian_board
+        .prepare(`INSERT INTO rate_limits (key, count, expires_at) VALUES (?, ?, ?)
+                  ON CONFLICT(key) DO UPDATE SET count = excluded.count, expires_at = excluded.expires_at`)
+        .bind(key, next, expires)
+        .run();
       return true;
     }
 
-    // 비밀번호 실패 추적 (KST 일 단위, 일 3회 실패 시 차단)
+    // 비밀번호 실패 추적 (KST 일 단위, 일 3회 실패 시 차단) - D1 저장
     const kstDate = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const failKey = () => `fail:${kstDate}:${ip}`;
     async function getFailCount() {
-      return parseInt((await env.COUNTER_KV.get(`fail:${kstDate}:${ip}`)) || '0', 10);
+      const row = await env.donian_board
+        .prepare('SELECT count, expires_at FROM rate_limits WHERE key = ?')
+        .bind(failKey())
+        .first();
+      return (row && row.expires_at > Date.now()) ? row.count : 0;
     }
     async function recordFail() {
-      const key = `fail:${kstDate}:${ip}`;
-      const count = parseInt((await env.COUNTER_KV.get(key)) || '0', 10);
+      const key = failKey();
+      const now = Date.now();
+      const row = await env.donian_board
+        .prepare('SELECT count, expires_at FROM rate_limits WHERE key = ?')
+        .bind(key)
+        .first();
+      const valid = row && row.expires_at > now;
+      const count = valid ? row.count : 0;
       const next = count + 1;
-      await env.COUNTER_KV.put(key, String(next), { expirationTtl: 172800 });
+      await env.donian_board
+        .prepare(`INSERT INTO rate_limits (key, count, expires_at) VALUES (?, ?, ?)
+                  ON CONFLICT(key) DO UPDATE SET count = excluded.count, expires_at = excluded.expires_at`)
+        .bind(key, next, now + 2 * 24 * 60 * 60 * 1000) // 2일
+        .run();
       return next;
     }
     async function isBlocked() {
@@ -259,13 +287,21 @@ export default {
         }
       }
 
-      // 조회수: IP당 1시간 1회만 증가 (KV 중복 체크 → D1 쓰기 절감)
-      const viewKey = `viewed:${id}:${ip}`;
-      const alreadyViewed = await env.COUNTER_KV.get(viewKey);
+      // 조회수: IP당 24시간 1회 (D1 저장 → KV 안 씀)
+      const DAY_MS = 24 * 60 * 60 * 1000;
+      const nowMs = Date.now();
       let views = post.views;
-      if (!alreadyViewed) {
+      const vr = await env.donian_board
+        .prepare('SELECT viewed_at FROM post_views WHERE post_id = ? AND ip = ?')
+        .bind(id, ip)
+        .first();
+      if (!vr || (nowMs - vr.viewed_at) > DAY_MS) {
         await env.donian_board.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').bind(id).run();
-        await env.COUNTER_KV.put(viewKey, '1', { expirationTtl: 86400 });
+        await env.donian_board
+          .prepare(`INSERT INTO post_views (post_id, ip, viewed_at) VALUES (?, ?, ?)
+                    ON CONFLICT(post_id, ip) DO UPDATE SET viewed_at = excluded.viewed_at`)
+          .bind(id, ip, nowMs)
+          .run();
         views = post.views + 1;
       }
       const comments = await env.donian_board
@@ -380,6 +416,7 @@ export default {
         if (adminComment) return json({ error: '관리자 답변이 달린 게시글은 관리자만 삭제할 수 있습니다.' }, 403);
       }
       await env.donian_board.prepare('DELETE FROM comments WHERE post_id = ?').bind(id).run();
+      await env.donian_board.prepare('DELETE FROM post_views WHERE post_id = ?').bind(id).run();
       await env.donian_board.prepare('DELETE FROM posts WHERE id = ?').bind(id).run();
       return json({ ok: true });
     }
