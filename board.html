@@ -757,6 +757,7 @@
       updateCommentCounter();
       loadProfanity();
       applyAdminName();
+      startDonianBadgeAnim();
 
       // 댓글 삭제
       detailContent.querySelectorAll('.delete-comment-btn').forEach((btn) => {
@@ -904,6 +905,36 @@
       }
     }
 
+    // ---------- Donian 뱃지 스크램블 애니메이션 (메인 DONIAN 라벨 효과 축소) ----------
+    let donianAnimStarted = false;
+    function startDonianBadgeAnim() {
+      if (donianAnimStarted) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      donianAnimStarted = true;
+      const FINAL = 'Donian';
+      const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const SCRAMBLE = 900;
+      const HOLD = 2200;
+      const LOOP = SCRAMBLE + HOLD + 260;
+      let start = null;
+      function rnd() { return GLYPHS[(Math.random() * GLYPHS.length) | 0]; }
+      setInterval(() => {
+        const now = performance.now();
+        if (start === null) start = now;
+        const t = (now - start) % LOOP;
+        let text = FINAL;
+        if (t < SCRAMBLE) {
+          const p = t / SCRAMBLE;
+          const settled = Math.min(FINAL.length, Math.floor(p * (FINAL.length + 1)));
+          text = '';
+          for (let i = 0; i < FINAL.length; i++) text += (i < settled) ? FINAL[i] : rnd();
+        }
+        document.querySelectorAll('.donian-badge').forEach((el) => {
+          if (el.textContent !== text) el.textContent = text;
+        });
+      }, 50);
+    }
+
     // ---------- 관리자 모드 (토큰 방식, 레이트리밋 면제) ----------
     const adminBtn = document.getElementById('admin-btn');
 
@@ -982,6 +1013,7 @@
     // ---------- 시작 ----------
     loadList();
     loadProfanity();
+    startDonianBadgeAnim();
   </script>
 </body>
 </html>
