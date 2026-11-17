@@ -84,7 +84,13 @@
 
     <!-- Search -->
     <div class="flex flex-row gap-2 mb-4">
-      <input id="search-input" type="text" placeholder="검색 (제목 + 내용)"
+      <select id="search-type" class="px-2 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+        <option value="both">제목+내용</option>
+        <option value="title">제목만</option>
+        <option value="content">내용만</option>
+        <option value="author">작성자만</option>
+      </select>
+      <input id="search-input" type="text" placeholder="검색"
         class="flex-1 min-w-0 px-3 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
       <button id="search-btn" class="px-4 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm hover:bg-zinc-700 transition whitespace-nowrap">검색</button>
     </div>
@@ -422,7 +428,11 @@
       emptyEl.classList.add('hidden');
       try {
         const params = new URLSearchParams({ page: currentPage });
-        if (currentSearch) params.set('search', currentSearch);
+        if (currentSearch) {
+          params.set('search', currentSearch);
+          const typeEl = document.getElementById('search-type');
+          if (typeEl) params.set('search_type', typeEl.value);
+        }
         const data = await api('/posts?' + params.toString());
         totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
         if (!data.posts.length) {

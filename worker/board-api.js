@@ -136,16 +136,29 @@ export default {
       const pageSize = 10;
       const offset = (page - 1) * pageSize;
       const search = (url.searchParams.get('search') || '').trim();
+      const searchType = url.searchParams.get('search_type') || 'both';
 
       let where = '';
       let params = [];
       if (search) {
-        where = 'WHERE p.title LIKE ? OR p.content LIKE ?';
-        params = [`%${search}%`, `%${search}%`];
+        const like = `%${search}%`;
+        if (searchType === 'title') {
+          where = 'WHERE p.title LIKE ?';
+          params = [like];
+        } else if (searchType === 'content') {
+          where = 'WHERE p.content LIKE ?';
+          params = [like];
+        } else if (searchType === 'author') {
+          where = 'WHERE p.name LIKE ?';
+          params = [like];
+        } else {
+          where = 'WHERE p.title LIKE ? OR p.content LIKE ?';
+          params = [like, like];
+        }
       }
 
       const totalRow = await env.donian_board
-        .prepare(`SELECT COUNT(*) as total FROM posts ${where}`)
+        .prepare(`SELECT COUNT(*) as total FROM posts p ${where}`)
         .bind(...params)
         .first();
       const total = totalRow ? totalRow.total : 0;
