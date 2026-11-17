@@ -204,17 +204,17 @@ export default {
 
     // POST /admin/verify - 관리자 비밀번호 확인 후 임시 토큰 발급
     if (method === 'POST' && path === '/admin/verify') {
-      // brute-force 방어: IP당 10분에 5회 실패 시 차단
+      // brute-force 방어: IP당 24시간에 3회 실패 시 차단
       const alKey = `adminlogin:${ip}`;
       const nowTs = Date.now();
-      const WINDOW = 10 * 60 * 1000; // 10분
+      const WINDOW = 24 * 60 * 60 * 1000; // 24시간
       const alRow = await env.donian_board
         .prepare('SELECT count, expires_at FROM rate_limits WHERE key = ?')
         .bind(alKey)
         .first();
       const alValid = alRow && alRow.expires_at > nowTs;
       const fails = alValid ? alRow.count : 0;
-      if (fails >= 5) return json({ ok: false, error: '로그인 시도가 너무 많습니다. 10분 후 다시 시도하세요.' }, 429);
+      if (fails >= 3) return json({ ok: false, error: '로그인 시도가 너무 많습니다. 24시간 후 다시 시도하세요.' }, 429);
       const body = await request.json().catch(() => ({}));
       const pw = body.password || '';
       if (env.ADMIN_PASSWORD && pw === env.ADMIN_PASSWORD) {
