@@ -106,6 +106,15 @@ export default {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const ua = request.headers.get('user-agent') || '';
 
+    // IP 차단 (해킹/불법봇) - KV 저장
+    async function isBanned() {
+      return !!(await env.COUNTER_KV.get('ban:' + ip));
+    }
+    async function banIp() {
+      await env.COUNTER_KV.put('ban:' + ip, String(Date.now()), { expirationTtl: 90 * 24 * 60 * 60 }); // 90일
+    }
+    if (await isBanned()) return json({ error: '해킹 및 불법봇사용으로 차단되었습니다.' }, 403);
+
     // IP당 쓰기 제한: 시간당 N회 (D1 저장 → KV 안 씀)
     async function rateLimitWrite(action, limit) {
       const key = `w:${action}:${ip}`;
@@ -316,7 +325,7 @@ export default {
         is_admin: c.is_admin,
         parent_id: c.parent_id,
         // 작성자 판별: 댓글 비밀번호 === 게시글 비밀번호 (이름 도용 방지)
-        is_author: (c.password_hash && c.password_hash === post.password_hash),
+        is_author: (!post.is_admin && c.password_hash && c.password_hash === post.password_hash),
       }));
       return json({
         post: {
@@ -444,7 +453,7 @@ export default {
       if (spam) return json({ error: spam }, 400);
       if (hasProfanity(content)) return json({ error: '욕설/비속어가 포함되어 등록할 수 없습니다.' }, 400);
       if (!(isAdmin || (await rateLimitWrite('comment', 5)))) return json({ error: '댓글은 시간당 5회까지 작성할 수 있습니다.' }, 429);
-      const post = await env.donian_board.prepare('SELECT id FROM posts WHERE id = ?').bind(id).first();
+      const post = await env.donian_board.prepare('SELECT id, password_hash, is_admin FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
       let parentId = null;
       if (parent_id) {
@@ -456,6 +465,11 @@ export default {
         parentId = parent_id;
       }
       const hash = await hashPassword(password);
+      // 관리자 게시글에 비관리자가 게시글 비번으로 댓글 → 사칭/해킹 → IP 차단
+      if (!isAdmin && post.is_admin && post.password_hash && hash === post.password_hash) {
+        await banIp();
+        return json({ error: '해킹 및 불법봇사용으로 차단되었습니다.' }, 403);
+      }
       const now = new Date().toISOString();
       const finalName = isAdmin ? 'Donian' : (name || '익명');
       await env.donian_board
