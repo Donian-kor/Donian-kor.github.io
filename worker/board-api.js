@@ -590,6 +590,12 @@ export default {
           return json({ error: '비밀번호가 일치하지 않습니다' }, 403);
         }
       }
+      // 답글이 달린 부모 댓글은 삭제 불가 (관리자 포함)
+      const child = await env.donian_board
+        .prepare('SELECT id FROM comments WHERE parent_id = ? LIMIT 1')
+        .bind(id)
+        .first();
+      if (child) return json({ error: '답글이 달린 댓글은 삭제할 수 없습니다. 먼저 답글을 삭제하세요.' }, 403);
       await env.donian_board
         .prepare(`WITH RECURSIVE descendants(id) AS (
           SELECT id FROM comments WHERE id = ?
