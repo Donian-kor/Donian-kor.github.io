@@ -1754,6 +1754,21 @@
       const btnDefault = btn ? btn.textContent : '보내기';
       // 영문·숫자 기반 이메일 형식 (한글/공지/형식 오류 거부)
       const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      // docs/world_country_domains.txt 의 국가별 도메인(ccTLD/ccSLD) 목록
+      const VALID_EMAIL_DOMAINS = new Set([".ab",".ac",".ad",".ae",".ai",".ak",".aq",".ar",".art",".arts",".asn",".asso",".at",".au",".av",".ax",".bc",".bd",".be",".bel",".bg",".bh",".biz",".blog",".bm",".bo",".br",".busan",".ca",".cc",".ch",".chungbuk",".chungnam",".ci",".ck",".cl",".club",".cm",".cn",".co",".com",".cr",".cu",".cx",".cy",".cz",".daegu",".daejeon",".de",".dev",".dk",".do",".dr",".dz",".ebiz",".ec",".ed",".edu",".ee",".eg",".ens",".es",".et",".eu",".eun",".fam",".fhs",".fi",".fie",".fin",".firm",".fj",".fl",".fm",".fo",".fr",".from",".game",".gangwon",".gc",".geek",".gen",".gg",".gh",".gi",".gl",".go",".gob",".gouv",".gov",".govt",".gr",".gs",".gub",".gv",".gwangju",".gyeongbuk",".gyeonggi",".gyeongnam",".health",".hk",".hotel",".hr",".hs",".hu",".id",".idf",".idv",".ie",".il",".im",".in",".incheon",".ind",".inf",".info",".int",".io",".ir",".is",".isla",".it",".iz",".je",".jeju",".jeonbuk",".jeonnam",".jo",".jp",".ke",".kg",".kh",".kiev",".kiwi",".kommune",".kr",".kw",".ky",".kyiv",".kz",".la",".lb",".lg",".lk",".lt",".ltd",".lu",".lv",".ly",".ma",".maori",".mb",".me",".med",".mi",".mil",".mm",".mn",".mo",".mobi",".mod",".ms",".msk",".mt",".mu",".muni",".museum",".mx",".my",".name",".nat",".nb",".ne",".net",".nf",".ng",".nhs",".nic",".nl",".no",".nom",".nome",".np",".ns",".nt",".nu",".ny",".nz",".om",".on",".or",".org",".other",".pa",".parti",".pe",".per",".perso",".pg",".ph",".pk",".pl",".plc",".pol",".police",".pp",".pr",".prd",".press",".presse",".pri",".priv",".pro",".pt",".pub",".pw",".py",".qa",".qc",".re",".rec",".res",".ro",".rs",".ru",".rw",".sa",".sc",".sch",".school",".sci",".se",".sejong",".seoul",".sg",".si",".sk",".sld",".sn",".spb",".stat",".store",".su",".tec",".tel",".th",".tm",".tn",".to",".tourism",".tr",".tur",".tv",".tw",".tx",".tz",".ua",".ug",".uk",".ulsan",".univ",".us",".uy",".uz",".ve",".vg",".vgs",".vn",".waw",".web",".ws",".www",".yk",".za",".zm",".zw",".한국"]);
+      function emailDomainAllowed(email) {
+        const at = email.lastIndexOf('@');
+        if (at < 0) return false;
+        const host = email.slice(at + 1).toLowerCase();
+        // 도메인 전체 또는 접미사(각 라벨)가 문서 목록에 있으면 허용 (예: gmail.com → .com)
+        const parts = host.split('.');
+        for (let i = 0; i < parts.length; i++) {
+          const suffix = '.' + parts.slice(i).join('.');
+          if (VALID_EMAIL_DOMAINS.has(suffix)) return true;
+        }
+        return false;
+      }
+      const EMAIL_DOMAIN_MSG = '해당하는 이메일주소를 확인해서 수정해주세요';
       let profanityReady = false;
 
       function setFieldMsg(key, msg) {
@@ -1791,13 +1806,14 @@
         const nameEmpty = !v.name;
         const emailEmpty = !v.email;
         const emailBad = !!v.email && !EMAIL_RE.test(v.email);
+        const emailDomainBad = !!v.email && EMAIL_RE.test(v.email) && !emailDomainAllowed(v.email);
         const msgEmpty = !v.message;
         const profane = profanityReady && (findProfanityRanges(v.name).length || findProfanityRanges(v.message).length);
         // 형식 오류·욕설은 입력 즉시 경고, 빈 값은 제출 시도 시에만 경고
         setFieldMsg('name', (show && nameEmpty) ? '이름을 입력해 주세요.' : '');
-        setFieldMsg('email', emailBad ? '올바른 이메일 주소를 입력해 주세요. (예: doniankhj@gmail.com)' : ((show && emailEmpty) ? '이메일을 입력해 주세요.' : ''));
+        setFieldMsg('email', emailDomainBad ? EMAIL_DOMAIN_MSG : (emailBad ? '올바른 이메일 주소를 입력해 주세요. (예: doniankhj@gmail.com)' : ((show && emailEmpty) ? '이메일을 입력해 주세요.' : '')));
         setFieldMsg('message', profane ? '욕설/비속어가 포함되어 전송할 수 없습니다.' : ((show && msgEmpty) ? '문의 내용을 입력해 주세요.' : ''));
-        const ok = !nameEmpty && !emailEmpty && !emailBad && !msgEmpty && !profane;
+        const ok = !nameEmpty && !emailEmpty && !emailBad && !emailDomainBad && !msgEmpty && !profane;
         if (btn) {
           btn.disabled = !ok;
           btn.classList.toggle('opacity-40', !ok);
