@@ -243,6 +243,7 @@ export default {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+          'Access-Control-Allow-Credentials': 'true',
           'Cache-Control': 'public, max-age=3600',
         },
       });
@@ -380,6 +381,7 @@ export default {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+          'Access-Control-Allow-Credentials': 'true',
           'Cache-Control': 'public, max-age=30',
         },
       });
