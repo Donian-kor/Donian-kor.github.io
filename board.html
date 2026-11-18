@@ -355,11 +355,17 @@
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">제목</label>
-            <input type="text" name="title" required placeholder="제목 (최대 35글자)" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+            <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+              <div id="edit-title-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
+              <input type="text" name="title" required placeholder="제목 (최대 35글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+            </div>
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">내용</label>
-            <textarea name="content" required rows="6" placeholder="내용 (최대 1500글자)" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+            <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+              <div id="edit-content-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
+              <textarea name="content" required rows="6" placeholder="내용 (최대 1500글자)" class="hl-input relative w-full px-3 py-2 text-sm leading-relaxed bg-transparent focus:outline-none resize-y"></textarea>
+            </div>
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">비밀번호 (작성 시 사용한 비밀번호)</label>
@@ -1287,6 +1293,8 @@
       }
       form.querySelector('[name="title"]').value = p.title;
       form.querySelector('[name="content"]').value = p.content;
+      loadProfanity();
+      updateEditPreview();
       const statusEl = form.querySelector('[name="status"]');
       if (statusEl) statusEl.value = (p.status === 'bug' || p.status === 'request') ? p.status : 'question';
       applyAdminStatusFields();
@@ -1296,13 +1304,34 @@
 
     const editForm = document.getElementById('edit-form');
     const editError = document.getElementById('edit-error');
+    function updateEditPreview() {
+      const titleEl = editForm.querySelector('[name="title"]');
+      const contentEl = editForm.querySelector('[name="content"]');
+      const titleHl = document.getElementById('edit-title-highlight');
+      const contentHl = document.getElementById('edit-content-highlight');
+      if (!titleHl || !contentHl) return;
+      titleHl.innerHTML = renderHighlighted(titleEl.value, false).html;
+      titleHl.scrollLeft = titleEl.scrollLeft;
+      contentHl.innerHTML = renderHighlighted(contentEl.value, false).html;
+      contentHl.scrollTop = contentEl.scrollTop;
+    }
     editForm.querySelector('[name="title"]').addEventListener('input', (e) => {
       const t = truncateChars(e.target.value, 35);
       if (t !== e.target.value) e.target.value = t;
+      updateEditPreview();
     });
     editForm.querySelector('[name="content"]').addEventListener('input', (e) => {
       const t = truncateChars(e.target.value, 1500);
       if (t !== e.target.value) e.target.value = t;
+      updateEditPreview();
+    });
+    editForm.querySelector('[name="title"]').addEventListener('scroll', (e) => {
+      const hl = document.getElementById('edit-title-highlight');
+      if (hl) hl.scrollLeft = e.target.scrollLeft;
+    });
+    editForm.querySelector('[name="content"]').addEventListener('scroll', (e) => {
+      const hl = document.getElementById('edit-content-highlight');
+      if (hl) hl.scrollTop = e.target.scrollTop;
     });
     editForm.querySelector('[name="pw"]').addEventListener('input', (e) => {
       let v = [...e.target.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
@@ -1329,6 +1358,11 @@
       }
       if (charLen(body.content) > 1500) {
         editError.textContent = '내용은 1500글자 이하여야 합니다.';
+        editError.classList.remove('hidden');
+        return;
+      }
+      if (findProfanityRanges(body.title).length > 0 || findProfanityRanges(body.content).length > 0) {
+        editError.textContent = '욕설/비속어가 포함되어 있습니다. 입력창에 빨간색으로 표시된 부분을 수정한 후 다시 등록하세요.';
         editError.classList.remove('hidden');
         return;
       }
@@ -1438,7 +1472,10 @@
             </div>
             <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호" class="pw-mask px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50">
           </div>
-          <textarea name="content" required rows="2" maxlength="1500" placeholder="답글 (최대 1500글자)" class="w-full px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+          <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+            <div class="hl-layer absolute inset-0 overflow-hidden px-2 py-1 text-xs leading-snug text-zinc-200 reply-content-highlight" aria-hidden="true"></div>
+            <textarea name="content" required rows="2" maxlength="1500" placeholder="답글 (최대 1500글자)" class="hl-input relative w-full px-2 py-1 text-xs leading-snug bg-transparent focus:outline-none resize-y"></textarea>
+          </div>
           <div class="cf-turnstile"></div>
           <div class="flex justify-end gap-1">
             <button type="button" class="cancel-reply px-2 py-1 rounded bg-zinc-700 text-zinc-300 text-[0.65rem]">취소</button>
@@ -1451,7 +1488,17 @@
       const textarea = wrap.querySelector('textarea');
       const replyNameEl = formEl.querySelector('[name="name"]');
       const replyNameHl = wrap.querySelector('.reply-name-highlight');
+      const replyContentHl = wrap.querySelector('.reply-content-highlight');
       if (replyNameEl) replyNameEl.addEventListener('input', (e) => applyImpersonationHighlight(e.target, replyNameHl));
+      const updateReplyPreview = () => {
+        if (!replyContentHl) return;
+        replyContentHl.innerHTML = renderHighlighted(textarea.value, false).html;
+        replyContentHl.scrollTop = textarea.scrollTop;
+      };
+      textarea.addEventListener('input', updateReplyPreview);
+      textarea.addEventListener('scroll', () => { if (replyContentHl) replyContentHl.scrollTop = textarea.scrollTop; });
+      loadProfanity();
+      updateReplyPreview();
       applyPwFallback();
       setupTurnstile();
       textarea.focus();
@@ -1460,13 +1507,19 @@
         e.preventDefault();
         const fd = new FormData(formEl);
         const replyName = (fd.get('name') || '').trim();
+        const replyContent = (fd.get('content') || '').trim();
         if (!replyName) { showToast('이름을 입력하세요.'); return; }
+        if (!replyContent) { showToast('답글 내용을 입력하세요.'); return; }
         if (!isAdminMode() && isImpersonationName(replyName)) {
           showToast('관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.');
           return;
         }
         if (!isAdminMode() && findProfanityRanges(replyName).length > 0) {
           showToast('이름에 욕설/비속어가 포함되어 사용할 수 없습니다.');
+          return;
+        }
+        if (findProfanityRanges(replyContent).length > 0) {
+          showToast('욕설/비속어를 수정한 후 다시 등록하세요.');
           return;
         }
         try {
