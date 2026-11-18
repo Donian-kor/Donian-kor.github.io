@@ -146,7 +146,7 @@
     // 폴드 펼침·태블릿처럼 화면이 넓은 터치 기기에서는 카카오페이 후원 링크도 함께 표시
     (function () {
       function updateSponsorLinks() {
-        var coarse = window.matchMedia('(pointer: coarse)').matches; // 주 입력 수단이 손가락(터치)
+        var coarse = window.matchMedia('(any-pointer: coarse)').matches; // 터치 입력이 하나라도 있음 (마우스 병용 태블릿 포함)
         var wide = window.matchMedia('(min-width: 640px)').matches;  // 화면 너비 640px 이상
         var kakao = document.getElementById('sponsor-kakao');
         if (kakao) kakao.style.display = (coarse && wide) ? 'inline-flex' : '';
@@ -1314,13 +1314,13 @@
       }
       form.querySelector('[name="title"]').value = p.title;
       form.querySelector('[name="content"]').value = p.content;
+      loadProfanity();
+      updateEditPreview();
       const statusEl = form.querySelector('[name="status"]');
       if (statusEl) statusEl.value = (p.status === 'bug' || p.status === 'request') ? p.status : 'question';
-      updateEditPreview();
       applyAdminStatusFields();
       closeModal('detail-modal');
       openModal('edit-modal');
-      loadProfanity();
     }
 
     const editForm = document.getElementById('edit-form');
@@ -1330,14 +1330,11 @@
       const contentEl = editForm.querySelector('[name="content"]');
       const titleHl = document.getElementById('edit-title-highlight');
       const contentHl = document.getElementById('edit-content-highlight');
-      if (titleHl) {
-        titleHl.innerHTML = renderHighlighted(titleEl.value, false).html;
-        titleHl.scrollLeft = titleEl.scrollLeft;
-      }
-      if (contentHl) {
-        contentHl.innerHTML = renderHighlighted(contentEl.value, false).html;
-        contentHl.scrollTop = contentEl.scrollTop;
-      }
+      if (!titleHl || !contentHl) return;
+      titleHl.innerHTML = renderHighlighted(titleEl.value, false).html;
+      titleHl.scrollLeft = titleEl.scrollLeft;
+      contentHl.innerHTML = renderHighlighted(contentEl.value, false).html;
+      contentHl.scrollTop = contentEl.scrollTop;
     }
     editForm.querySelector('[name="title"]').addEventListener('input', (e) => {
       const t = truncateChars(e.target.value, 35);
@@ -1349,13 +1346,13 @@
       if (t !== e.target.value) e.target.value = t;
       updateEditPreview();
     });
-    editForm.querySelector('[name="title"]').addEventListener('scroll', () => {
+    editForm.querySelector('[name="title"]').addEventListener('scroll', (e) => {
       const hl = document.getElementById('edit-title-highlight');
-      if (hl) hl.scrollLeft = editForm.querySelector('[name="title"]').scrollLeft;
+      if (hl) hl.scrollLeft = e.target.scrollLeft;
     });
-    editForm.querySelector('[name="content"]').addEventListener('scroll', () => {
+    editForm.querySelector('[name="content"]').addEventListener('scroll', (e) => {
       const hl = document.getElementById('edit-content-highlight');
-      if (hl) hl.scrollTop = editForm.querySelector('[name="content"]').scrollTop;
+      if (hl) hl.scrollTop = e.target.scrollTop;
     });
     editForm.querySelector('[name="pw"]').addEventListener('input', (e) => {
       let v = [...e.target.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
@@ -1383,6 +1380,11 @@
       }
       if (charLen(body.content) > 1500) {
         editError.textContent = '내용은 1500글자 이하여야 합니다.';
+        editError.classList.remove('hidden');
+        return;
+      }
+      if (findProfanityRanges(body.title).length > 0 || findProfanityRanges(body.content).length > 0) {
+        editError.textContent = '욕설/비속어가 포함되어 있습니다. 입력창에 빨간색으로 표시된 부분을 수정한 후 다시 등록하세요.';
         editError.classList.remove('hidden');
         return;
       }
@@ -1511,11 +1513,14 @@
       const replyContentHl = wrap.querySelector('.reply-content-highlight');
       if (replyNameEl) replyNameEl.addEventListener('input', (e) => applyImpersonationHighlight(e.target, replyNameHl));
       const updateReplyPreview = () => {
+        if (!replyContentHl) return;
         replyContentHl.innerHTML = renderHighlighted(textarea.value, false).html;
         replyContentHl.scrollTop = textarea.scrollTop;
       };
       textarea.addEventListener('input', updateReplyPreview);
-      textarea.addEventListener('scroll', () => { replyContentHl.scrollTop = textarea.scrollTop; });
+      textarea.addEventListener('scroll', () => { if (replyContentHl) replyContentHl.scrollTop = textarea.scrollTop; });
+      loadProfanity();
+      updateReplyPreview();
       applyPwFallback();
       setupTurnstile();
       textarea.focus();
@@ -1524,13 +1529,19 @@
         e.preventDefault();
         const fd = new FormData(formEl);
         const replyName = (fd.get('name') || '').trim();
+        const replyContent = (fd.get('content') || '').trim();
         if (!replyName) { showToast('이름을 입력하세요.'); return; }
+        if (!replyContent) { showToast('답글 내용을 입력하세요.'); return; }
         if (!isAdminMode() && isImpersonationName(replyName)) {
           showToast('관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.');
           return;
         }
         if (!isAdminMode() && findProfanityRanges(replyName).length > 0) {
           showToast('이름에 욕설/비속어가 포함되어 사용할 수 없습니다.');
+          return;
+        }
+        if (findProfanityRanges(replyContent).length > 0) {
+          showToast('욕설/비속어를 수정한 후 다시 등록하세요.');
           return;
         }
         try {
