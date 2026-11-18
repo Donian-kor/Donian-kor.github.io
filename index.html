@@ -202,10 +202,10 @@
           <span class="text-green-400 font-bold text-lg">C:\></span>
           <span class="text-zinc-200 text-lg">type intro.txt</span>
         </div>
-        <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-4 mb-4 md:h-[360px] md:flex md:flex-col md:overflow-hidden">
-          <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 overflow-y-auto pr-1"></div>
-          <div class="mt-2 pt-2 border-t border-white/5 md:flex-1 md:min-h-0 md:overflow-y-auto">
-            <div id="about-body" class="pl-2 text-zinc-400 leading-relaxed space-y-1"></div>
+        <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-3 md:p-4 mb-4 md:h-[360px] md:flex md:flex-col md:overflow-hidden">
+          <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 overflow-y-auto overflow-x-hidden break-words pr-0.5 md:pr-1"></div>
+          <div class="mt-1.5 pt-1.5 md:mt-2 md:pt-2 border-t border-white/5 md:flex-1 md:min-h-0 md:overflow-y-auto">
+            <div id="about-body" class="pl-1 md:pl-2 text-zinc-400 leading-relaxed space-y-1 break-words"></div>
           </div>
         </div>
         <div class="mt-2">
@@ -719,7 +719,7 @@ function isNewProject(p) {
           } else {
             setTimeout(() => {
               let currentLine = document.createElement('div');
-              currentLine.className = 'text-zinc-400 pl-4';
+              currentLine.className = 'text-zinc-400 pl-2 md:pl-4 break-words';
               body.appendChild(currentLine);
               const cursor = document.createElement('span');
               cursor.className = 'term-cursor';
@@ -730,7 +730,7 @@ function isNewProject(p) {
                   if (out[oi] === '\n') {
                     currentLine.removeChild(cursor);
                     currentLine = document.createElement('div');
-                    currentLine.className = 'text-zinc-400 pl-4';
+                    currentLine.className = 'text-zinc-400 pl-2 md:pl-4 break-words';
                     body.appendChild(currentLine);
                     currentLine.appendChild(cursor);
                   } else {
