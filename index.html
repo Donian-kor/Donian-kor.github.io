@@ -204,8 +204,8 @@
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-3 md:p-4 mb-4 md:h-[360px] md:flex md:flex-col md:overflow-hidden">
           <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 overflow-y-auto overflow-x-hidden break-words pr-0.5 md:pr-1"></div>
-          <div class="mt-1.5 pt-1.5 md:mt-2 md:pt-2 border-t border-white/5 md:flex-1 md:min-h-0 md:overflow-y-auto">
-            <div id="about-body" class="pl-1 md:pl-2 text-zinc-400 leading-relaxed space-y-1 break-words"></div>
+          <div class="mt-1.5 pt-1.5 md:mt-2 md:pt-2 border-t border-white/5 flex flex-col h-[130px] md:h-auto md:flex-1 md:min-h-0 md:overflow-y-auto">
+            <div id="about-body" class="pl-1 md:pl-2 text-zinc-400 leading-relaxed space-y-1 break-words flex-1 min-h-0 overflow-y-auto md:overflow-visible"></div>
           </div>
         </div>
         <div class="mt-2">
@@ -218,10 +218,10 @@
     <!-- Career -->
     <section id="career" class="pb-6">
       <div class="font-mono text-sm">
-        <div class="mb-2 flex items-center gap-3 flex-wrap">
-          <span class="text-green-400 font-bold text-lg">C:\></span>
-          <span class="text-zinc-200 text-lg">type career.log</span>
-          <span class="ml-auto text-emerald-400 text-lg whitespace-nowrap">현재 <span id="career-duration" class="font-semibold"></span></span>
+        <div class="mb-2 flex items-center gap-1.5 md:gap-3 flex-nowrap">
+          <span class="text-green-400 font-bold text-[clamp(0.8rem,4.1vw,1.125rem)] md:text-lg">C:\></span>
+          <span class="text-zinc-200 text-[clamp(0.8rem,4.1vw,1.125rem)] md:text-lg whitespace-nowrap">type career.log</span>
+          <span class="ml-auto text-emerald-400 text-[clamp(0.8rem,4.1vw,1.125rem)] md:text-lg whitespace-nowrap">현재 <span id="career-duration" class="font-semibold"></span></span>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/95 py-6 px-4 font-mono text-xs leading-relaxed overflow-x-auto md:h-[360px] md:overflow-y-auto">
           <div id="career-log" class="space-y-1">
@@ -602,7 +602,25 @@ function isNewProject(p) {
       const now = new Date();
       let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
       if (now.getDate() < start.getDate()) months -= 1;
-      el.textContent = months >= 1 ? `${months}개월 차` : `${Math.max(1, Math.floor((now - start) / 86400000))}일째`;
+      const text = months >= 1 ? `${months}개월 차` : `${Math.max(1, Math.floor((now - start) / 86400000))}일째`;
+      // 모바일에서는 타이핑 애니메이션, PC는 즉시 표시
+      if (window.matchMedia('(max-width: 767px)').matches) {
+        el.textContent = '';
+        const cursor = document.createElement('span');
+        cursor.className = 'term-cursor';
+        el.appendChild(cursor);
+        let i = 0;
+        (function type() {
+          if (i < text.length) {
+            cursor.insertAdjacentText('beforebegin', text[i++]);
+            setTimeout(type, 65);
+          } else {
+            setTimeout(() => cursor.remove(), 700);
+          }
+        })();
+      } else {
+        el.textContent = text;
+      }
     })();
 
     // ---------- 업데이트 날짜 자동 갱신 (GitHub API, 커밋 기준) ----------
