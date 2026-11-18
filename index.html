@@ -68,10 +68,6 @@
       text-shadow: 2px 0 0 #22d3ee, -2px 0 0 #f472b6, 0 0 14px rgba(163,230,53,0.9);
       transform: skewX(-6deg) translateX(2px);
     }
-    /* PC(md+) 좌우 2컬럼에서는 이름이 좌측 컬럼 안에 들어오도록 축소 (모바일은 기존 크기 유지) */
-    @media (min-width: 768px) {
-      .donian-decode { font-size: clamp(2.5rem, 9vw, 7rem); letter-spacing: clamp(0.1rem, 0.5vw, 0.5rem); }
-    }
     @media (prefers-reduced-motion: reduce) {
       .donian-decode { text-shadow: 0 0 8px rgba(163,230,53,0.5); }
     }
@@ -167,8 +163,6 @@
   <main class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 sm:pb-8">
 
     <!-- Hero / Terminal intro -->
-    <!-- Intro + Career: PC(md 이상)에서 좌우 배치, 모바일은 세로 쌓임 -->
-    <div class="md:grid md:grid-cols-2 md:gap-5 md:items-start">
     <section id="top" class="py-6">
       <div class="font-mono text-sm leading-relaxed">
         <div class="text-zinc-400 mb-2"># Donian Portfolio — AI coding session</div>
@@ -193,9 +187,16 @@
           <div class="donian-decode donian-name" aria-label="Donian">Donian</div>
           <div class="text-zinc-400 text-sm font-mono mt-2">AI Coder · AI Music Creator</div>
         </div>
-        <div class="mt-4 mb-2">
+      </div>
+    </section>
+
+    <!-- intro.txt / career.log 제목 행을 같은 행에 두고 그 아래에 각 카드 배치 (PC는 좌우, 모바일은 세로) -->
+    <div class="md:grid md:grid-cols-2 md:gap-5 md:items-start">
+    <section id="intro-card" class="pb-6">
+      <div class="font-mono text-sm leading-relaxed">
+        <div class="mb-2 flex items-center gap-3">
           <span class="text-green-400 font-bold text-lg">C:\></span>
-          <span class="text-zinc-200 ml-2 text-lg">type intro.txt</span>
+          <span class="text-zinc-200 text-lg">type intro.txt</span>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-4 mb-4">
           <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 min-h-[8rem]"></div>
@@ -211,10 +212,9 @@
     </section>
 
     <!-- Career -->
-    <section id="career" class="py-6">
+    <section id="career" class="pb-6">
       <div class="font-mono text-sm">
-        <div class="text-zinc-400 mb-2 leading-relaxed"># Donian Career — dev timeline</div>
-        <div class="mb-4 flex items-center gap-3">
+        <div class="mb-2 flex items-center gap-3">
           <span class="text-green-400 font-bold text-lg">C:\></span>
           <span class="text-zinc-200 text-lg">type career.log</span>
         </div>
