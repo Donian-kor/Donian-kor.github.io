@@ -52,6 +52,7 @@
     .hl-layer-single { white-space: pre; overflow: hidden; }
     .hl-input { color: transparent; -webkit-text-fill-color: transparent; caret-color: #e4e4e7; overflow-wrap: break-word; word-break: normal; }
     .hl-input::placeholder { color: #71717a; -webkit-text-fill-color: #71717a; }
+    .contact-email::placeholder { color: #71717a; -webkit-text-fill-color: #71717a; opacity: 1; }
     .hl-input::selection { background: rgba(59,130,246,0.35); }
     /* Matrix 배경 (메인화면과 동일 효과) */
     #matrix-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.42; }
@@ -173,7 +174,7 @@
           <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-zinc-400 mb-1 text-xs">이름</label>
+              <label class="block text-zinc-400 mb-1 text-xs">이름 <span class="text-zinc-600">(최대 27)</span></label>
               <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
                 <div id="contact-name-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
                 <input type="text" name="name" required class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
@@ -182,12 +183,15 @@
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">이메일</label>
-              <input type="email" name="email" required placeholder="doniankhj@gmail.com" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="email" name="email" required placeholder="doniankhj@gmail.com" class="contact-email w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
               <p class="hidden text-rose-400 text-[0.65rem] mt-1" data-error="email"></p>
             </div>
           </div>
           <div>
-            <label class="block text-zinc-400 mb-1 text-xs">내용</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-zinc-400 text-xs">내용 <span class="text-zinc-600">(최대 1500)</span></label>
+              <span id="contact-msg-counter" class="text-zinc-600 text-[0.65rem] font-mono">0/1500</span>
+            </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="contact-message-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
               <textarea name="message" required rows="4" class="hl-input relative w-full px-3 py-2 text-sm leading-relaxed bg-transparent focus:outline-none resize-y"></textarea>
@@ -1751,6 +1755,7 @@
       const messageEl = form.querySelector('[name="message"]');
       const nameHl = document.getElementById('contact-name-highlight');
       const messageHl = document.getElementById('contact-message-highlight');
+      const msgCounter = document.getElementById('contact-msg-counter');
       const btnDefault = btn ? btn.textContent : '보내기';
       // 영문·숫자 기반 이메일 형식 (한글/공지/형식 오류 거부)
       const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -1768,7 +1773,7 @@
         }
         return false;
       }
-      const EMAIL_DOMAIN_MSG = '해당하는 이메일주소를 확인해서 수정해주세요';
+      const EMAIL_DOMAIN_MSG = '입력한 이메일주소를 다시 확인해주세요';
       let profanityReady = false;
 
       function setFieldMsg(key, msg) {
@@ -1800,6 +1805,7 @@
             messageHl.scrollLeft = messageEl.scrollLeft;
           }
         }
+        if (msgCounter) msgCounter.textContent = charLen(v.message) + '/1500';
       }
       function validate(show) {
         const v = values();
@@ -1832,7 +1838,16 @@
       }
 
       [nameEl, emailEl, messageEl].forEach((el) => {
-        if (el) el.addEventListener('input', () => refresh(false));
+        if (el) el.addEventListener('input', () => {
+          if (el === nameEl) {
+            const t = truncateChars(el.value, 27);
+            if (t !== el.value) el.value = t;
+          } else if (el === messageEl) {
+            const t = truncateChars(el.value, 1500);
+            if (t !== el.value) el.value = t;
+          }
+          refresh(false);
+        });
       });
       if (messageEl && messageHl) {
         messageEl.addEventListener('scroll', () => {
