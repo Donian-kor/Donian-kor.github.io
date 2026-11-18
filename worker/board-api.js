@@ -74,8 +74,9 @@ async function rateLimitEdge(ip, env) {
 }
 
 // 욕설/비속어 목록 (프론트 하이라이팅용 /profanity-list, 서버 차단용)
+// 도메인 확장자(.으로 시작)는 이메일 검증 전용이므로 비속어 필터에서 제외
 import PROFANITY_RAW from './profanity-words.js';
-const PROFANITY = PROFANITY_RAW.split('\n').filter(Boolean);
+const PROFANITY = PROFANITY_RAW.split('\n').map((w) => w.trim()).filter((w) => w && !w.startsWith('.'));
 
 function normalizeText(s) {
   return String(s).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '');

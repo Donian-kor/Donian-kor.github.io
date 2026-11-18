@@ -253,7 +253,7 @@
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block text-zinc-400 text-xs">내용 <span class="text-zinc-600">(최대 1500)</span></label>
-              <span id="contact-msg-counter" class="text-zinc-600 text-[0.65rem] font-mono">0/1500</span>
+              <span id="contact-msg-counter" class="text-zinc-400 text-xs font-mono font-medium">0 / 1500</span>
             </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="contact-message-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
@@ -315,7 +315,7 @@
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="text-zinc-400 text-xs">내용</label>
-              <span id="content-counter" class="text-[0.65rem] text-zinc-500 font-mono">0 / 1500</span>
+              <span id="content-counter" class="text-xs text-zinc-400 font-mono font-medium">0 / 1500</span>
             </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="content-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
@@ -689,12 +689,16 @@
     }
 
     // ---------- 욕설/비속어 하이라이팅 ----------
-    const PROFANITY_CACHE_KEY = 'board_profanity_v1';
+    const PROFANITY_CACHE_KEY = 'board_profanity_v2';
     let PROFANITY_SET = null;
     let PROFANITY_MAXLEN = 0;
 
     function setProfanityWords(words) {
-      const norm = words.map((w) => String(w).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, '')).filter(Boolean);
+      // 도메인 확장자(.com, .co.kr 등)는 이메일 검증 전용이므로 비속어 필터에서 제외
+      const norm = words
+        .filter((w) => !String(w).trim().startsWith('.'))
+        .map((w) => String(w).toLowerCase().replace(/[\s\p{P}\p{S}_]+/gu, ''))
+        .filter(Boolean);
       PROFANITY_SET = new Set(norm);
       PROFANITY_MAXLEN = norm.reduce((m, w) => Math.max(m, [...w].length), 0);
       // 욕설 목록 로드 완료 후, 이미 입력된 이름 필드 재검사
@@ -1165,7 +1169,7 @@
             </div>
             <div class="flex items-center justify-between">
               <span class="text-zinc-500 text-[0.65rem]">댓글</span>
-              <span id="comment-counter" class="text-[0.65rem] text-zinc-500 font-mono">0 / 1500</span>
+              <span id="comment-counter" class="text-xs text-zinc-400 font-mono font-medium">0 / 1500</span>
             </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="comment-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-2.5 py-1.5 text-sm leading-snug text-zinc-200"></div>
@@ -1889,7 +1893,7 @@
             messageHl.scrollLeft = messageEl.scrollLeft;
           }
         }
-        if (msgCounter) msgCounter.textContent = charLen(v.message) + '/1500';
+        if (msgCounter) msgCounter.textContent = charLen(v.message) + ' / 1500';
       }
       function validate(show) {
         const v = values();
