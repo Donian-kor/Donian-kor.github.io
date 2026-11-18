@@ -1811,15 +1811,15 @@
         const v = values();
         const nameEmpty = !v.name;
         const emailEmpty = !v.email;
-        const emailBad = !!v.email && !EMAIL_RE.test(v.email);
-        const emailDomainBad = !!v.email && EMAIL_RE.test(v.email) && !emailDomainAllowed(v.email);
+        // 형식 오류·도메인 오류 모두 동일한 안내로 통합
+        const emailInvalid = !!(v.email && (!EMAIL_RE.test(v.email) || !emailDomainAllowed(v.email)));
         const msgEmpty = !v.message;
         const profane = profanityReady && (findProfanityRanges(v.name).length || findProfanityRanges(v.message).length);
         // 형식 오류·욕설은 입력 즉시 경고, 빈 값은 제출 시도 시에만 경고
         setFieldMsg('name', (show && nameEmpty) ? '이름을 입력해 주세요.' : '');
-        setFieldMsg('email', emailDomainBad ? EMAIL_DOMAIN_MSG : (emailBad ? '올바른 이메일 주소를 입력해 주세요. (예: doniankhj@gmail.com)' : ((show && emailEmpty) ? '이메일을 입력해 주세요.' : '')));
+        setFieldMsg('email', emailInvalid ? EMAIL_DOMAIN_MSG : ((show && emailEmpty) ? '이메일을 입력해 주세요.' : ''));
         setFieldMsg('message', profane ? '욕설/비속어가 포함되어 전송할 수 없습니다.' : ((show && msgEmpty) ? '문의 내용을 입력해 주세요.' : ''));
-        const ok = !nameEmpty && !emailEmpty && !emailBad && !emailDomainBad && !msgEmpty && !profane;
+        const ok = !nameEmpty && !emailEmpty && !emailInvalid && !msgEmpty && !profane;
         if (btn) {
           btn.disabled = !ok;
           btn.classList.toggle('opacity-40', !ok);
