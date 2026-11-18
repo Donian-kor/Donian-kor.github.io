@@ -130,9 +130,8 @@
       <span class="w-3 h-3 rounded-full bg-green-500 shrink-0"></span>
       <span class="ml-2 sm:ml-3 text-xs font-mono hidden sm:inline"><span class="text-white">Terminal</span><span class="text-zinc-400 hidden sm:inline"> — Donian Portfolio</span><span class="text-zinc-600 hidden md:inline ml-2">~/portfolio</span></span>
       <div class="ml-auto flex items-center gap-0.5 sm:gap-3 text-xs text-zinc-400 font-mono whitespace-nowrap">
-        <a href="#projects" class="inline-block px-1 sm:px-2 py-1 hover:text-zinc-200 transition">projects</a>
-        <a href="board.html" class="inline-block px-1 sm:px-2 py-1 hover:text-zinc-200 transition">contact</a>
-        <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" class="inline-block px-1 sm:px-2 py-1 hover:text-zinc-200 transition">github</a>
+        <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" aria-label="깃헙" title="깃헙" class="inline-flex items-center justify-center min-w-[3.125rem] sm:min-w-[3.625rem] px-1 sm:px-2 py-1 text-emerald-400 hover:text-emerald-300 transition"><iconify-icon icon="mdi:github" aria-hidden="true" class="text-base"></iconify-icon></a>
+        <a href="board.html" class="inline-flex items-center gap-1 px-1 sm:px-2 py-1 text-emerald-400 hover:text-emerald-300 transition"><iconify-icon icon="solar:chat-round-line-bold" aria-hidden="true" class="text-sm"></iconify-icon>문의하기</a>
         <a href="https://github.com/sponsors/Donian-kor" target="_blank" rel="noopener" aria-label="github 후원" title="github 후원" class="hidden sm:inline-flex items-center gap-1 px-1 sm:px-2 py-1 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>github후원</a>
         <a id="sponsor-kakao" href="https://qr.kakaopay.com/FL8dh56ra9c406950" target="_blank" rel="noopener" aria-label="kakao 후원" title="kakao 후원" class="inline-flex sm:hidden items-center gap-1 px-1 py-1 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>kakao후원</a>
       </div>
@@ -175,17 +174,6 @@
             <span class="text-green-400 font-bold text-lg">C:\></span>
             <span class="text-zinc-200 ml-2 text-lg">whoami</span>
           </div>
-          <div class="flex flex-wrap gap-2 justify-end">
-            <a href="board.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-green-500/20 border border-green-500/40 text-green-300 text-xs hover:bg-green-500/30 transition">
-              <iconify-icon icon="solar:chat-round-line-bold"></iconify-icon> 게시판
-            </a>
-            <a href="https://donian-kor.tistory.com/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs hover:bg-amber-500/30 transition">
-              <iconify-icon icon="solar:document-text-bold"></iconify-icon> Blog
-            </a>
-            <a href="mailto:doniankhj@gmail.com" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs hover:bg-rose-500/30 transition">
-              <iconify-icon icon="solar:letter-bold"></iconify-icon> gmail
-            </a>
-          </div>
         </div>
         <div class="mb-6 pl-2 max-w-full overflow-hidden">
           <div class="donian-decode donian-name" aria-label="Donian">Donian</div>
@@ -198,19 +186,16 @@
     <div class="md:grid md:grid-cols-2 md:gap-5 md:items-start">
     <section id="intro-card" class="pb-6">
       <div class="font-mono text-sm leading-relaxed">
-        <div class="mb-2 flex items-center gap-3">
+        <div class="mb-2 flex items-center gap-3 flex-nowrap">
           <span class="text-green-400 font-bold text-lg">C:\></span>
-          <span class="text-zinc-200 text-lg">type intro.txt</span>
+          <span class="text-zinc-200 text-lg whitespace-nowrap">type intro.txt</span>
+          <a href="https://github.com/Donian-kor/Donian-kor.github.io/blob/main/AGENTS.md" target="_blank" rel="noopener" class="ml-auto text-emerald-400 text-[clamp(0.7rem,3.7vw,1.03125rem)] md:text-[1.03125rem] whitespace-nowrap hover:text-emerald-300 transition underline-offset-2 hover:underline">AGENTS.MD 읽어보기</a>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-3 md:p-4 mb-4 md:h-[360px] md:flex md:flex-col md:overflow-hidden">
           <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 overflow-y-auto overflow-x-hidden break-words pr-0.5 md:pr-1"></div>
           <div class="mt-1.5 pt-1.5 md:mt-2 md:pt-2 border-t border-white/5 flex flex-col h-[130px] md:h-auto md:flex-1 md:min-h-0 md:overflow-y-auto">
             <div id="about-body" class="pl-1 md:pl-2 text-zinc-400 leading-relaxed space-y-1 break-words flex-1 min-h-0 overflow-y-auto md:overflow-visible"></div>
           </div>
-        </div>
-        <div class="mt-2">
-          <span class="text-green-400 font-bold">C:\></span>
-          <a href="https://github.com/Donian-kor/Donian-kor.github.io/blob/main/AGENTS.md" target="_blank" rel="noopener" class="text-zinc-200 ml-2 hover:text-blue-300 transition underline-offset-2 hover:underline">AI 코딩 에이전트 전역 규칙 (AGENTS.md) 읽기 →</a>
         </div>
       </div>
     </section>
@@ -221,7 +206,7 @@
         <div class="mb-2 flex items-center gap-1.5 md:gap-3 flex-nowrap">
           <span class="text-green-400 font-bold text-[clamp(0.8rem,4.1vw,1.125rem)] md:text-lg">C:\></span>
           <span class="text-zinc-200 text-[clamp(0.8rem,4.1vw,1.125rem)] md:text-lg whitespace-nowrap">type career.log</span>
-          <span class="ml-auto text-emerald-400 text-[clamp(0.8rem,4.1vw,1.125rem)] md:text-lg whitespace-nowrap"><span id="career-duration" class="font-semibold"></span></span>
+          <span class="ml-auto text-emerald-400 text-[clamp(0.7rem,3.7vw,1.03125rem)] md:text-[1.03125rem] whitespace-nowrap"><span id="career-duration" class="font-semibold"></span></span>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/95 py-6 px-4 font-mono text-xs leading-relaxed overflow-x-auto md:h-[360px] md:overflow-y-auto">
           <div id="career-log" class="space-y-1">
