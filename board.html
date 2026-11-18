@@ -355,11 +355,17 @@
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">제목</label>
-            <input type="text" name="title" required placeholder="제목 (최대 35글자)" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+            <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+              <div id="edit-title-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
+              <input type="text" name="title" required placeholder="제목 (최대 35글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+            </div>
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">내용</label>
-            <textarea name="content" required rows="6" placeholder="내용 (최대 1500글자)" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+            <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+              <div id="edit-content-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
+              <textarea name="content" required rows="6" placeholder="내용 (최대 1500글자)" class="hl-input relative w-full px-3 py-2 text-sm leading-relaxed bg-transparent focus:outline-none resize-y"></textarea>
+            </div>
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">비밀번호 (작성 시 사용한 비밀번호)</label>
@@ -701,13 +707,34 @@
         .filter(Boolean);
       PROFANITY_SET = new Set(norm);
       PROFANITY_MAXLEN = norm.reduce((m, w) => Math.max(m, [...w].length), 0);
-      // 욕설 목록 로드 완료 후, 이미 입력된 이름 필드 재검사
+      // 욕설 목록 로드 완료 후, 이미 입력된 값 재검사
       try {
         const wn = document.querySelector('#write-form [name="name"]');
         if (wn) applyImpersonationHighlight(wn, document.getElementById('write-name-highlight'), document.getElementById('write-name-filter-msg'));
         const cn = document.querySelector('#comment-form [name="name"]');
         if (cn) applyImpersonationHighlight(cn, document.getElementById('comment-name-highlight'));
+        refreshProfanityHighlights();
       } catch (e) {}
+    }
+
+    // 목록 로드 전에 입력한 텍스트도 하이라이트되도록 모든 입력 레이어를 다시 그림
+    function refreshProfanityHighlights() {
+      const pairs = [
+        ['#write-form', 'title', 'title-highlight'],
+        ['#write-form', 'content', 'content-highlight'],
+        ['#edit-form', 'title', 'edit-title-highlight'],
+        ['#edit-form', 'content', 'edit-content-highlight'],
+        ['#comment-form', 'content', 'comment-highlight'],
+      ];
+      for (const [formSel, fieldName, layerId] of pairs) {
+        const el = document.querySelector(`${formSel} [name="${fieldName}"]`);
+        const layer = document.getElementById(layerId);
+        if (el && layer) layer.innerHTML = renderHighlighted(el.value, false).html;
+      }
+      document.querySelectorAll('.reply-content-highlight').forEach((layer) => {
+        const el = layer.parentElement && layer.parentElement.querySelector('textarea[name="content"]');
+        if (el) layer.innerHTML = renderHighlighted(el.value, false).html;
+      });
     }
 
     async function loadProfanity() {
@@ -1289,20 +1316,46 @@
       form.querySelector('[name="content"]').value = p.content;
       const statusEl = form.querySelector('[name="status"]');
       if (statusEl) statusEl.value = (p.status === 'bug' || p.status === 'request') ? p.status : 'question';
+      updateEditPreview();
       applyAdminStatusFields();
       closeModal('detail-modal');
       openModal('edit-modal');
+      loadProfanity();
     }
 
     const editForm = document.getElementById('edit-form');
     const editError = document.getElementById('edit-error');
+    function updateEditPreview() {
+      const titleEl = editForm.querySelector('[name="title"]');
+      const contentEl = editForm.querySelector('[name="content"]');
+      const titleHl = document.getElementById('edit-title-highlight');
+      const contentHl = document.getElementById('edit-content-highlight');
+      if (titleHl) {
+        titleHl.innerHTML = renderHighlighted(titleEl.value, false).html;
+        titleHl.scrollLeft = titleEl.scrollLeft;
+      }
+      if (contentHl) {
+        contentHl.innerHTML = renderHighlighted(contentEl.value, false).html;
+        contentHl.scrollTop = contentEl.scrollTop;
+      }
+    }
     editForm.querySelector('[name="title"]').addEventListener('input', (e) => {
       const t = truncateChars(e.target.value, 35);
       if (t !== e.target.value) e.target.value = t;
+      updateEditPreview();
     });
     editForm.querySelector('[name="content"]').addEventListener('input', (e) => {
       const t = truncateChars(e.target.value, 1500);
       if (t !== e.target.value) e.target.value = t;
+      updateEditPreview();
+    });
+    editForm.querySelector('[name="title"]').addEventListener('scroll', () => {
+      const hl = document.getElementById('edit-title-highlight');
+      if (hl) hl.scrollLeft = editForm.querySelector('[name="title"]').scrollLeft;
+    });
+    editForm.querySelector('[name="content"]').addEventListener('scroll', () => {
+      const hl = document.getElementById('edit-content-highlight');
+      if (hl) hl.scrollTop = editForm.querySelector('[name="content"]').scrollTop;
     });
     editForm.querySelector('[name="pw"]').addEventListener('input', (e) => {
       let v = [...e.target.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
@@ -1313,6 +1366,7 @@
     editForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       editError.classList.add('hidden');
+      updateEditPreview();
       if (!currentPost) return;
       const fd = new FormData(editForm);
       const body = {
@@ -1438,7 +1492,10 @@
             </div>
             <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호" class="pw-mask px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50">
           </div>
-          <textarea name="content" required rows="2" maxlength="1500" placeholder="답글 (최대 1500글자)" class="w-full px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+          <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+            <div class="hl-layer absolute inset-0 overflow-hidden px-2 py-1 text-xs leading-snug text-zinc-200 reply-content-highlight" aria-hidden="true"></div>
+            <textarea name="content" required rows="2" maxlength="1500" placeholder="답글 (최대 1500글자)" class="hl-input relative w-full px-2 py-1 text-xs leading-snug bg-transparent focus:outline-none resize-y"></textarea>
+          </div>
           <div class="cf-turnstile"></div>
           <div class="flex justify-end gap-1">
             <button type="button" class="cancel-reply px-2 py-1 rounded bg-zinc-700 text-zinc-300 text-[0.65rem]">취소</button>
@@ -1451,7 +1508,14 @@
       const textarea = wrap.querySelector('textarea');
       const replyNameEl = formEl.querySelector('[name="name"]');
       const replyNameHl = wrap.querySelector('.reply-name-highlight');
+      const replyContentHl = wrap.querySelector('.reply-content-highlight');
       if (replyNameEl) replyNameEl.addEventListener('input', (e) => applyImpersonationHighlight(e.target, replyNameHl));
+      const updateReplyPreview = () => {
+        replyContentHl.innerHTML = renderHighlighted(textarea.value, false).html;
+        replyContentHl.scrollTop = textarea.scrollTop;
+      };
+      textarea.addEventListener('input', updateReplyPreview);
+      textarea.addEventListener('scroll', () => { replyContentHl.scrollTop = textarea.scrollTop; });
       applyPwFallback();
       setupTurnstile();
       textarea.focus();
