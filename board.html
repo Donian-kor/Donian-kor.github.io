@@ -24,16 +24,32 @@
     }
   </script>
   <style>
-    body { font-family: 'JetBrains Mono', 'Pretendard', monospace; background: #0a0a0a; }
+    :root {
+      --bg: #0a0a0a;
+      --panel: #0e0f11;
+      --panel-2: #141619;
+      --line: rgba(255,255,255,0.07);
+      --line-hi: rgba(255,255,255,0.12);
+      --fg: #e7e9ea;
+      --dim: #9aa1a9;
+      --emerald: #34d399;
+      --emerald-bright: #6ee7b7;
+      --rad: 8px;
+      --mono: 'JetBrains Mono', 'Pretendard', monospace;
+      --sans: 'Pretendard', system-ui, sans-serif;
+    }
+    body { font-family: var(--sans); background: var(--bg); color: var(--fg); }
+    ::selection { background: rgba(52,211,153,0.25); color: #fff; }
+    :focus-visible { outline: 1px solid var(--emerald); outline-offset: 2px; }
     .keep-all { word-break: keep-all; overflow-wrap: break-word; }
-    .board-row { transition: background-color 0.15s, border-color 0.15s; }
-    .board-row:hover { background-color: rgba(255,255,255,0.03); border-color: rgba(34,197,94,0.35); }
-    .modal-backdrop { background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+    .board-row { transition: background-color 0.15s ease, border-color 0.15s ease; }
+    .board-row:hover { background-color: rgba(255,255,255,0.025); }
+    .modal-backdrop { background: rgba(0,0,0,0.82); backdrop-filter: blur(3px); }
     .lock-icon { width: 14px; height: 14px; flex-shrink: 0; }
-    /* 관리자 Donian 뱃지 애니메이션 (메인 DONIAN 라벨 효과 축소) */
+    /* 관리자 Donian 뱃지 애니메이션 */
     @keyframes donianBadgeGlow {
-      0%, 100% { text-shadow: 0 0 6px rgba(52, 211, 153, 0.45); }
-      50% { text-shadow: 0 0 14px rgba(52, 211, 153, 0.85); }
+      0%, 100% { text-shadow: 0 0 6px rgba(52, 211, 153, 0.42); }
+      50% { text-shadow: 0 0 14px rgba(52, 211, 153, 0.72); }
     }
     .donian-badge {
       animation: donianBadgeGlow 2.4s ease-in-out infinite;
@@ -41,22 +57,69 @@
       display: inline-block;
     }
     @media (prefers-reduced-motion: reduce) {
-      .donian-badge { animation: none; text-shadow: 0 0 6px rgba(52, 211, 153, 0.45); }
+      .donian-badge { animation: none; text-shadow: 0 0 6px rgba(52, 211, 153, 0.42); }
     }
     .pw-mask { -webkit-text-security: disc; text-security: disc; }
-    /* 비밀번호 입력창 placeholder도 연한 회색으로 (보안 점 처리는 제외) */
-    .pw-mask::placeholder { color: #71717a; -webkit-text-fill-color: #71717a; -webkit-text-security: none; text-security: none; opacity: 1; }
+    .pw-mask::placeholder { color: #6f7680; -webkit-text-fill-color: #6f7680; -webkit-text-security: none; text-security: none; opacity: 1; }
     /* 입력창 내부 하이라이팅 (투명 텍스트 + 하이라이트 레이어) */
     .hl-wrap { position: relative; }
     .hl-layer { pointer-events: none; white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; }
     .hl-layer-single { white-space: pre; overflow: hidden; }
-    .hl-input { color: transparent; -webkit-text-fill-color: transparent; caret-color: #e4e4e7; overflow-wrap: break-word; word-break: normal; }
-    .hl-input::placeholder { color: #71717a; -webkit-text-fill-color: #71717a; }
-    .contact-email::placeholder { color: #71717a; -webkit-text-fill-color: #71717a; opacity: 1; }
-    .hl-input::selection { background: rgba(59,130,246,0.35); }
+    .hl-input { color: transparent; -webkit-text-fill-color: transparent; caret-color: var(--emerald-bright); overflow-wrap: break-word; word-break: normal; }
+    .hl-input::placeholder { color: #6f7680; -webkit-text-fill-color: #6f7680; }
+    .contact-email::placeholder { color: #6f7680; -webkit-text-fill-color: #6f7680; opacity: 1; }
+    .hl-input::selection { background: rgba(52,211,153,0.28); }
     /* Matrix 배경 (메인화면과 동일 효과) */
-    #matrix-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.42; }
-    @media (max-width: 640px) { #matrix-bg { opacity: 0.25; } }
+    #matrix-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.18; }
+    @media (max-width: 640px) { #matrix-bg { opacity: 0.12; } }
+
+    /* ---------- refined surfaces ---------- */
+    .app-bar { background: #0b0c0d; border-bottom: 1px solid var(--line); }
+    .app-bar .bar-link { border-radius: 6px; }
+    .app-bar .bar-link:hover { background: rgba(255,255,255,0.04); }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--rad); }
+    .list-head { background: rgba(255,255,255,0.02); }
+
+    /* Tailwind CDN 주입 이후에도 우선하도록 body 후손 셀렉터 사용 */
+    body .bg-zinc-900, body .bg-zinc-900\/95 { background-color: var(--panel); }
+    body .bg-zinc-800, body .bg-zinc-800\/50 { background-color: var(--panel-2); }
+    body .bg-zinc-700 { background-color: #1b1f23; }
+    body .border-white\/10 { border-color: var(--line); }
+    body .border-white\/5 { border-color: var(--line); }
+    body .rounded { border-radius: 6px; }
+    body .rounded-lg { border-radius: 8px; }
+    body .rounded-xl { border-radius: 12px; }
+    body .text-green-400, body .text-green-300 { color: var(--emerald); }
+    body .text-blue-400, body .text-blue-300 { color: var(--emerald); }
+    body .bg-green-500\/20 { background-color: rgba(52,211,153,0.14); }
+    body .border-green-500\/40 { border-color: rgba(52,211,153,0.32); }
+    body .bg-blue-500\/20, body .bg-blue-500\/10 { background-color: rgba(52,211,153,0.12); }
+    body .border-blue-500\/40, body .border-blue-500\/30 { border-color: rgba(52,211,153,0.3); }
+    body .bg-red-500\/20 { background-color: rgba(248,113,113,0.14); }
+    body .focus\:border-green-500\/50:focus { border-color: rgba(52,211,153,0.45); }
+    body .hl-wrap:focus-within { border-color: rgba(52,211,153,0.45); }
+    body .hl-wrap .hl-layer { color: var(--fg); }
+    body input, body select, body textarea { color-scheme: dark; }
+    body select option { background: var(--panel-2); color: var(--fg); }
+    body .accent-green-500 { accent-color: var(--emerald); }
+    /* primary CTA: 에메랄드 단색 */
+    body button.bg-green-500\/20.border-green-500\/40 {
+      background-color: rgba(52,211,153,0.92);
+      border-color: rgba(52,211,153,0.92);
+      color: #04241a;
+      font-weight: 600;
+    }
+    body button.bg-green-500\/20.border-green-500\/40:hover { background-color: var(--emerald-bright); border-color: var(--emerald-bright); color: #04241a; }
+    body button.bg-green-500\/20.border-green-500\/40:disabled { background-color: rgba(52,211,153,0.35); border-color: rgba(52,211,153,0.2); color: rgba(4,36,26,0.7); }
+    body button.bg-blue-500\/20.border-blue-500\/40 {
+      background-color: rgba(52,211,153,0.92);
+      border-color: rgba(52,211,153,0.92);
+      color: #04241a;
+      font-weight: 600;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .board-row, .app-bar .bar-link { transition: none !important; }
+    }
   </style>
 </head>
 <body class="bg-[#0a0a0a] text-zinc-200 antialiased min-h-screen">
@@ -64,17 +127,17 @@
   <canvas id="matrix-bg" aria-hidden="true"></canvas>
 
   <!-- Terminal window chrome (sticky) -->
-  <div class="fixed top-0 left-0 right-0 z-40 bg-zinc-900/90 backdrop-blur border-b border-white/5">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-10 flex items-center gap-2">
-      <span class="w-3 h-3 rounded-full bg-red-500"></span>
-      <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-      <span class="w-3 h-3 rounded-full bg-green-500"></span>
-      <span class="ml-3 text-xs font-mono"><span class="text-white">Terminal</span><span class="text-zinc-400 hidden sm:inline"> — Donian Board</span></span>
-      <div class="ml-auto flex items-center gap-0.5 sm:gap-3 text-xs text-zinc-400 font-mono whitespace-nowrap">
-        <a href="index.html" class="px-1 sm:px-2 py-1 hover:text-zinc-200 transition whitespace-nowrap">← 메인</a>
-        <button id="admin-btn" class="px-1 sm:px-2 py-1 hover:text-zinc-200 transition">관리자</button>
-        <a href="https://github.com/sponsors/Donian-kor" target="_blank" rel="noopener" aria-label="github 후원" title="github 후원" class="hidden sm:inline-flex items-center gap-1 px-1 sm:px-2 py-1 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>github후원</a>
-        <a id="sponsor-kakao" href="https://qr.kakaopay.com/FL8dh56ra9c406950" target="_blank" rel="noopener" aria-label="kakao 후원" title="kakao 후원" class="inline-flex sm:hidden items-center gap-1 px-1 py-1 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>kakao후원</a>
+  <div class="app-bar fixed top-0 left-0 right-0 z-40">
+    <div class="max-w-4xl mx-auto px-3 sm:px-6 h-11 flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+      <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+      <span class="ml-3 text-xs font-mono"><span class="text-zinc-100">Terminal</span><span class="text-zinc-400 hidden sm:inline"> — Donian Board</span></span>
+      <div class="ml-auto flex items-center gap-0.5 sm:gap-2 text-xs text-zinc-400 font-mono whitespace-nowrap">
+        <a href="index.html" class="bar-link inline-flex items-center h-11 px-2 sm:px-2.5 hover:text-zinc-100 transition whitespace-nowrap">← 메인</a>
+        <button id="admin-btn" class="bar-link inline-flex items-center h-11 px-2 sm:px-2.5 hover:text-zinc-100 transition">관리자</button>
+        <a href="https://github.com/sponsors/Donian-kor" target="_blank" rel="noopener" aria-label="github 후원" title="github 후원" class="bar-link hidden sm:inline-flex items-center gap-1 h-11 px-2 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>github후원</a>
+        <a id="sponsor-kakao" href="https://qr.kakaopay.com/FL8dh56ra9c406950" target="_blank" rel="noopener" aria-label="kakao 후원" title="kakao 후원" class="bar-link inline-flex sm:hidden items-center gap-1 h-11 px-2 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>kakao후원</a>
       </div>
     </div>
   </div>
@@ -94,17 +157,17 @@
     })();
   </script>
 
-  <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pt-14 pb-12">
+  <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pt-16 pb-16">
 
     <!-- Header -->
-    <div class="mb-5">
-      <div class="font-mono text-sm">
-        <div class="text-zinc-400 mb-2"># Donian Board — 문의 게시판</div>
-        <div class="flex items-center gap-2">
-          <span class="text-green-400 font-bold text-lg">C:\></span>
-          <span class="text-zinc-200 text-lg">dir board\</span>
+    <div class="mb-6 pb-6 border-b border-white/5">
+      <div class="text-sm">
+        <div class="font-mono text-xs text-zinc-500 mb-3 tracking-wide"># Donian Board — 문의 게시판</div>
+        <div class="flex items-center gap-2 font-mono">
+          <span class="text-emerald-400/90 font-bold text-lg">C:\></span>
+          <span class="text-zinc-100 text-lg">dir board\</span>
         </div>
-        <p class="text-zinc-500 text-xs mt-1 keep-all">누구나 자유롭게 글을 남길 수 있습니다. (비회원제 · 비밀번호로 삭제 · 잠금 지원)</p>
+        <p class="text-zinc-500 text-xs mt-2 keep-all">누구나 자유롭게 글을 남길 수 있습니다. (비회원제 · 비밀번호로 삭제 · 잠금 지원)</p>
       </div>
     </div>
 
@@ -131,8 +194,8 @@
     </div>
 
     <!-- List -->
-    <div class="rounded-lg border border-white/10 bg-zinc-900/95 overflow-hidden">
-      <div class="grid grid-cols-[12%_1fr_32%_7%] sm:grid-cols-[2rem_3.5rem_1fr_8rem_5rem_2.5rem] gap-1 sm:gap-2 px-2 sm:px-4 py-2 border-b border-white/5 text-[0.65rem] text-zinc-500 font-mono">
+    <div class="panel overflow-hidden">
+      <div class="list-head grid grid-cols-[12%_1fr_32%_7%] sm:grid-cols-[2rem_3.5rem_1fr_8rem_5rem_2.5rem] gap-1 sm:gap-2 px-2 sm:px-4 py-2.5 border-b border-white/5 text-[0.65rem] text-zinc-500 font-mono tracking-wide">
         <span class="text-center hidden sm:block">번호</span>
         <span class="text-center">상태</span>
         <span class="text-center">제목</span>
@@ -148,8 +211,8 @@
 
     <!-- 글쓰기 버튼 (목록 섹션 우측 아래) -->
     <div class="flex justify-end mt-4">
-      <button id="write-btn" class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-green-500/20 border border-green-500/40 text-green-300 text-sm font-semibold hover:bg-green-500/30 transition shadow-lg">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      <button id="write-btn" class="inline-flex items-center gap-2 px-4 h-10 rounded-md bg-emerald-400/12 border border-emerald-400/30 text-emerald-300 text-sm font-medium hover:bg-emerald-400/20 hover:border-emerald-400/45 transition">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
         글쓰기
       </button>
     </div>
@@ -158,16 +221,16 @@
     <div id="pagination" class="flex items-center justify-center gap-2 mt-4"></div>
 
     <!-- 문의 폼 -->
-    <div id="contact" class="mt-8">
-      <div class="mb-3 font-mono text-sm">
-        <div class="flex items-center gap-2">
-          <span class="text-green-400 font-bold">C:\></span>
-          <span class="text-zinc-200">type Mail 1:1 문의하기.txt</span>
+    <div id="contact" class="mt-10 pt-8 border-t border-white/5">
+      <div class="mb-4 text-sm">
+        <div class="flex items-center gap-2 font-mono">
+          <span class="text-emerald-400/90 font-bold">C:\></span>
+          <span class="text-zinc-100">type Mail 1:1 문의하기.txt</span>
         </div>
-        <p class="text-zinc-500 text-xs mt-1">게시판에 글을 남기기 어려운 경우 이 폼으로 문의하세요.</p>
+        <p class="text-zinc-500 text-xs mt-1.5">게시판에 글을 남기기 어려운 경우 이 폼으로 문의하세요.</p>
       </div>
-      <div class="rounded-lg bg-zinc-900/95 border border-white/10 p-4">
-        <form id="contact-form" action="https://api.web3forms.com/submit" method="POST" novalidate class="space-y-3 text-sm">
+      <div class="panel p-4 sm:p-5">
+        <form id="contact-form" action="https://api.web3forms.com/submit" method="POST" novalidate class="space-y-3.5 text-sm">
           <input type="hidden" name="access_key" value="86ed093a-3831-49d5-af59-51b56c5cfeb9">
           <input type="hidden" name="from_name" value="Donian 웹사이트 문의">
           <input type="hidden" name="subject" value="Donian 게시판 1:1 문의">
@@ -215,7 +278,7 @@
   <!-- Write Modal -->
   <div id="write-modal" class="hidden fixed inset-0 z-[70] items-center justify-center p-4 modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="write-title">
     <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-zinc-900 border border-white/10 shadow-2xl">
-      <button data-close="write-modal" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 flex items-center justify-center transition" aria-label="닫기">✕</button>
+      <button data-close="write-modal" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-300 flex items-center justify-center transition" aria-label="닫기">✕</button>
       <div class="p-5">
         <h3 id="write-title" class="font-bold text-lg text-zinc-100 mb-4">글쓰기</h3>
         <form id="write-form" class="space-y-3 text-sm" autocomplete="off" novalidate>
@@ -277,7 +340,7 @@
   <!-- Edit Modal -->
   <div id="edit-modal" class="hidden fixed inset-0 z-[70] items-center justify-center p-4 modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-title">
     <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-zinc-900 border border-white/10 shadow-2xl">
-      <button data-close="edit-modal" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 flex items-center justify-center transition" aria-label="닫기">✕</button>
+      <button data-close="edit-modal" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-300 flex items-center justify-center transition" aria-label="닫기">✕</button>
       <div class="p-5">
         <h3 id="edit-title" class="font-bold text-lg text-zinc-100 mb-4">글 수정</h3>
         <form id="edit-form" class="space-y-3 text-sm" autocomplete="off" novalidate>
@@ -315,7 +378,7 @@
   <!-- Detail Modal -->
   <div id="detail-modal" class="hidden fixed inset-0 z-[70] items-center justify-center p-4 modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="detail-title">
     <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-zinc-900 border border-white/10 shadow-2xl">
-      <button data-close="detail-modal" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 flex items-center justify-center transition" aria-label="닫기">✕</button>
+      <button data-close="detail-modal" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-300 flex items-center justify-center transition" aria-label="닫기">✕</button>
       <div class="p-5">
         <div id="detail-content"></div>
       </div>
@@ -799,8 +862,8 @@
               ${p.comment_count > 0 ? `<span class="text-emerald-400 text-xs shrink-0">+ ${p.comment_count}</span>` : ''}
             </div>
             <div class="text-zinc-100 font-semibold text-xs truncate py-1 text-center">${renderName(p.name, p.is_admin)}</div>
-            <div class="hidden sm:block text-zinc-500 text-xs text-center">${fmtPostDate(p.created_at)}</div>
-            <div class="text-center text-zinc-500 text-xs">${p.views}</div>
+            <div class="hidden sm:block text-zinc-500 text-xs text-center font-mono tabular-nums">${fmtPostDate(p.created_at)}</div>
+            <div class="text-center text-zinc-500 text-xs font-mono tabular-nums">${p.views}</div>
           </div>
           `;
       }).join('');
@@ -853,15 +916,15 @@
       let html = '';
       const prev = Math.max(1, currentPage - 1);
       const next = Math.min(totalPages, currentPage + 1);
-      html += `<button data-page="${prev}" class="px-3 py-1.5 rounded bg-zinc-800 border border-white/10 text-zinc-300 text-xs hover:bg-zinc-700 transition ${currentPage === 1 ? 'opacity-40 pointer-events-none' : ''}">이전</button>`;
+      html += `<button data-page="${prev}" class="inline-flex items-center justify-center h-9 px-3 rounded-md bg-zinc-800 border border-white/10 text-zinc-300 text-xs hover:bg-zinc-700 transition ${currentPage === 1 ? 'opacity-40 pointer-events-none' : ''}">이전</button>`;
       for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
-          html += `<button data-page="${i}" class="px-3 py-1.5 rounded text-xs transition ${i === currentPage ? 'bg-green-500/20 text-green-300 border border-green-500/40' : 'bg-zinc-800 border border-white/10 text-zinc-300 hover:bg-zinc-700'}">${i}</button>`;
+          html += `<button data-page="${i}" class="inline-flex items-center justify-center h-9 min-w-9 px-3 rounded-md text-xs transition ${i === currentPage ? 'bg-green-500/20 text-green-300 border border-green-500/40' : 'bg-zinc-800 border border-white/10 text-zinc-300 hover:bg-zinc-700'}">${i}</button>`;
         } else if (i === currentPage - 2 || i === currentPage + 2) {
           html += '<span class="text-zinc-600 text-xs px-1">…</span>';
         }
       }
-      html += `<button data-page="${next}" class="px-3 py-1.5 rounded bg-zinc-800 border border-white/10 text-zinc-300 text-xs hover:bg-zinc-700 transition ${currentPage === totalPages ? 'opacity-40 pointer-events-none' : ''}">다음</button>`;
+      html += `<button data-page="${next}" class="inline-flex items-center justify-center h-9 px-3 rounded-md bg-zinc-800 border border-white/10 text-zinc-300 text-xs hover:bg-zinc-700 transition ${currentPage === totalPages ? 'opacity-40 pointer-events-none' : ''}">다음</button>`;
       paginationEl.innerHTML = html;
       paginationEl.querySelectorAll('button[data-page]').forEach((btn) => {
         btn.addEventListener('click', () => {
