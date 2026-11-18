@@ -460,9 +460,7 @@ export default {
       const ts = await verifyTurnstile(body['cf-turnstile-response'], ip, env);
       if (!ts.success) return json({ error: '봇 인증에 실패했습니다.', detail: ts.errorCodes || [] }, 403);
       if (!password || !title || !content || !name) return json({ error: '이름, 비밀번호, 제목, 내용은 필수 항목입니다.' }, 400);
-      if (charLen(password) < 4) return json({ error: '비밀번호는 4글자 이상이어야 합니다.' }, 400);
       if (!isAdmin && charLen(password) > 12) return json({ error: '비밀번호는 12글자 이하여야 합니다.' }, 400);
-      if (name && charLen(name.trim()) === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
       if (name && charLen(name) > 27) return json({ error: '이름은 27글자 이하여야 합니다.' }, 400);
       if (charLen(title) > 35) return json({ error: '제목은 35글자 이하여야 합니다.' }, 400);
       if (charLen(content) > 1500) return json({ error: '내용은 1500글자 이하여야 합니다.' }, 400);
@@ -532,9 +530,7 @@ export default {
       const ts = await verifyTurnstile(body['cf-turnstile-response'], ip, env);
       if (!ts.success) return json({ error: '봇 인증에 실패했습니다.', detail: ts.errorCodes || [] }, 403);
       if (!password || !content || !name) return json({ error: '이름, 비밀번호, 내용은 필수 항목입니다.' }, 400);
-      if (charLen(password) < 4) return json({ error: '비밀번호는 4글자 이상이어야 합니다.' }, 400);
       if (charLen(password) > 12) return json({ error: '비밀번호는 12글자 이하여야 합니다.' }, 400);
-      if (name && charLen(name.trim()) === 1) return json({ error: '이름은 2글자 이상이어야 합니다.' }, 400);
       if (name && charLen(name) > 27) return json({ error: '이름은 27글자 이하여야 합니다.' }, 400);
       if (charLen(content) > 1500) return json({ error: '댓글은 1500글자 이하여야 합니다.' }, 400);
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);

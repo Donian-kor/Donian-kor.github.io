@@ -219,13 +219,13 @@
               <label class="block text-zinc-400 mb-1 text-xs">이름</label>
               <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
                 <div id="write-name-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
-                <input type="text" name="name" required placeholder="이름 (최소 2 · 최대 27글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+                <input type="text" name="name" required placeholder="이름 (최대 27글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
               </div>
               <p id="write-name-filter-msg" class="hidden mt-1 text-[0.65rem] text-rose-400">사칭,욕설,비속어는 차단됩니다</p>
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">비밀번호</label>
-              <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호 (최소 4 · 최대 12글자, 한글 불가)" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호 (최대 12글자, 한글 불가)" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
           </div>
           <div id="write-status-field">
@@ -985,11 +985,8 @@
       if (!nameVal) { setFieldError(nameEl, '이름을 입력하세요.'); return; }
       if (!titleVal.trim()) { setFieldError(titleEl, '제목을 입력하세요.'); return; }
       if (!contentVal.trim()) { setFieldError(contentEl, '내용을 입력하세요.'); return; }
-      if (pwEl.value.length < 4) {
-        setFieldError(pwEl, pwEl.value.length === 0 ? '비밀번호를 입력하세요.' : '비밀번호는 4글자 이상이어야 합니다.');
-        return;
-      }
-      if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
+      if (!pwEl.value) { setFieldError(pwEl, '비밀번호를 입력하세요.'); return; }
+      if (!nameVal) { setFieldError(nameEl, '이름을 입력하세요.'); return; }
       if (!isAdminMode() && isImpersonationName(nameVal)) { setFieldError(nameEl, '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.'); return; }
       if (!isAdminMode() && findProfanityRanges(nameVal).length > 0) { setFieldError(nameEl, '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.'); return; }
       if (findProfanityRanges(titleVal).length > 0 || findProfanityRanges(contentVal).length > 0) {
@@ -1093,9 +1090,9 @@
             <div class="grid grid-cols-2 gap-2">
               <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
                 <div id="comment-name-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
-                <input type="text" name="name" required placeholder="이름 (최소 2 · 최대 27글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+                <input type="text" name="name" required placeholder="이름 (최대 27글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
               </div>
-              <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호 (최소 4 · 최대 12글자, 한글 불가)" class="pw-mask px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호 (최대 12글자, 한글 불가)" class="pw-mask px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
             <div class="flex items-center justify-between">
               <span class="text-zinc-500 text-[0.65rem]">댓글</span>
@@ -1290,10 +1287,7 @@
       const contentVal = contentEl.value;
       if (!contentVal.trim()) { setFieldError(contentEl, '댓글 내용을 입력하세요.'); return; }
       const pwVal = pwEl.value;
-      if (pwVal.length < 4) {
-        setFieldError(pwEl, pwVal.length === 0 ? '비밀번호를 입력하세요.' : '비밀번호는 4글자 이상이어야 합니다.');
-        return;
-      }
+      if (!pwVal) { setFieldError(pwEl, '비밀번호를 입력하세요.'); return; }
       const nameVal = nameEl.value.trim();
       const nameMsg = document.getElementById('write-name-filter-msg');
       if (!nameVal) {
@@ -1301,7 +1295,6 @@
         setFieldError(nameEl, '이름을 입력하세요.');
         return;
       }
-      if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
       if (!isAdminMode() && (isImpersonationName(nameVal) || findProfanityRanges(nameVal).length > 0)) {
         if (nameMsg) { nameMsg.textContent = FILTER_MSG; nameMsg.classList.remove('hidden'); }
         setFieldError(nameEl, FILTER_MSG);
@@ -1368,7 +1361,7 @@
           <div class="grid grid-cols-2 gap-2">
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-2 py-1 text-xs text-zinc-200 reply-name-highlight" aria-hidden="true"></div>
-              <input type="text" name="name" required maxlength="27" placeholder="이름 (최소 2 · 최대 27글자)" class="hl-input relative w-full px-2 py-1 text-xs bg-transparent focus:outline-none">
+              <input type="text" name="name" required maxlength="27" placeholder="이름 (최대 27글자)" class="hl-input relative w-full px-2 py-1 text-xs bg-transparent focus:outline-none">
             </div>
             <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호" class="pw-mask px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50">
           </div>
@@ -1482,7 +1475,7 @@
         pwEl.style.color = '#6ee7b7';
       } else {
         if (pwEl.readOnly) { pwEl.value = ''; pwEl.readOnly = false; }
-        pwEl.placeholder = '최소 4 · 최대 12글자 (한글 불가)';
+        pwEl.placeholder = '최대 12글자 (한글 불가)';
         pwEl.style.color = '';
       }
     }
