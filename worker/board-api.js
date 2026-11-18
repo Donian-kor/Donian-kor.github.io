@@ -5,6 +5,10 @@
 
 const ALLOWED_ORIGIN = 'https://donian-kor.github.io';
 
+// 게시글 상태: 일반 사용자가 선택 가능한 값 (알림/완료는 자동 파생)
+const POST_STATUSES = ['question', 'bug', 'request'];
+const FILTER_STATUSES = ['notice', ...POST_STATUSES, 'done'];
+
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
@@ -283,25 +287,35 @@ export default {
       const offset = (page - 1) * pageSize;
       const search = (url.searchParams.get('search') || '').trim();
       const searchType = url.searchParams.get('search_type') || 'both';
+      const statusFilter = url.searchParams.get('status') || '';
 
-      let where = '';
-      let params = [];
+      const conditions = [];
+      const params = [];
       if (search) {
         const like = `%${search}%`;
         if (searchType === 'title') {
-          where = 'WHERE p.title LIKE ?';
-          params = [like];
+          conditions.push('p.title LIKE ?');
+          params.push(like);
         } else if (searchType === 'content') {
-          where = 'WHERE p.content LIKE ?';
-          params = [like];
+          conditions.push('p.content LIKE ?');
+          params.push(like);
         } else if (searchType === 'author') {
-          where = 'WHERE p.name LIKE ?';
-          params = [like];
+          conditions.push('p.name LIKE ?');
+          params.push(like);
         } else {
-          where = 'WHERE p.title LIKE ? OR p.content LIKE ?';
-          params = [like, like];
+          conditions.push('(p.title LIKE ? OR p.content LIKE ?)');
+          params.push(like, like);
         }
       }
+      if (FILTER_STATUSES.includes(statusFilter)) {
+        // 표시 상태 계산: 알림(관리자 글) > 완료(관리자 답변) > 저장된 상태
+        conditions.push(`CASE
+          WHEN p.is_admin = 1 OR p.status = 'notice' THEN 'notice'
+          WHEN (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id AND comments.is_admin = 1) > 0 THEN 'done'
+          ELSE p.status END = ?`);
+        params.push(statusFilter);
+      }
+      const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
 
       const totalRow = await env.donian_board
         .prepare(`SELECT COUNT(*) as total FROM posts p ${where}`)
@@ -309,11 +323,12 @@ export default {
         .first();
       const total = totalRow ? totalRow.total : 0;
 
+      // 알림(관리자 글)은 항상 목록 최상단에 고정
       const rows = await env.donian_board
-        .prepare(`SELECT p.id, p.name, p.title, p.created_at, p.views, p.is_locked, p.is_admin,
+        .prepare(`SELECT p.id, p.name, p.title, p.created_at, p.views, p.is_locked, p.is_admin, p.status,
           (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id AND comments.is_admin = 1) as admin_replies,
           (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id) as comment_count
-          FROM posts p ${where} ORDER BY p.created_at DESC LIMIT ? OFFSET ?`)
+          FROM posts p ${where} ORDER BY p.is_admin DESC, p.created_at DESC LIMIT ? OFFSET ?`)
         .bind(...params, pageSize, offset)
         .all();
 
@@ -330,7 +345,7 @@ export default {
     if (method === 'GET' && /^\/posts\/\d+$/.test(path)) {
       const id = parseInt(path.split('/')[2], 10);
       const post = await env.donian_board
-        .prepare('SELECT id, name, title, content, created_at, views, is_locked, password_hash, is_admin FROM posts WHERE id = ?')
+        .prepare('SELECT id, name, title, content, created_at, views, is_locked, password_hash, is_admin, status FROM posts WHERE id = ?')
         .bind(id)
         .first();
       if (!post) return json({ error: 'not found' }, 404);
@@ -393,6 +408,7 @@ export default {
           views: views,
           is_locked: post.is_locked,
           is_admin: post.is_admin,
+          status: post.status,
         },
         comments: enriched,
       });
@@ -405,7 +421,7 @@ export default {
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
       const isAdmin = await isAdminToken(body.token);
-      const { password, title, content } = body;
+      const { password, title, content, status } = body;
       if (!title || !content) return json({ error: '필수 항목 누락' }, 400);
       if (!isAdmin && !password) return json({ error: '비밀번호를 입력하세요.' }, 400);
       if (charLen(title) > 20) return json({ error: '제목은 20글자 이하여야 합니다.' }, 400);
@@ -416,10 +432,14 @@ export default {
       if (!(isAdmin || (await rateLimitWrite('edit', 10)))) return json({ error: '너무 많은 요청입니다. 잠시 후 시도하세요.' }, 429);
       const hash = password ? await hashPassword(password) : '';
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
-      const post = await env.donian_board.prepare('SELECT password_hash FROM posts WHERE id = ?').bind(id).first();
+      const post = await env.donian_board.prepare('SELECT password_hash, status, is_admin FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
       if (!isAdmin && post.password_hash !== hash && hash !== adminHash) return json({ error: '비밀번호가 일치하지 않습니다.' }, 403);
-      await env.donian_board.prepare('UPDATE posts SET title = ?, content = ? WHERE id = ?').bind(title, content, id).run();
+      // 관리자 글은 항상 'notice' 유지, 일반 글은 허용값만 반영(없으면 기존값)
+      const finalStatus = isAdmin || post.is_admin
+        ? 'notice'
+        : (POST_STATUSES.includes(status) ? status : (post.status || 'question'));
+      await env.donian_board.prepare('UPDATE posts SET title = ?, content = ?, status = ? WHERE id = ?').bind(title, content, finalStatus, id).run();
       return json({ ok: true });
     }
 
@@ -428,7 +448,7 @@ export default {
       if (isBot(ua)) return json({ error: '봇 요청은 차단됩니다.' }, 403);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
-      const { name, password, title, content, is_locked } = body;
+      const { name, password, title, content, is_locked, status } = body;
       // 이름 사칭 검증을 봇 인증보다 먼저 (명확한 안내)
       const isAdmin = await isAdminToken(body.token);
       if (name && !isAdmin && isImpersonationName(name)) return json({ error: '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.' }, 400);
@@ -451,9 +471,11 @@ export default {
       const hash = await hashPassword(password);
       const now = new Date().toISOString();
       const finalName = isAdmin ? 'Donian' : name;
+      // 관리자 글은 자동 '알림', 일반 글은 문의/버그/의뢰만 허용
+      const finalStatus = isAdmin ? 'notice' : (POST_STATUSES.includes(status) ? status : 'question');
       await env.donian_board
-        .prepare('INSERT INTO posts (name, password_hash, title, content, created_at, is_locked, is_admin) VALUES (?, ?, ?, ?, ?, ?, ?)')
-        .bind(finalName, hash, title, content, now, is_locked ? 1 : 0, isAdmin ? 1 : 0)
+        .prepare('INSERT INTO posts (name, password_hash, title, content, created_at, is_locked, is_admin, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+        .bind(finalName, hash, title, content, now, is_locked ? 1 : 0, isAdmin ? 1 : 0, finalStatus)
         .run();
       return json({ ok: true });
     }

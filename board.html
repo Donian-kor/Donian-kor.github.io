@@ -106,7 +106,7 @@
     </div>
 
     <!-- Search -->
-    <div class="flex flex-row gap-2 mb-4">
+    <div class="flex flex-row flex-wrap gap-2 mb-4">
       <select id="search-type" class="px-2 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
         <option value="both">제목+내용</option>
         <option value="title">제목만</option>
@@ -117,6 +117,14 @@
         class="flex-1 min-w-0 px-3 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
       <button id="search-btn" class="px-4 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm hover:bg-zinc-700 transition whitespace-nowrap">검색</button>
       <button id="reset-search-btn" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-400 text-sm hover:bg-zinc-700 hover:text-zinc-200 transition whitespace-nowrap">전체</button>
+      <select id="status-filter" class="px-2 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50" aria-label="상태 필터">
+        <option value="">상태: 전체</option>
+        <option value="notice">알림</option>
+        <option value="question">문의</option>
+        <option value="bug">버그</option>
+        <option value="request">의뢰</option>
+        <option value="done">완료</option>
+      </select>
     </div>
 
     <!-- List -->
@@ -211,6 +219,14 @@
               <input type="text" name="pw" required autocomplete="new-password" placeholder="최대 8글자 (한글 불가)" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
           </div>
+          <div id="write-status-field">
+            <label class="block text-zinc-400 mb-1 text-xs">상태</label>
+            <select name="status" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <option value="question">문의</option>
+              <option value="bug">버그</option>
+              <option value="request">의뢰</option>
+            </select>
+          </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">제목</label>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
@@ -251,6 +267,14 @@
         <h3 id="edit-title" class="font-bold text-lg text-zinc-100 mb-4">글 수정</h3>
         <form id="edit-form" class="space-y-3 text-sm" autocomplete="off" novalidate>
           <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
+          <div id="edit-status-field">
+            <label class="block text-zinc-400 mb-1 text-xs">상태</label>
+            <select name="status" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <option value="question">문의</option>
+              <option value="bug">버그</option>
+              <option value="request">의뢰</option>
+            </select>
+          </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">제목</label>
             <input type="text" name="title" required placeholder="최대 20글자" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
@@ -287,6 +311,8 @@
     // ---------- 설정 ----------
     const API_BASE = 'https://board-api.donian.workers.dev';
     const PAGE_SIZE = 10;
+    // 게시글 상태: 알림/완료는 자동, 문의/버그/의뢰는 작성자가 선택
+    const STATUS_LABELS = { notice: '알림', done: '완료', question: '문의', bug: '버그', request: '의뢰' };
     // Cloudflare Turnstile Site Key
     const TURNSTILE_SITE_KEY = '0x4AAAAAAGEuj5z4bjUhFlrp';
 
@@ -332,6 +358,7 @@
     let currentPage = 1;
     let totalPages = 1;
     let currentSearch = '';
+    let currentStatus = '';
     let currentPostId = null;
 
     // ---------- 유틸 ----------
@@ -696,6 +723,19 @@
       }
     });
 
+    // ---------- 게시글 상태 배지 ----------
+    function renderPostStatus(p) {
+      let key, cls;
+      if (p.is_admin || p.status === 'notice') {
+        key = 'notice'; cls = 'text-red-300 font-semibold';
+      } else if (p.admin_replies > 0) {
+        key = 'done'; cls = 'text-yellow-200 font-semibold';
+      } else {
+        key = p.status || 'question'; cls = 'text-zinc-100';
+      }
+      return `<span class="${cls}">${STATUS_LABELS[key] || '문의'}</span>`;
+    }
+
     // ---------- 목록 ----------
     const listEl = document.getElementById('board-list');
     const emptyEl = document.getElementById('empty-state');
@@ -706,7 +746,7 @@
     function listCacheKey() {
       const typeEl = document.getElementById('search-type');
       const type = currentSearch ? (typeEl ? typeEl.value : 'both') : '';
-      return LIST_CACHE_PREFIX + currentPage + ':' + currentSearch + ':' + type;
+      return LIST_CACHE_PREFIX + currentPage + ':' + currentSearch + ':' + type + ':' + currentStatus;
     }
     function clearListCache() {
       try {
@@ -728,11 +768,7 @@
       }
       emptyEl.classList.add('hidden');
       listEl.innerHTML = data.posts.map((p) => {
-        const statusHtml = p.is_admin
-          ? '<span class="text-red-300 font-semibold">알림</span>'
-          : (p.admin_replies > 0
-            ? '<span class="text-yellow-200 font-semibold">완료</span>'
-            : '<span class="text-zinc-300">대기</span>');
+        const statusHtml = renderPostStatus(p);
         return `
           <div class="board-row grid grid-cols-[12%_1fr_32%_7%] sm:grid-cols-[2rem_3.5rem_1fr_8rem_5rem_2.5rem] gap-1 sm:gap-2 items-center px-2 sm:px-4 py-3 cursor-pointer" data-id="${p.id}">
             <div class="text-zinc-600 text-[0.65rem] font-mono text-center hidden sm:block">${String(p.id).padStart(2, '0')}</div>
@@ -772,6 +808,7 @@
       // 2) 항상 최신 데이터로 백그라운드 갱신 (새 글/답변 반영)
       try {
         const params = new URLSearchParams({ page: currentPage });
+        if (currentStatus) params.set('status', currentStatus);
         if (currentSearch) {
           params.set('search', currentSearch);
           const typeEl = document.getElementById('search-type');
@@ -827,9 +864,17 @@
         loadList();
       }
     });
+    document.getElementById('status-filter').addEventListener('change', (e) => {
+      currentStatus = e.target.value;
+      currentPage = 1;
+      loadList();
+    });
     document.getElementById('reset-search-btn').addEventListener('click', () => {
       document.getElementById('search-input').value = '';
+      const statusEl = document.getElementById('status-filter');
+      if (statusEl) statusEl.value = '';
       currentSearch = '';
+      currentStatus = '';
       currentPage = 1;
       loadList();
     });
@@ -849,6 +894,7 @@
       if (cHl) cHl.innerHTML = '';
       applyAdminName();
       applyAdminWritePassword();
+      applyAdminStatusFields();
       openModal('write-modal');
       loadProfanity();
       setupTurnstile();
@@ -943,6 +989,7 @@
         password: fd.get('pw') || '',
         title: fd.get('title') || '',
         content: fd.get('content') || '',
+        status: fd.get('status') || 'question',
         is_locked: fd.get('is_locked') ? 1 : 0,
         botcheck: fd.get('botcheck') || '',
         'cf-turnstile-response': fd.get('cf-turnstile-response') || '',
@@ -1156,6 +1203,9 @@
       }
       form.querySelector('[name="title"]').value = p.title;
       form.querySelector('[name="content"]').value = p.content;
+      const statusEl = form.querySelector('[name="status"]');
+      if (statusEl) statusEl.value = (p.status === 'bug' || p.status === 'request') ? p.status : 'question';
+      applyAdminStatusFields();
       closeModal('detail-modal');
       openModal('edit-modal');
     }
@@ -1185,6 +1235,7 @@
         password: fd.get('pw') || '',
         title: fd.get('title') || '',
         content: fd.get('content') || '',
+        status: fd.get('status') || 'question',
         botcheck: fd.get('botcheck') || '',
       };
       if (charLen(body.title) > 20) {
@@ -1205,6 +1256,8 @@
           body: JSON.stringify(body),
         });
         closeModal('edit-modal');
+        clearListCache();
+        loadList(true); // 변경된 상태를 목록에 즉시 반영
         openDetail(currentPost.id);
         showToast('글이 수정되었습니다.');
       } catch (err) {
@@ -1262,6 +1315,7 @@
         });
         openDetail(postId);
         clearListCache();
+        loadList(true); // 관리자 답변으로 상태가 "완료"로 바뀐 목록 즉시 반영
         showToast('댓글이 등록되었습니다.');
       } catch (err) {
         showToast('댓글 등록 실패: ' + err.message);
@@ -1279,6 +1333,7 @@
         });
         openDetail(postId);
         clearListCache();
+        loadList(true);
         showToast('댓글이 삭제되었습니다.');
       } catch (err) {
         showToast('삭제 실패: ' + err.message);
@@ -1393,6 +1448,15 @@
       return !!sessionStorage.getItem('board_admin_token');
     }
 
+    // 관리자 모드에서는 상태 선택 숨김 (관리자 글은 항상 "알림")
+    function applyAdminStatusFields() {
+      const on = isAdminMode();
+      const writeField = document.getElementById('write-status-field');
+      const editField = document.getElementById('edit-status-field');
+      if (writeField) writeField.classList.toggle('hidden', on);
+      if (editField) editField.classList.toggle('hidden', on);
+    }
+
     // 관리자 모드: 글쓰기 비밀번호를 20자 랜덤으로 자동 생성(읽기전용)
     function applyAdminWritePassword() {
       const pwEl = writeForm.querySelector('[name="pw"]');
@@ -1472,6 +1536,7 @@
       adminBtn.classList.toggle('text-zinc-400', !on);
       applyAdminName();
       applyAdminWritePassword();
+      applyAdminStatusFields();
       if (on) startAdminKeepAlive(); else stopAdminKeepAlive();
     }
 

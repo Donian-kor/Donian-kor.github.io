@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS posts (
   created_at TEXT NOT NULL,
   views INTEGER DEFAULT 0,
   is_locked INTEGER DEFAULT 0,
-  is_admin INTEGER DEFAULT 0
+  is_admin INTEGER DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'question'
 );
 
 CREATE TABLE IF NOT EXISTS comments (
@@ -39,4 +40,5 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 );
 
 CREATE INDEX IF NOT EXISTS idx_posts_created ON posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_posts_admin_created ON posts(is_admin DESC, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id);
