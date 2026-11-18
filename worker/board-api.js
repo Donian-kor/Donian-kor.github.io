@@ -12,11 +12,27 @@ const FILTER_STATUSES = ['notice', ...POST_STATUSES, 'done'];
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+  'Access-Control-Allow-Credentials': 'true',
   'Cache-Control': 'no-store',
 };
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
+function json(data, status = 200, extraHeaders = {}) {
+  return new Response(JSON.stringify(data), { status, headers: { ...JSON_HEADERS, ...extraHeaders } });
+}
+
+// 관리자 세션 쿠키 읽기 (HttpOnly, cross-site → SameSite=None; Secure)
+const ADMIN_COOKIE = 'donian_admin';
+function getAdminCookie(request) {
+  const raw = request.headers.get('Cookie') || '';
+  const m = raw.match(new RegExp('(?:^|;\\s*)' + ADMIN_COOKIE + '=([^;]+)'));
+  return m ? m[1] : '';
+}
+function adminCookieSet(id) {
+  // Max-Age/Expires 없음 = 세션 쿠키 → 브라우저 닫으면 삭제
+  return ADMIN_COOKIE + '=' + id + '; Path=/; HttpOnly; Secure; SameSite=None';
+}
+function adminCookieClear() {
+  return ADMIN_COOKIE + '=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0';
 }
 
 // 봇/크롤러 User-Agent 패턴
@@ -119,6 +135,7 @@ export default {
           'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Allow-Credentials': 'true',
         },
       });
     }
@@ -249,8 +266,10 @@ export default {
         // 성공 → 실패 카운터 초기화
         await env.donian_board.prepare('DELETE FROM rate_limits WHERE key = ?').bind(alKey).run();
         const token = crypto.randomUUID().replace(/-/g, '').slice(0, 32);
+        const sessionId = crypto.randomUUID().replace(/-/g, '').slice(0, 32);
         await env.COUNTER_KV.put('admin_token:' + token, 'admin', { expirationTtl: 3600 });
-        return json({ ok: true, token });
+        await env.COUNTER_KV.put('admin_session:' + sessionId, 'admin', { expirationTtl: 3600 });
+        return json({ ok: true, token }, 200, { 'Set-Cookie': adminCookieSet(sessionId) });
       }
       // 실패 → 누적
       const next = fails + 1;
@@ -263,18 +282,42 @@ export default {
       return json({ ok: false, error: '비밀번호가 일치하지 않습니다.' });
     }
 
-    // POST /admin/keepalive - 관리자 토큰 TTL 연장 (활동 중 세션 유지)
+    // POST /admin/keepalive - 관리자 세션 TTL 연장 (쿠키 세션 + 기존 토큰 모두 지원)
     if (method === 'POST' && path === '/admin/keepalive') {
       const body = await request.json().catch(() => ({}));
       const tk = body.token || '';
+      const sid = getAdminCookie(request);
+      let extended = false;
+      if (sid && (await env.COUNTER_KV.get('admin_session:' + sid))) {
+        await env.COUNTER_KV.put('admin_session:' + sid, 'admin', { expirationTtl: 3600 });
+        extended = true;
+      }
       if (tk && (await isAdminToken(tk))) {
         await env.COUNTER_KV.put('admin_token:' + tk, 'admin', { expirationTtl: 3600 });
-        return json({ ok: true });
+        extended = true;
       }
-      return json({ ok: false });
+      return json({ ok: extended });
     }
 
-    // 토큰 유효성 검사
+    // POST /admin/logout - 세션 쿠키 및 토큰 즉시 폐기
+    if (method === 'POST' && path === '/admin/logout') {
+      const body = await request.json().catch(() => ({}));
+      const tk = body.token || '';
+      const sid = getAdminCookie(request);
+      if (sid) await env.COUNTER_KV.delete('admin_session:' + sid);
+      if (tk) await env.COUNTER_KV.delete('admin_token:' + tk);
+      return json({ ok: true }, 200, { 'Set-Cookie': adminCookieClear() });
+    }
+
+    // 관리자 세션 유효성: 쿠키 세션 우선, 기존 토큰도 지원
+    async function isAdminSession(request, token) {
+      const sid = getAdminCookie(request);
+      if (sid && (await env.COUNTER_KV.get('admin_session:' + sid))) return true;
+      if (token && (await env.COUNTER_KV.get('admin_token:' + token))) return true;
+      return false;
+    }
+
+    // 토큰 유효성 검사 (하위 호환)
     async function isAdminToken(token) {
       if (!token) return false;
       return !!(await env.COUNTER_KV.get('admin_token:' + token));
@@ -420,7 +463,7 @@ export default {
       const id = parseInt(path.split('/')[2], 10);
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
-      const isAdmin = await isAdminToken(body.token);
+      const isAdmin = await isAdminSession(request, body.token);
       const { password, title, content, status } = body;
       if (!title || !content) return json({ error: '필수 항목 누락' }, 400);
       if (!isAdmin && !password) return json({ error: '비밀번호를 입력하세요.' }, 400);
@@ -453,7 +496,7 @@ export default {
       if (body.botcheck) return json({ error: 'bot' }, 400);
       const { name, password, title, content, is_locked, status } = body;
       // 이름 사칭 검증을 봇 인증보다 먼저 (명확한 안내)
-      const isAdmin = await isAdminToken(body.token);
+      const isAdmin = await isAdminSession(request, body.token);
       if (name && !isAdmin && isImpersonationName(name)) return json({ error: '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.' }, 400);
       if (name && !isAdmin && hasProfanity(name)) return json({ error: '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.' }, 400);
       if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
@@ -490,7 +533,7 @@ export default {
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const post = await env.donian_board.prepare('SELECT password_hash FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
-      const isAdmin = await isAdminToken(body.token);
+      const isAdmin = await isAdminSession(request, body.token);
       if (!isAdmin && adminHash && hash === adminHash) {
         return json({ error: '관리자 비밀번호로 삭제하려면 관리자 로그인이 필요합니다. 관리자 버튼으로 로그인하세요.' }, 403);
       }
@@ -523,7 +566,7 @@ export default {
       const body = await request.json();
       if (body.botcheck) return json({ error: 'bot' }, 400);
       const { name, password, content, parent_id } = body;
-      const isAdmin = await isAdminToken(body.token);
+      const isAdmin = await isAdminSession(request, body.token);
       if (name && !isAdmin && isImpersonationName(name)) return json({ error: '관리자·운영자 또는 이와 혼동되는 이름은 사용할 수 없습니다.' }, 400);
       if (name && !isAdmin && hasProfanity(name)) return json({ error: '이름에 욕설/비속어가 포함되어 사용할 수 없습니다.' }, 400);
       if (!(await rateLimitEdge(ip, env))) return json({ error: '요청이 너무 많습니다. 잠시 후 시도하세요.' }, 429);
@@ -573,7 +616,7 @@ export default {
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const comment = await env.donian_board.prepare('SELECT password_hash FROM comments WHERE id = ?').bind(id).first();
       if (!comment) return json({ error: 'not found' }, 404);
-      const isAdmin = await isAdminToken(body.token);
+      const isAdmin = await isAdminSession(request, body.token);
       if (!isAdmin && adminHash && hash === adminHash) {
         return json({ error: '관리자 비밀번호로 댓글을 삭제하려면 관리자 로그인이 필요합니다. 관리자 버튼으로 로그인하세요.' }, 403);
       }

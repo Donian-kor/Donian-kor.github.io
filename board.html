@@ -457,8 +457,8 @@
       return escapeHtml(s).replace(/\n/g, '<br>');
     }
     async function api(path, options) {
-      const opts = { ...(options || {}) };
-      // 관리자 모드면 POST/PUT/DELETE 요청에 token 자동 첨부
+      const opts = { credentials: 'include', ...(options || {}) };
+      // 관리자 모드면 POST/PUT/DELETE 요청에 token 자동 첨부 (쿠키 인증도 병행, 하위 호환)
       if (opts.body && typeof opts.body === 'string' && opts.method && opts.method !== 'GET') {
         try {
           const bodyObj = JSON.parse(opts.body);
@@ -1556,6 +1556,12 @@
     if (adminBtn) {
       adminBtn.addEventListener('click', async () => {
         if (isAdminMode()) {
+          // 서버 세션/토큰 즉시 폐기
+          fetch(API_BASE + '/admin/logout', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: sessionStorage.getItem('board_admin_token') || '' }),
+          }).catch(() => {});
           sessionStorage.removeItem('board_admin_token');
           updateAdminBtn();
           showToast('관리자 모드가 해제되었습니다.');
@@ -1566,6 +1572,7 @@
         try {
           const res = await fetch(API_BASE + '/admin/verify', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ password: pw }),
           });
