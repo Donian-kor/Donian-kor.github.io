@@ -434,7 +434,10 @@ export default {
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const post = await env.donian_board.prepare('SELECT password_hash, status, is_admin FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
-      if (!isAdmin && post.password_hash !== hash && hash !== adminHash) return json({ error: '비밀번호가 일치하지 않습니다.' }, 403);
+      if (!isAdmin && adminHash && hash === adminHash) {
+        return json({ error: '관리자 비밀번호로 수정하려면 관리자 로그인이 필요합니다. 관리자 버튼으로 로그인하세요.' }, 403);
+      }
+      if (!isAdmin && post.password_hash !== hash) return json({ error: '비밀번호가 일치하지 않습니다.' }, 403);
       // 관리자 글은 항상 'notice' 유지, 일반 글은 허용값만 반영(없으면 기존값)
       const finalStatus = isAdmin || post.is_admin
         ? 'notice'
@@ -489,7 +492,10 @@ export default {
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const post = await env.donian_board.prepare('SELECT password_hash FROM posts WHERE id = ?').bind(id).first();
       if (!post) return json({ error: 'not found' }, 404);
-      const isAdmin = (await isAdminToken(body.token)) || hash === adminHash;
+      const isAdmin = await isAdminToken(body.token);
+      if (!isAdmin && adminHash && hash === adminHash) {
+        return json({ error: '관리자 비밀번호로 삭제하려면 관리자 로그인이 필요합니다. 관리자 버튼으로 로그인하세요.' }, 403);
+      }
       const isAuthor = post.password_hash === hash;
       if (!isAdmin) {
         if (await isBlocked()) return json({ error: '비밀번호를 3회 틀려 차단되었습니다. 내일 다시 시도하세요.' }, 429);
@@ -571,7 +577,10 @@ export default {
       const adminHash = env.ADMIN_PASSWORD ? await hashPassword(env.ADMIN_PASSWORD) : null;
       const comment = await env.donian_board.prepare('SELECT password_hash FROM comments WHERE id = ?').bind(id).first();
       if (!comment) return json({ error: 'not found' }, 404);
-      const isAdmin = hash === adminHash;
+      const isAdmin = await isAdminToken(body.token);
+      if (!isAdmin && adminHash && hash === adminHash) {
+        return json({ error: '관리자 비밀번호로 댓글을 삭제하려면 관리자 로그인이 필요합니다. 관리자 버튼으로 로그인하세요.' }, 403);
+      }
       if (!isAdmin) {
         if (await isBlocked()) return json({ error: '비밀번호를 3회 틀려 차단되었습니다. 내일 다시 시도하세요.' }, 429);
         if (comment.password_hash !== hash) {
