@@ -1759,8 +1759,22 @@
       const btnDefault = btn ? btn.textContent : '보내기';
       // 영문·숫자 기반 이메일 형식 (한글/공지/형식 오류 거부)
       const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-      // docs/world_country_domains.txt 의 국가별 도메인(ccTLD/ccSLD) 목록
-      const VALID_EMAIL_DOMAINS = new Set([".ab",".ac",".ad",".ae",".ai",".ak",".aq",".ar",".art",".arts",".asn",".asso",".at",".au",".av",".ax",".bc",".bd",".be",".bel",".bg",".bh",".biz",".blog",".bm",".bo",".br",".busan",".ca",".cc",".ch",".chungbuk",".chungnam",".ci",".ck",".cl",".club",".cm",".cn",".co",".com",".cr",".cu",".cx",".cy",".cz",".daegu",".daejeon",".de",".dev",".dk",".do",".dr",".dz",".ebiz",".ec",".ed",".edu",".ee",".eg",".ens",".es",".et",".eu",".eun",".fam",".fhs",".fi",".fie",".fin",".firm",".fj",".fl",".fm",".fo",".fr",".from",".game",".gangwon",".gc",".geek",".gen",".gg",".gh",".gi",".gl",".go",".gob",".gouv",".gov",".govt",".gr",".gs",".gub",".gv",".gwangju",".gyeongbuk",".gyeonggi",".gyeongnam",".health",".hk",".hotel",".hr",".hs",".hu",".id",".idf",".idv",".ie",".il",".im",".in",".incheon",".ind",".inf",".info",".int",".io",".ir",".is",".isla",".it",".iz",".je",".jeju",".jeonbuk",".jeonnam",".jo",".jp",".ke",".kg",".kh",".kiev",".kiwi",".kommune",".kr",".kw",".ky",".kyiv",".kz",".la",".lb",".lg",".lk",".lt",".ltd",".lu",".lv",".ly",".ma",".maori",".mb",".me",".med",".mi",".mil",".mm",".mn",".mo",".mobi",".mod",".ms",".msk",".mt",".mu",".muni",".museum",".mx",".my",".name",".nat",".nb",".ne",".net",".nf",".ng",".nhs",".nic",".nl",".no",".nom",".nome",".np",".ns",".nt",".nu",".ny",".nz",".om",".on",".or",".org",".other",".pa",".parti",".pe",".per",".perso",".pg",".ph",".pk",".pl",".plc",".pol",".police",".pp",".pr",".prd",".press",".presse",".pri",".priv",".pro",".pt",".pub",".pw",".py",".qa",".qc",".re",".rec",".res",".ro",".rs",".ru",".rw",".sa",".sc",".sch",".school",".sci",".se",".sejong",".seoul",".sg",".si",".sk",".sld",".sn",".spb",".stat",".store",".su",".tec",".tel",".th",".tm",".tn",".to",".tourism",".tr",".tur",".tv",".tw",".tx",".tz",".ua",".ug",".uk",".ulsan",".univ",".us",".uy",".uz",".ve",".vg",".vgs",".vn",".waw",".web",".ws",".www",".yk",".za",".zm",".zw",".한국"]);
+      // 도메인 목록: docs/all_world_domains_integrated.txt 를 fetch로 로드 (하드코딩 없음)
+      // file:// 로컬 열기 등 fetch 실패 시 최소 폴백만 사용
+      const VALID_EMAIL_DOMAINS = new Set(['.com','.net','.org','.kr','.co.kr','.jp','.co.jp','.us','.uk','.io','.dev','.xyz']);
+      async function loadEmailDomains() {
+        try {
+          const res = await fetch('docs/all_world_domains_integrated.txt', { cache: 'no-store' });
+          if (!res.ok) return false;
+          const text = await res.text();
+          // .도메인 형태 추출 (영문/한글/중국어/일본어/러시아어/아랍어)
+          const re = /\.([A-Za-z]{2,}|[가-힣]{2,}|[一-龥]{2,}|[ぁ-んァ-ン]{2,}|[а-яА-Я]{2,}|[ا-ي]{2,})(?=\s|,|$|\.)/gu;
+          let m, count = 0;
+          while ((m = re.exec(text)) !== null) { VALID_EMAIL_DOMAINS.add(m[0].toLowerCase()); count++; }
+          return count > 0;
+        } catch (e) { return false; }
+      }
+      const emailDomainsReady = loadEmailDomains();
       function emailDomainAllowed(email) {
         const at = email.lastIndexOf('@');
         if (at < 0) return false;
@@ -1856,6 +1870,7 @@
         });
       }
       loadProfanity().then(() => { profanityReady = true; refresh(false); });
+      emailDomainsReady.then(() => refresh(false)); // 도메인 목록 로드 후 이메일 검증 재평가
       refresh(false);
 
       form.addEventListener('submit', async (e) => {
@@ -1865,6 +1880,7 @@
         if (payload.botcheck) return; // 봇으로 판단되면 조용히 중단
 
         await loadProfanity();
+        await emailDomainsReady;
         profanityReady = true;
         const state = validate(true); // 최종 검증 + 경고 표시
         paintHighlights(state.v);
