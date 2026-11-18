@@ -107,6 +107,14 @@
 
     <!-- Search -->
     <div class="flex flex-row flex-wrap gap-2 mb-4">
+      <select id="status-filter" class="px-2 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50" aria-label="상태 필터">
+        <option value="">기본</option>
+        <option value="notice">알림</option>
+        <option value="question">문의</option>
+        <option value="bug">버그</option>
+        <option value="request">의뢰</option>
+        <option value="done">완료</option>
+      </select>
       <select id="search-type" class="px-2 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
         <option value="both">제목+내용</option>
         <option value="title">제목만</option>
@@ -117,14 +125,6 @@
         class="flex-1 min-w-0 px-3 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
       <button id="search-btn" class="px-4 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm hover:bg-zinc-700 transition whitespace-nowrap">검색</button>
       <button id="reset-search-btn" class="px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-400 text-sm hover:bg-zinc-700 hover:text-zinc-200 transition whitespace-nowrap">전체</button>
-      <select id="status-filter" class="px-2 py-2 rounded bg-zinc-900 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50" aria-label="상태 필터">
-        <option value="">상태: 전체</option>
-        <option value="notice">알림</option>
-        <option value="question">문의</option>
-        <option value="bug">버그</option>
-        <option value="request">의뢰</option>
-        <option value="done">완료</option>
-      </select>
     </div>
 
     <!-- List -->
@@ -172,23 +172,29 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">이름</label>
-              <input type="text" name="name" required class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+                <div id="contact-name-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
+                <input type="text" name="name" required class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+              </div>
               <p class="hidden text-rose-400 text-[0.65rem] mt-1" data-error="name"></p>
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">이메일</label>
-              <input type="email" name="email" required class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="email" name="email" required placeholder="doniankhj@gmail.com" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
               <p class="hidden text-rose-400 text-[0.65rem] mt-1" data-error="email"></p>
             </div>
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">내용</label>
-            <textarea name="message" required rows="4" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+            <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
+              <div id="contact-message-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
+              <textarea name="message" required rows="4" class="hl-input relative w-full px-3 py-2 text-sm leading-relaxed bg-transparent focus:outline-none resize-y"></textarea>
+            </div>
             <p class="hidden text-rose-400 text-[0.65rem] mt-1" data-error="message"></p>
           </div>
           <div class="flex items-center justify-between gap-2">
             <p id="contact-status" class="hidden font-mono text-xs"></p>
-            <button type="submit" class="ml-auto px-4 py-2 rounded bg-green-500/20 border border-green-500/40 text-green-300 text-sm hover:bg-green-500/30 transition">보내기</button>
+            <button type="submit" disabled class="ml-auto px-4 py-2 rounded bg-green-500/20 border border-green-500/40 text-green-300 text-sm hover:bg-green-500/30 transition opacity-40 cursor-not-allowed">보내기</button>
           </div>
         </form>
       </div>
@@ -1745,7 +1751,15 @@
       if (!form) return;
       const btn = form.querySelector('button[type=submit]');
       const statusEl = document.getElementById('contact-status');
+      const nameEl = form.querySelector('[name="name"]');
+      const emailEl = form.querySelector('[name="email"]');
+      const messageEl = form.querySelector('[name="message"]');
+      const nameHl = document.getElementById('contact-name-highlight');
+      const messageHl = document.getElementById('contact-message-highlight');
       const btnDefault = btn ? btn.textContent : '보내기';
+      // 영문·숫자 기반 이메일 형식 (한글/공지/형식 오류 거부)
+      const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      let profanityReady = false;
 
       function setFieldMsg(key, msg) {
         const el = form.querySelector('[data-error="' + key + '"]');
@@ -1753,20 +1767,70 @@
         el.textContent = msg || '';
         el.classList.toggle('hidden', !msg);
       }
-      ['name', 'email', 'message'].forEach((key) => {
-        const el = form.querySelector('[name="' + key + '"]');
-        if (el) el.addEventListener('input', () => setFieldMsg(key, ''));
-      });
-
       function showStatus(text, kind) {
         if (!statusEl) return;
         statusEl.textContent = text;
         statusEl.classList.remove('hidden', 'text-green-400', 'text-rose-400', 'text-zinc-400');
         statusEl.classList.add(kind === 'ok' ? 'text-green-400' : 'text-rose-400');
       }
-      function resetButton() {
-        if (btn) { btn.disabled = false; btn.textContent = btnDefault; }
+      function values() {
+        return {
+          name: (nameEl ? nameEl.value : '').trim(),
+          email: (emailEl ? emailEl.value : '').trim(),
+          message: (messageEl ? messageEl.value : '').trim(),
+        };
       }
+      // 입력 중 욕설·비속어 즉시 하이라이트
+      function paintHighlights(v) {
+        if (nameHl) nameHl.innerHTML = renderHighlighted(v.name, false).html;
+        if (messageHl) {
+          messageHl.innerHTML = renderHighlighted(v.message, true).html;
+          if (messageEl) {
+            messageHl.scrollTop = messageEl.scrollTop;
+            messageHl.scrollLeft = messageEl.scrollLeft;
+          }
+        }
+      }
+      function validate(show) {
+        const v = values();
+        const nameEmpty = !v.name;
+        const emailEmpty = !v.email;
+        const emailBad = !!v.email && !EMAIL_RE.test(v.email);
+        const msgEmpty = !v.message;
+        const profane = profanityReady && (findProfanityRanges(v.name).length || findProfanityRanges(v.message).length);
+        // 형식 오류·욕설은 입력 즉시 경고, 빈 값은 제출 시도 시에만 경고
+        setFieldMsg('name', (show && nameEmpty) ? '이름을 입력해 주세요.' : '');
+        setFieldMsg('email', emailBad ? '올바른 이메일 주소를 입력해 주세요. (예: doniankhj@gmail.com)' : ((show && emailEmpty) ? '이메일을 입력해 주세요.' : ''));
+        setFieldMsg('message', profane ? '욕설/비속어가 포함되어 전송할 수 없습니다.' : ((show && msgEmpty) ? '문의 내용을 입력해 주세요.' : ''));
+        const ok = !nameEmpty && !emailEmpty && !emailBad && !msgEmpty && !profane;
+        if (btn) {
+          btn.disabled = !ok;
+          btn.classList.toggle('opacity-40', !ok);
+          btn.classList.toggle('cursor-not-allowed', !ok);
+        }
+        return { ok, v };
+      }
+      function refresh(show) {
+        const v = values();
+        paintHighlights(v);
+        return validate(show);
+      }
+      function resetButton() {
+        if (btn) btn.textContent = btnDefault;
+        refresh(false); // 전송 후/오류 후에도 현재 입력값 기준으로 버튼 상태 복원
+      }
+
+      [nameEl, emailEl, messageEl].forEach((el) => {
+        if (el) el.addEventListener('input', () => refresh(false));
+      });
+      if (messageEl && messageHl) {
+        messageEl.addEventListener('scroll', () => {
+          messageHl.scrollTop = messageEl.scrollTop;
+          messageHl.scrollLeft = messageEl.scrollLeft;
+        });
+      }
+      loadProfanity().then(() => { profanityReady = true; refresh(false); });
+      refresh(false);
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1774,32 +1838,11 @@
         if (payload.botcheck === undefined) payload.botcheck = ''; // honeypot 빈 값 유지
         if (payload.botcheck) return; // 봇으로 판단되면 조용히 중단
 
-        // 이름/이메일/내용 필수 검증 + 욕설·비속어 필터 (게시판과 동일한 단어 목록)
-        setFieldMsg('name', '');
-        setFieldMsg('email', '');
-        setFieldMsg('message', '');
-        const nameVal = (payload.name || '').trim();
-        const emailVal = (payload.email || '').trim();
-        const messageVal = (payload.message || '').trim();
-        let invalid = false;
-        if (!nameVal) { setFieldMsg('name', '이름을 입력해 주세요.'); invalid = true; }
-        if (!emailVal) {
-          setFieldMsg('email', '이메일을 입력해 주세요.'); invalid = true;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-          setFieldMsg('email', '올바른 이메일 주소를 입력해 주세요.'); invalid = true;
-        }
-        if (!messageVal) { setFieldMsg('message', '문의 내용을 입력해 주세요.'); invalid = true; }
-        if (!invalid) {
-          await loadProfanity();
-          if (findProfanityRanges(nameVal).length || findProfanityRanges(messageVal).length) {
-            setFieldMsg('message', '욕설/비속어가 포함되어 전송할 수 없습니다.');
-            invalid = true;
-          }
-        }
-        if (invalid) {
-          showStatus('입력 내용을 확인해 주세요.', 'error');
-          return;
-        }
+        await loadProfanity();
+        profanityReady = true;
+        const state = validate(true); // 최종 검증 + 경고 표시
+        paintHighlights(state.v);
+        if (!state.ok) { showStatus('입력 내용을 확인해 주세요.', 'error'); return; }
 
         if (btn) { btn.disabled = true; btn.textContent = '전송 중...'; }
         if (statusEl) {
