@@ -219,13 +219,13 @@
               <label class="block text-zinc-400 mb-1 text-xs">이름</label>
               <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
                 <div id="write-name-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
-                <input type="text" name="name" required placeholder="최대 10글자" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+                <input type="text" name="name" required placeholder="이름 (최소 2 · 최대 27글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
               </div>
               <p id="write-name-filter-msg" class="hidden mt-1 text-[0.65rem] text-rose-400">사칭,욕설,비속어는 차단됩니다</p>
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 text-xs">비밀번호</label>
-              <input type="text" name="pw" required autocomplete="new-password" placeholder="최대 8글자 (한글 불가)" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호 (최소 4 · 최대 12글자, 한글 불가)" class="pw-mask w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
           </div>
           <div id="write-status-field">
@@ -240,17 +240,17 @@
             <label class="block text-zinc-400 mb-1 text-xs">제목</label>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="title-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
-              <input type="text" name="title" required placeholder="최대 20글자" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+              <input type="text" name="title" required placeholder="제목 (최대 35글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
             </div>
           </div>
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="text-zinc-400 text-xs">내용</label>
-              <span id="content-counter" class="text-[0.65rem] text-zinc-500 font-mono">0 / 500</span>
+              <span id="content-counter" class="text-[0.65rem] text-zinc-500 font-mono">0 / 1500</span>
             </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="content-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
-              <textarea name="content" required rows="6" placeholder="최대 500글자" class="hl-input relative w-full px-3 py-2 text-sm leading-relaxed bg-transparent focus:outline-none resize-y"></textarea>
+              <textarea name="content" required rows="6" placeholder="내용 (최대 1500글자)" class="hl-input relative w-full px-3 py-2 text-sm leading-relaxed bg-transparent focus:outline-none resize-y"></textarea>
             </div>
           </div>
           <label class="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
@@ -286,11 +286,11 @@
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">제목</label>
-            <input type="text" name="title" required placeholder="최대 20글자" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+            <input type="text" name="title" required placeholder="제목 (최대 35글자)" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">내용</label>
-            <textarea name="content" required rows="6" placeholder="최대 500글자" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+            <textarea name="content" required rows="6" placeholder="내용 (최대 1500글자)" class="w-full px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50 resize-y"></textarea>
           </div>
           <div>
             <label class="block text-zinc-400 mb-1 text-xs">비밀번호 (작성 시 사용한 비밀번호)</label>
@@ -939,23 +939,23 @@
       const contentEl = writeForm.querySelector('[name="content"]');
       const counter = document.getElementById('content-counter');
       const updateCounter = () => {
-        if (counter) counter.textContent = charLen(contentEl.value) + ' / 500';
+        if (counter) counter.textContent = charLen(contentEl.value) + ' / 1500';
       };
       nameEl.addEventListener('input', () => {
-        const t = truncateChars(nameEl.value, 10);
+        const t = truncateChars(nameEl.value, 27);
         if (t !== nameEl.value) nameEl.value = t;
       });
       pwEl.addEventListener('input', () => {
         let v = [...pwEl.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
-        v = truncateChars(v, 8);
+        v = truncateChars(v, 12);
         if (v !== pwEl.value) pwEl.value = v;
       });
       titleEl.addEventListener('input', () => {
-        const t = truncateChars(titleEl.value, 20);
+        const t = truncateChars(titleEl.value, 35);
         if (t !== titleEl.value) titleEl.value = t;
       });
       contentEl.addEventListener('input', () => {
-        const t = truncateChars(contentEl.value, 500);
+        const t = truncateChars(contentEl.value, 1500);
         if (t !== contentEl.value) contentEl.value = t;
         updateCounter();
       });
@@ -985,8 +985,8 @@
       if (!nameVal) { setFieldError(nameEl, '이름을 입력하세요.'); return; }
       if (!titleVal.trim()) { setFieldError(titleEl, '제목을 입력하세요.'); return; }
       if (!contentVal.trim()) { setFieldError(contentEl, '내용을 입력하세요.'); return; }
-      if (pwEl.value.length < 2) {
-        setFieldError(pwEl, pwEl.value.length === 0 ? '비밀번호를 입력하세요.' : '비밀번호는 2글자 이상이어야 합니다.');
+      if (pwEl.value.length < 4) {
+        setFieldError(pwEl, pwEl.value.length === 0 ? '비밀번호를 입력하세요.' : '비밀번호는 4글자 이상이어야 합니다.');
         return;
       }
       if (nameVal.length === 1) { setFieldError(nameEl, '이름은 2글자 이상이어야 합니다.'); return; }
@@ -1093,13 +1093,13 @@
             <div class="grid grid-cols-2 gap-2">
               <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
                 <div id="comment-name-highlight" aria-hidden="true" class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-3 py-2 text-sm text-zinc-200"></div>
-                <input type="text" name="name" required placeholder="이름 (최대 10글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
+                <input type="text" name="name" required placeholder="이름 (최소 2 · 최대 27글자)" class="hl-input relative w-full px-3 py-2 text-sm bg-transparent focus:outline-none">
               </div>
-              <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호 (최대 8글자, 한글 불가)" class="pw-mask px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
+              <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호 (최소 4 · 최대 12글자, 한글 불가)" class="pw-mask px-3 py-2 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-sm focus:outline-none focus:border-green-500/50">
             </div>
             <div class="flex items-center justify-between">
               <span class="text-zinc-500 text-[0.65rem]">댓글</span>
-              <span id="comment-counter" class="text-[0.65rem] text-zinc-500 font-mono">0 / 50</span>
+              <span id="comment-counter" class="text-[0.65rem] text-zinc-500 font-mono">0 / 1500</span>
             </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="comment-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-3 py-2 text-sm leading-relaxed text-zinc-200"></div>
@@ -1132,7 +1132,7 @@
         commentHl.scrollTop = commentContentEl.scrollTop;
       };
       const updateCommentCounter = () => {
-        if (commentCounter) commentCounter.textContent = charLen(commentContentEl.value) + ' / 50';
+        if (commentCounter) commentCounter.textContent = charLen(commentContentEl.value) + ' / 1500';
       };
       commentContentEl.addEventListener('input', updateCommentPreview);
       commentContentEl.addEventListener('scroll', () => { commentHl.scrollTop = commentContentEl.scrollTop; });
@@ -1141,17 +1141,17 @@
       });
       // 댓글 폼 글자 수 제한
       commentNameEl.addEventListener('input', () => {
-        const t = truncateChars(commentNameEl.value, 10);
+        const t = truncateChars(commentNameEl.value, 27);
         if (t !== commentNameEl.value) commentNameEl.value = t;
         applyImpersonationHighlight(commentNameEl, document.getElementById('comment-name-highlight'));
       });
       commentPwEl.addEventListener('input', () => {
         let v = [...commentPwEl.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
-        v = truncateChars(v, 8);
+        v = truncateChars(v, 12);
         if (v !== commentPwEl.value) commentPwEl.value = v;
       });
       commentContentEl.addEventListener('input', () => {
-        const t = truncateChars(commentContentEl.value, 50);
+        const t = truncateChars(commentContentEl.value, 1500);
         if (t !== commentContentEl.value) commentContentEl.value = t;
         updateCommentCounter();
       });
@@ -1227,16 +1227,16 @@
     const editForm = document.getElementById('edit-form');
     const editError = document.getElementById('edit-error');
     editForm.querySelector('[name="title"]').addEventListener('input', (e) => {
-      const t = truncateChars(e.target.value, 20);
+      const t = truncateChars(e.target.value, 35);
       if (t !== e.target.value) e.target.value = t;
     });
     editForm.querySelector('[name="content"]').addEventListener('input', (e) => {
-      const t = truncateChars(e.target.value, 500);
+      const t = truncateChars(e.target.value, 1500);
       if (t !== e.target.value) e.target.value = t;
     });
     editForm.querySelector('[name="pw"]').addEventListener('input', (e) => {
       let v = [...e.target.value].filter((ch) => !KOREAN_CHAR_RE.test(ch)).join('');
-      v = truncateChars(v, 8);
+      v = truncateChars(v, 12);
       if (v !== e.target.value) e.target.value = v;
     });
 
@@ -1252,13 +1252,13 @@
         status: fd.get('status') || 'question',
         botcheck: fd.get('botcheck') || '',
       };
-      if (charLen(body.title) > 20) {
-        editError.textContent = '제목은 20글자 이하여야 합니다.';
+      if (charLen(body.title) > 35) {
+        editError.textContent = '제목은 35글자 이하여야 합니다.';
         editError.classList.remove('hidden');
         return;
       }
-      if (charLen(body.content) > 500) {
-        editError.textContent = '내용은 500글자 이하여야 합니다.';
+      if (charLen(body.content) > 1500) {
+        editError.textContent = '내용은 1500글자 이하여야 합니다.';
         editError.classList.remove('hidden');
         return;
       }
@@ -1290,8 +1290,8 @@
       const contentVal = contentEl.value;
       if (!contentVal.trim()) { setFieldError(contentEl, '댓글 내용을 입력하세요.'); return; }
       const pwVal = pwEl.value;
-      if (pwVal.length < 2) {
-        setFieldError(pwEl, pwVal.length === 0 ? '비밀번호를 입력하세요.' : '비밀번호는 2글자 이상이어야 합니다.');
+      if (pwVal.length < 4) {
+        setFieldError(pwEl, pwVal.length === 0 ? '비밀번호를 입력하세요.' : '비밀번호는 4글자 이상이어야 합니다.');
         return;
       }
       const nameVal = nameEl.value.trim();
@@ -1368,11 +1368,11 @@
           <div class="grid grid-cols-2 gap-2">
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div class="hl-layer hl-layer-single absolute inset-0 overflow-hidden px-2 py-1 text-xs text-zinc-200 reply-name-highlight" aria-hidden="true"></div>
-              <input type="text" name="name" required maxlength="10" placeholder="이름 (최대 10글자)" class="hl-input relative w-full px-2 py-1 text-xs bg-transparent focus:outline-none">
+              <input type="text" name="name" required maxlength="27" placeholder="이름 (최소 2 · 최대 27글자)" class="hl-input relative w-full px-2 py-1 text-xs bg-transparent focus:outline-none">
             </div>
             <input type="text" name="pw" required autocomplete="new-password" placeholder="비밀번호" class="pw-mask px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50">
           </div>
-          <textarea name="content" required rows="2" maxlength="50" placeholder="답글 (최대 50글자)" class="w-full px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50 resize-y"></textarea>
+          <textarea name="content" required rows="2" maxlength="1500" placeholder="답글 (최대 1500글자)" class="w-full px-2 py-1 rounded bg-zinc-800 border border-white/10 text-zinc-200 text-xs focus:outline-none focus:border-green-500/50 resize-y"></textarea>
           <div class="cf-turnstile"></div>
           <div class="flex justify-end gap-1">
             <button type="button" class="cancel-reply px-2 py-1 rounded bg-zinc-700 text-zinc-300 text-[0.65rem]">취소</button>
@@ -1482,7 +1482,7 @@
         pwEl.style.color = '#6ee7b7';
       } else {
         if (pwEl.readOnly) { pwEl.value = ''; pwEl.readOnly = false; }
-        pwEl.placeholder = '최대 8글자 (한글 불가)';
+        pwEl.placeholder = '최소 4 · 최대 12글자 (한글 불가)';
         pwEl.style.color = '';
       }
     }
