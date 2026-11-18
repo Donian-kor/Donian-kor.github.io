@@ -74,6 +74,10 @@
     .donian-cursor { display: inline-block; margin-left: 0.05em; animation: blink 0.8s step-end infinite; }
     .cursor-blink { animation: blink 1s step-end infinite; }
     .term-cursor { display: inline-block; width: 0.6ch; height: 1.1em; margin-left: 0.15rem; background: #22c55e; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+    /* 터미널 출력 스크롤바를 어두운 테마에 맞게 얇게 */
+    #terminal-body { scrollbar-width: thin; scrollbar-color: rgba(34,197,94,0.4) transparent; }
+    #terminal-body::-webkit-scrollbar { width: 4px; }
+    #terminal-body::-webkit-scrollbar-thumb { background: rgba(34,197,94,0.35); border-radius: 4px; }
     .prompt::before { content: '$ '; color: #22c55e; font-weight: 700; }
     .section-cmd { color: #22c55e; }
     .section-cmd::before { content: '$ '; }
@@ -199,9 +203,9 @@
           <span class="text-zinc-200 text-lg">type intro.txt</span>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/95 p-4 mb-4">
-          <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 min-h-[8rem]"></div>
-          <div class="mt-3 pt-3 border-t border-white/5">
-            <div id="about-body" class="pl-2 text-zinc-400 leading-relaxed space-y-1 min-h-[4rem]"></div>
+          <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 overflow-y-auto pr-1"></div>
+          <div class="mt-2 pt-2 border-t border-white/5">
+            <div id="about-body" class="pl-2 text-zinc-400 leading-relaxed space-y-1"></div>
           </div>
         </div>
         <div class="mt-2">
@@ -500,33 +504,6 @@ function isNewProject(p) {
       if (!body) return;
       const out = '◆ Android 앱 · PC 유틸리티 · 웹 게임 · AI 도구\n→ OCR · LLM · AI 이미지 생성(ComfyUI)을 엮은 실용 도구를 주로 만듭니다.\n$ type skills.txt\n◆ Kotlin · Jetpack Compose · Tkinter · PySide6\n◆ JavaScript · TypeScript · C#/.NET 10 · Rust · WebAssembly';
       let started = false;
-      let minHeight = 0;
-      // 스트리밍 중 박스 크기 고정 (최대 높이 미리 측정)
-      (function fixHeight() {
-        const m = document.createElement('div');
-        m.className = body.className;
-        m.style.position = 'absolute';
-        m.style.visibility = 'hidden';
-        m.style.left = '-9999px';
-        m.style.top = '0';
-        m.style.width = (body.offsetWidth || 320) + 'px';
-        let cl = document.createElement('div');
-        m.appendChild(cl);
-        out.split('\n').forEach((seg, idx) => {
-          if (idx > 0) {
-            cl = document.createElement('div');
-            m.appendChild(cl);
-          }
-          cl.appendChild(document.createTextNode(seg));
-        });
-        document.body.appendChild(m);
-        const h = m.offsetHeight;
-        document.body.removeChild(m);
-        body.style.minHeight = h + 'px';
-        body.style.height = h + 'px';
-        body.style.overflow = 'hidden';
-        minHeight = h;
-      })();
       function runStream() {
         body.innerHTML = '';
         let currentLine = document.createElement('div');
@@ -551,9 +528,7 @@ function isNewProject(p) {
             if (out[oi] === '$') delay = 900;
             setTimeout(streamChar, delay);
           } else {
-            // 다 찍은 실제 높이를 최소 높이로 고정 → 반복 초기화 시 레이아웃 점프 방지
-            minHeight = Math.max(minHeight, body.offsetHeight);
-            body.style.minHeight = minHeight + 'px';
+            // 다음 반복 전 잠시 유지 (높이는 콘텐츠에 맞춰 자연스럽게)
             setTimeout(() => {
               body.innerHTML = '';
               setTimeout(runStream, 600);
@@ -712,40 +687,13 @@ function isNewProject(p) {
         { cmd: '', out: '◆ Initializing profile...\n▸ 안녕하세요, Donian 입니다.\n◆ AI 코딩 도구 5개(Cline·Copilot·Kilo·Codex·opencode)를 규칙 파일 하나로 묶어 씁니다.\n→ AI가 실행하지 않은 검증을 "했다"고 보고하지 못하게 하고,\n   같은 오류에 3번 실패하면 멈추고 보고하게 만들었습니다.\n✓ 1998년 Visual Basic으로 시작해, 지금은 이 규칙으로 AI와 함께 Python·Kotlin 앱을 만듭니다.\n♫ ACE-Step Studio로 AI 음악 생성도 공부하고 있습니다.\n⚡ Done.' },
       ];
       let ci = 0;
-      // 스트리밍 중 박스 크기 고정 (최대 높이 미리 측정)
+      // 출력 영역은 5줄 높이로 고정, 6줄부터 스크롤 (줄 높이 실제 계산)
       (function fixHeight() {
-        const m = document.createElement('div');
-        m.className = body.className;
-        m.style.position = 'absolute';
-        m.style.visibility = 'hidden';
-        m.style.left = '-9999px';
-        m.style.top = '0';
-        m.style.width = (body.offsetWidth || 320) + 'px';
-        const { cmd, out } = commands[0];
-        if (cmd) {
-          const line = document.createElement('div');
-          line.innerHTML = '<span class="text-green-400 font-bold">$</span> <span class="text-zinc-200 ml-2 typing-text"></span>';
-          const t = line.querySelector('.typing-text');
-          t.textContent = cmd;
-          m.appendChild(line);
-        }
-        let cl = document.createElement('div');
-        cl.className = 'text-zinc-400 pl-4';
-        m.appendChild(cl);
-        out.split('\n').forEach((seg, idx) => {
-          if (idx > 0) {
-            cl = document.createElement('div');
-            cl.className = 'text-zinc-400 pl-4';
-            m.appendChild(cl);
-          }
-          cl.appendChild(document.createTextNode(seg));
-        });
-        document.body.appendChild(m);
-        const h = m.offsetHeight;
-        document.body.removeChild(m);
-        body.style.minHeight = h + 'px';
-        body.style.height = h + 'px';
-        body.style.overflow = 'hidden';
+        const lh = parseFloat(getComputedStyle(body).lineHeight) || 23;
+        const gap = 4; // space-y-1
+        body.style.minHeight = '0';
+        body.style.height = Math.round(lh * 5 + gap * 4) + 'px';
+        body.style.overflowY = 'auto';
       })();
       function runCommand() {
         if (ci >= commands.length) {
