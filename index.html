@@ -234,7 +234,7 @@
     // 폴드 펼침·태블릿처럼 화면이 넓은 터치 기기에서는 카카오페이 후원 링크도 함께 표시
     (function () {
       function updateSponsorLinks() {
-        var coarse = window.matchMedia('(pointer: coarse)').matches; // 주 입력 수단이 손가락(터치)
+        var coarse = window.matchMedia('(any-pointer: coarse)').matches; // 터치 입력이 하나라도 있음 (마우스 병용 태블릿 포함)
         var wide = window.matchMedia('(min-width: 640px)').matches;  // 화면 너비 640px 이상
         var kakao = document.getElementById('sponsor-kakao');
         if (kakao) kakao.style.display = (coarse && wide) ? 'inline-flex' : '';
