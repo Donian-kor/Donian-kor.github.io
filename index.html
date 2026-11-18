@@ -68,15 +68,16 @@
       text-shadow: 2px 0 0 #22d3ee, -2px 0 0 #f472b6, 0 0 14px rgba(163,230,53,0.9);
       transform: skewX(-6deg) translateX(2px);
     }
+    /* PC(md+) 좌우 2컬럼에서는 이름이 좌측 컬럼 안에 들어오도록 축소 (모바일은 기존 크기 유지) */
+    @media (min-width: 768px) {
+      .donian-decode { font-size: clamp(2.5rem, 9vw, 7rem); letter-spacing: clamp(0.1rem, 0.5vw, 0.5rem); }
+    }
     @media (prefers-reduced-motion: reduce) {
       .donian-decode { text-shadow: 0 0 8px rgba(163,230,53,0.5); }
     }
     .donian-cursor { display: inline-block; margin-left: 0.05em; animation: blink 0.8s step-end infinite; }
     .cursor-blink { animation: blink 1s step-end infinite; }
     .term-cursor { display: inline-block; width: 0.6ch; height: 1.1em; margin-left: 0.15rem; background: #22c55e; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
-    .career-extra { max-height: 0; transition: max-height 0.12s ease; }
-    .career-log:hover .career-extra, .career-log.hovered .career-extra, .career-log.expanded .career-extra { max-height: 420px; }
-    .career-log.expanded .career-hint { opacity: 0; }
     .prompt::before { content: '$ '; color: #22c55e; font-weight: 700; }
     .section-cmd { color: #22c55e; }
     .section-cmd::before { content: '$ '; }
@@ -212,30 +213,26 @@
     <!-- Career -->
     <section id="career" class="py-6">
       <div class="font-mono text-sm">
-        <div class="mb-3 flex items-center gap-3">
+        <div class="text-zinc-400 mb-2 leading-relaxed"># Donian Career — dev timeline</div>
+        <div class="mb-4 flex items-center gap-3">
           <span class="text-green-400 font-bold text-lg">C:\></span>
           <span class="text-zinc-200 text-lg">type career.log</span>
         </div>
         <div class="rounded-lg border border-white/10 bg-zinc-900/95 py-6 px-4 font-mono text-xs leading-relaxed overflow-x-auto">
-          <div id="career-log" class="career-log group space-y-1 cursor-pointer" tabindex="0" role="button" aria-expanded="false" onclick="this.classList.toggle('expanded'); this.setAttribute('aria-expanded', this.classList.contains('expanded'));" style="touch-action: manipulation;">
+          <div id="career-log" class="space-y-1">
             <div><span class="text-blue-400">2026.11.12</span>  <span class="text-zinc-200">MyAITutor 개발 중</span>  <span class="text-zinc-500"># AI 튜터 프로젝트</span></div>
-            <div class="career-extra overflow-hidden">
-              <div class="space-y-1 pt-1">
-                <div><span class="text-zinc-500">2026.11.06</span>  <span class="text-zinc-200">pdf_hwp_viewer 공개</span>  <span class="text-zinc-500"># PDF/HWP 문서 뷰어</span></div>
-                <div><span class="text-zinc-500">2026.10.21</span>  <span class="text-zinc-200">AI_GoStop 공개</span>  <span class="text-zinc-500"># AI 고스톱 프로젝트</span></div>
-                <div><span class="text-zinc-500">2026.10.20</span>  <span class="text-zinc-200">AI_jjangie 공개</span>  <span class="text-zinc-500"># AI 기반 웹앱</span></div>
-                <div><span class="text-zinc-500">2026.09.25</span>  <span class="text-zinc-200">gpu-cpu-status-monitor 공개</span>  <span class="text-zinc-500"># GPU/CPU 상태 모니터링</span></div>
-                <div><span class="text-zinc-500">2026.09.12</span>  <span class="text-zinc-200">Novel_Studio_Maker 공개</span>  <span class="text-zinc-500"># 소설/콘텐츠 제작 보조 도구</span></div>
-                <div><span class="text-zinc-500">2026.06.02</span>  <span class="text-zinc-200">split-text-file 공개</span>  <span class="text-zinc-500"># 대용량 텍스트 파일 분할 도구</span></div>
-                  <div><span class="text-zinc-500">2026.01.07</span>  <span class="text-zinc-200">AI coding 개발 입문 시작</span>, <span class="text-emerald-400">현재</span> <span id="career-duration" class="text-emerald-400 text-sm font-semibold"></span></div>
-                  <div><span class="text-zinc-500">2007.09.12</span>  <span class="text-zinc-200">만기제대</span></div>
-                  <div><span class="text-zinc-500">2005.09.13</span>  <span class="text-zinc-200">육군입대</span></div>
-                  <div><span class="text-zinc-500">2000.04.01</span>  <span class="text-zinc-200">유니텔 util 자료실에 "메모장 프로그램 출시"</span></div>
-                  <div><span class="text-zinc-500">1999.04.15</span>  <span class="text-zinc-200">한글로 만든 언어 "창조98" 입문</span></div>
-                  <div><span class="text-zinc-500">1998.02.01</span>  <span class="text-zinc-200">Visual Basic 입문</span></div>
-              </div>
-            </div>
-            <div class="career-hint text-zinc-600 text-[0.65rem] mt-1 opacity-100 group-hover:opacity-0 transition-opacity">hover/tap to expand</div>
+            <div><span class="text-zinc-500">2026.11.06</span>  <span class="text-zinc-200">pdf_hwp_viewer 공개</span>  <span class="text-zinc-500"># PDF/HWP 문서 뷰어</span></div>
+            <div><span class="text-zinc-500">2026.10.21</span>  <span class="text-zinc-200">AI_GoStop 공개</span>  <span class="text-zinc-500"># AI 고스톱 프로젝트</span></div>
+            <div><span class="text-zinc-500">2026.10.20</span>  <span class="text-zinc-200">AI_jjangie 공개</span>  <span class="text-zinc-500"># AI 기반 웹앱</span></div>
+            <div><span class="text-zinc-500">2026.09.25</span>  <span class="text-zinc-200">gpu-cpu-status-monitor 공개</span>  <span class="text-zinc-500"># GPU/CPU 상태 모니터링</span></div>
+            <div><span class="text-zinc-500">2026.09.12</span>  <span class="text-zinc-200">Novel_Studio_Maker 공개</span>  <span class="text-zinc-500"># 소설/콘텐츠 제작 보조 도구</span></div>
+            <div><span class="text-zinc-500">2026.06.02</span>  <span class="text-zinc-200">split-text-file 공개</span>  <span class="text-zinc-500"># 대용량 텍스트 파일 분할 도구</span></div>
+            <div><span class="text-zinc-500">2026.01.07</span>  <span class="text-zinc-200">AI coding 개발 입문 시작</span>, <span class="text-emerald-400">현재</span> <span id="career-duration" class="text-emerald-400 text-sm font-semibold"></span></div>
+            <div><span class="text-zinc-500">2007.09.12</span>  <span class="text-zinc-200">만기제대</span></div>
+            <div><span class="text-zinc-500">2005.09.13</span>  <span class="text-zinc-200">육군입대</span></div>
+            <div><span class="text-zinc-500">2000.04.01</span>  <span class="text-zinc-200">유니텔 util 자료실에 "메모장 프로그램 출시"</span></div>
+            <div><span class="text-zinc-500">1999.04.15</span>  <span class="text-zinc-200">한글로 만든 언어 "창조98" 입문</span></div>
+            <div><span class="text-zinc-500">1998.02.01</span>  <span class="text-zinc-200">Visual Basic 입문</span></div>
           </div>
         </div>
       </div>
@@ -630,25 +627,6 @@ function isNewProject(p) {
       let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
       if (now.getDate() < start.getDate()) months -= 1;
       el.textContent = months >= 1 ? `${months}개월 차` : `${Math.max(1, Math.floor((now - start) / 86400000))}일째`;
-    })();
-
-    // ---------- career.log 펼치기 (모바일 탭 지원) ----------
-    (function () {
-      const log = document.getElementById('career-log');
-      if (!log) return;
-      function toggle() {
-        log.classList.toggle('expanded');
-        log.setAttribute('aria-expanded', log.classList.contains('expanded') ? 'true' : 'false');
-      }
-      log.addEventListener('mouseenter', () => log.classList.add('hovered'));
-      log.addEventListener('mouseleave', () => log.classList.remove('hovered'));
-      // 클릭은 인라인 onclick에서 처리 (모바일 호환성)
-      log.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          toggle();
-        }
-      });
     })();
 
     // ---------- 업데이트 날짜 자동 갱신 (GitHub API, 커밋 기준) ----------
