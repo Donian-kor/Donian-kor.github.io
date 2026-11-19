@@ -322,8 +322,6 @@ export function createBoard({ host, onMessage }) {
       '</div>' +
       '<div class="post-meta">' + renderName(p.name, p.is_admin) + '<span class="post-date-group"> · <span class="post-date">' + fmtDate(p.created_at) + '</span></span> · 조회 ' + esc(p.views) + '</div>' +
       '<div class="post-body keep-all">' + nl2br(p.content) + '</div>' +
-      '<div class="board-section">댓글 ' + comments.length + '</div>' +
-      '<div class="comment-list">' + (comments.length ? renderCommentTree(comments) : '<div class="out-muted">댓글이 없습니다.</div>') + '</div>' +
       '<form class="comment-form" autocomplete="off">' +
         '<div class="cf-ids">' +
           '<input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
@@ -334,7 +332,9 @@ export function createBoard({ host, onMessage }) {
           '<button class="filter-chip" type="submit">등록</button>' +
           '<div class="cf-turnstile"></div>' +
         '</div>' +
-      '</form>';
+      '</form>' +
+      '<div class="board-section">댓글 ' + comments.length + '</div>' +
+      '<div class="comment-list">' + (comments.length ? renderCommentTree(comments) : '<div class="out-muted">댓글이 없습니다.</div>') + '</div>';
     bindBack();
     host.querySelector('[data-action="edit"]').addEventListener('click', () => renderEdit(p));
     host.querySelector('[data-action="delete"]').addEventListener('click', () => removePost(p.id));
@@ -457,7 +457,7 @@ export function createBoard({ host, onMessage }) {
       scope.querySelectorAll('.cf-turnstile').forEach(el => {
         if (el.dataset.rendered) return;
         el.dataset.rendered = '1';
-        turnstileWidget = window.turnstile.render(el, { sitekey: TURNSTILE_SITE_KEY, theme: 'dark' });
+        turnstileWidget = window.turnstile.render(el, { sitekey: TURNSTILE_SITE_KEY, theme: 'dark', size: 'compact' });
       });
     });
   }
