@@ -154,8 +154,8 @@ export function createBoard({ host, onMessage }) {
         '</div>' +
         '<div class="board-foot-row flex items-center justify-between gap-2 mt-2">' +
           renderPagination(data.total) +
-          '<button type="button" class="board-write-btn shrink-0" data-action="write">' +
-            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>글쓰기</button>' +
+          '<button type="button" class="board-write-btn shrink-0" data-action="write" aria-label="글쓰기" title="글쓰기">' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span class="write-label">글쓰기</span></button>' +
         '</div>';
       bindList();
     } catch (err) {
