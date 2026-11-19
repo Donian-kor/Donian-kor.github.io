@@ -182,9 +182,9 @@
     .post-title{ color:#fff; font-weight:700; font-size:1.05em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .post-meta{ color:var(--mute); font-size:.78em; margin-bottom:.5rem; text-align:right; }
     .post-body{ border:1px solid var(--line-hi); border-radius:5px; background:var(--panel-2); padding:.6rem; margin-bottom:.7rem; color:var(--fg); font-size:.85em; height:17rem; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--line-hi) transparent; }
-    .post-body::-webkit-scrollbar,.comment-list::-webkit-scrollbar{ width:5px; }
-    .post-body::-webkit-scrollbar-thumb,.comment-list::-webkit-scrollbar-thumb{ background:var(--line-hi); border-radius:5px; }
-    .comment-list{ max-height:18rem; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--line-hi) transparent; }
+    .post-body::-webkit-scrollbar,.comment-list::-webkit-scrollbar{ width:8px; background:rgba(0,0,0,.25); }
+    .post-body::-webkit-scrollbar-thumb,.comment-list::-webkit-scrollbar-thumb{ background:rgba(110,231,183,.45); border-radius:5px; }
+    .comment-list{ flex:1 1 auto; min-height:6rem; overflow-y:auto; scrollbar-width:thin; scrollbar-color:rgba(110,231,183,.45) rgba(0,0,0,.25); scrollbar-gutter:stable; }
     .comment-form{ display:grid; grid-template-columns:9rem 1fr 9rem; gap:.5rem; align-items:stretch; margin-bottom:.7rem; padding-top:.5rem; border-top:1px solid var(--line); }
     .comment-form textarea{ height:100%; resize:none; }
     .cf-turnstile{ width:300px; height:65px; overflow:hidden; transform:scale(.42,.69); transform-origin:top left; margin-bottom:-20px; }
@@ -206,6 +206,7 @@
       .board-toolbar .board-search-btn,.board-toolbar .board-reset-btn{ flex:0 0 auto; min-width:2.1rem; min-height:2.1rem; justify-content:center; padding:.15rem .25rem; }
       .career-prefix{ display:none; }
       .board-host{ display:flex; flex-direction:column; margin-top:.25rem; padding-top:.25rem; }
+      .post-body{ flex:0 0 auto; height:8rem; }
       .board-list{ height:auto; flex:1 1 auto; min-height:0; }
       .board-rows{ flex:1 1 auto; min-height:0; overflow-y:auto; }
       .board-foot-row{ flex:0 0 auto; flex-wrap:nowrap; gap:.35rem; }
