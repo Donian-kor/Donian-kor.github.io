@@ -203,8 +203,11 @@
       .board-toolbar .board-search{ flex:1 1 auto; min-width:0; }
       .board-toolbar .tool-btn-label{ display:none; }
       .board-toolbar .board-search-btn,.board-toolbar .board-reset-btn{ flex:0 0 auto; min-width:2.1rem; min-height:2.1rem; justify-content:center; padding:.15rem .25rem; }
-      .board-list{ height:var(--term-out-h, 410px); }
-      .board-foot-row{ flex-wrap:nowrap; gap:.35rem; }
+      .career-prefix{ display:none; }
+      .board-host{ display:flex; flex-direction:column; margin-top:.25rem; padding-top:.25rem; }
+      .board-list{ height:auto; flex:1 1 auto; min-height:0; }
+      .board-rows{ flex:1 1 auto; min-height:0; overflow-y:auto; }
+      .board-foot-row{ flex:0 0 auto; flex-wrap:nowrap; gap:.35rem; }
     }
     .filter-chip:hover{ color:var(--fg); border-color:var(--emerald); }
     .filter-chip.active{ color:#04241a; background:var(--emerald); border-color:var(--emerald); font-weight:700; }
@@ -336,7 +339,7 @@
             <div class="out-line my-1"><span class="donian-decode donian-name" aria-label="Donian">Donian</span></div>
             <div class="out-line out-dim flex items-center justify-between gap-2 flex-wrap">
               <span>AI Coder · AI Music Creator</span>
-              <span class="out-muted">AI 활용개발 <span id="career-duration" class="out-ok font-semibold">10개월차</span></span>
+              <span class="out-muted"><span class="career-prefix">AI 활용개발 </span><span id="career-duration" class="out-ok font-semibold">10개월차</span></span>
             </div>
             <div class="my-3 border-t" style="border-color:var(--line-hi)"></div>
             <div class="out-line out-ok mt-1">✓ Ready. 'help' 로 명령을 확인하세요.</div>

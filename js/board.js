@@ -129,7 +129,7 @@ export function createBoard({ host, onMessage }) {
   async function renderList() {
     host.innerHTML = '<div class="out-muted py-3">불러오는 중...</div>';
     try {
-      const params = new URLSearchParams({ page: String(page) });
+      const params = new URLSearchParams({ page: String(page), _: String(Date.now()) });
       if (status) params.set('status', status);
       if (search) {
         params.set('search', search);
@@ -206,7 +206,7 @@ export function createBoard({ host, onMessage }) {
   async function openDetail(id, password) {
     host.innerHTML = '<div class="out-muted py-3">불러오는 중...</div>';
     try {
-      const qs = password ? '?password=' + encodeURIComponent(password) : '';
+      const qs = '?_=' + Date.now() + (password ? '&password=' + encodeURIComponent(password) : '');
       const data = await api('/posts/' + encodeURIComponent(id) + qs);
       currentPost = data.post;
       renderDetail(data);
@@ -306,6 +306,13 @@ export function createBoard({ host, onMessage }) {
       } catch (err) { notify('답글 등록 실패: ' + err.message); }
     });
     mountTurnstile(form);
+    requestAnimationFrame(() => {
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const list = host.querySelector('.comment-list');
+      if (list && list.scrollHeight > list.clientHeight) {
+        list.scrollTop = list.scrollHeight;
+      }
+    });
   }
 
   async function removeComment(postId, commentId) {
