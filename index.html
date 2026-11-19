@@ -185,7 +185,8 @@
     .post-body::-webkit-scrollbar,.comment-list::-webkit-scrollbar{ width:5px; }
     .post-body::-webkit-scrollbar-thumb,.comment-list::-webkit-scrollbar-thumb{ background:var(--line-hi); border-radius:5px; }
     .comment-list{ max-height:18rem; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--line-hi) transparent; }
-    .comment-form{ display:grid; grid-template-columns:9rem 1fr 9rem; gap:.5rem; align-items:start; margin-bottom:.7rem; padding-top:.5rem; border-top:1px solid var(--line); }
+    .comment-form{ display:grid; grid-template-columns:9rem 1fr 9rem; gap:.5rem; align-items:stretch; margin-bottom:.7rem; padding-top:.5rem; border-top:1px solid var(--line); }
+    .comment-form textarea{ height:100%; resize:none; }
     .cf-turnstile{ width:300px; height:65px; overflow:hidden; transform:scale(.42,.69); transform-origin:top left; margin-bottom:-20px; }
     .cf-submit{ gap:.35rem; }
     .cf-ids{ display:flex; flex-direction:column; gap:.35rem; }
