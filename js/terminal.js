@@ -211,10 +211,10 @@ export function initTerminal(ctx) {
     if (verb === 'help' || verb === '?') { await showHelp(token); return; }
     if (verb === 'whoami') {
       if (arg) { await deny('이 명령은 인자를 받지 않습니다.', token); return; }
-      await typeLine('◆ Donian  —  AI Coder · AI Music Creator', 'out-head', token);
-      await typeLine('안녕하세요. Python·Kotlin으로 실용 도구를 만드는 개발자입니다.', 'out-dim', token);
-      await typeLine('◆ 1998년 Visual Basic으로 시작해, 지금은 AI와 함께 앱을 만듭니다.', 'out-dim', token);
-      await typeLine('◆ Android 앱 · PC 유틸리티 · AI 도구 / OCR · LLM · ComfyUI', 'out-dim', token);
+      await typeLine('1998년 Visual Basic으로 코딩을 시작해, 지금은 AI 코딩과 AI 음악 도구 제작을 집중합니다.', 'out-dim', token);
+      await typeLine('• Android 앱 — MyAITutor: 카메라로 문제 찍어 온디바이스 AI 풀이를 알려주는 학습 앱', 'out-dim', token);
+      await typeLine('• 웹 게임 — AI_GoStop(고스톡), AI_jjangie(한국 장기): 브라우저에서 바로 즐기는 게임', 'out-dim', token);
+      await typeLine('• PC 도구 — TrayTranslator, karaoke-timing-generator, Geuryeojwo 등 실생활 유틸리티', 'out-dim', token);
       await typeLine('✓ ' + (ctx.getProjectCount ? ctx.getProjectCount() : 0) + '개의 오픈소스 프로젝트를 공개 중입니다.', 'out-ok', token);
       const a = document.createElement('div');
       a.className = 'out-line mt-1';
