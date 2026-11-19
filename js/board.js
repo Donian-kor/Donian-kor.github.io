@@ -89,6 +89,7 @@ function loadTurnstile() {
 export function createBoard({ host, onMessage }) {
   let page = 1;
   let search = '';
+  let searchType = 'both';
   let status = '';
   let currentPost = null;
   let turnstileWidget = null;
@@ -96,13 +97,18 @@ export function createBoard({ host, onMessage }) {
   const notify = msg => { if (onMessage) onMessage(msg); };
 
   function renderToolbar() {
-    return '<div class="flex flex-wrap items-center gap-1.5 mb-2">' +
-      '<select class="board-select" aria-label="상태 필터">' +
-        ['', 'notice', 'question', 'bug', 'request', 'done'].map(v =>
-          '<option value="' + v + '"' + (status === v ? ' selected' : '') + '>' + (v ? STATUS_LABELS[v] : '전체 상태') + '</option>').join('') +
+    const statusOpts = [['', '기본'], ['notice', '알림'], ['question', '문의'], ['bug', '버그'], ['request', '의뢰'], ['done', '완료']];
+    const typeOpts = [['both', '제목+내용'], ['title', '제목만'], ['content', '내용만'], ['author', '작성자만']];
+    return '<div class="board-toolbar flex flex-row flex-wrap gap-1.5 mb-2">' +
+      '<select class="board-select board-status" aria-label="상태 필터">' +
+        statusOpts.map(([v, l]) => '<option value="' + v + '"' + (status === v ? ' selected' : '') + '>' + l + '</option>').join('') +
       '</select>' +
-      '<input class="board-search" type="text" placeholder="검색어" value="' + esc(search) + '" aria-label="검색어">' +
-      '<button type="button" class="filter-chip" data-action="search">검색</button>' +
+      '<select class="board-select board-search-type" aria-label="검색 대상">' +
+        typeOpts.map(([v, l]) => '<option value="' + v + '"' + (searchType === v ? ' selected' : '') + '>' + l + '</option>').join('') +
+      '</select>' +
+      '<input class="board-search" type="text" placeholder="검색" value="' + esc(search) + '" aria-label="검색어">' +
+      '<button type="button" class="filter-chip board-search-btn">검색</button>' +
+      '<button type="button" class="filter-chip board-reset-btn">전체</button>' +
       (isAdmin() ? '<span class="out-ok text-[.72em] ml-1">● 관리자</span>' : '') +
     '</div>';
   }
@@ -125,21 +131,26 @@ export function createBoard({ host, onMessage }) {
     try {
       const params = new URLSearchParams({ page: String(page) });
       if (status) params.set('status', status);
-      if (search) params.set('search', search);
+      if (search) {
+        params.set('search', search);
+        params.set('search_type', searchType);
+      }
       const data = await api('/posts?' + params.toString());
       const posts = Array.isArray(data.posts) ? data.posts : [];
       host.innerHTML = renderToolbar() +
         '<div class="board-list">' +
-          '<div class="board-head"><span>분류</span><span>작성일</span><span>제목</span><span>작성자</span><span class="cat">조회</span></div>' +
-          (posts.length ? posts.map(p =>
-            '<button type="button" class="board-row-t" data-id="' + esc(p.id) + '">' +
-              '<span class="st">' + renderStatus(p) + '</span>' +
-              '<span class="date">' + fmtDate(p.created_at) + '</span>' +
-              '<span class="name">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) +
-                (p.comment_count > 0 ? ' <span class="out-ok">+' + p.comment_count + '</span>' : '') + '</span>' +
-              '<span class="author">' + renderName(p.name, p.is_admin) + '</span>' +
-              '<span class="cat">' + esc(p.views) + '</span>' +
-            '</button>').join('') : '<div class="out-muted py-3">글이 없습니다.</div>') +
+          '<div class="board-head"><span>분류</span><span>제목</span><span>작성자</span><span>작성일</span><span class="cat">조회</span></div>' +
+          '<div class="board-rows">' +
+            (posts.length ? posts.map(p =>
+              '<button type="button" class="board-row-t" data-id="' + esc(p.id) + '">' +
+                '<span class="st">' + renderStatus(p) + '</span>' +
+                '<span class="name">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) +
+                  (p.comment_count > 0 ? ' <span class="out-ok">+' + p.comment_count + '</span>' : '') + '</span>' +
+                '<span class="author">' + renderName(p.name, p.is_admin) + '</span>' +
+                '<span class="date">' + fmtDate(p.created_at) + '</span>' +
+                '<span class="cat">' + esc(p.views) + '</span>' +
+              '</button>').join('') : '<div class="out-muted py-3">글이 없습니다.</div>') +
+          '</div>' +
         '</div>' +
         '<div class="flex justify-end mt-2"><button type="button" class="board-write-btn" data-action="write">' +
           '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>글쓰기</button></div>' +
@@ -153,22 +164,25 @@ export function createBoard({ host, onMessage }) {
 
   function bindList() {
     host.querySelectorAll('.board-write-btn').forEach(btn => btn.addEventListener('click', () => renderWrite()));
-    host.querySelectorAll('.filter-chip').forEach(btn => btn.addEventListener('click', () => {
-      const a = btn.dataset.action;
-      if (a === 'write') return renderWrite();
-      if (a === 'search') {
-        const input = host.querySelector('.board-search');
-        search = input ? input.value.trim() : '';
-        page = 1;
-        renderList();
-      }
-    }));
-    const sel = host.querySelector('.board-select');
-    if (sel) sel.addEventListener('change', () => { status = sel.value; page = 1; renderList(); });
-    const input = host.querySelector('.board-search');
-    if (input) input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { search = input.value.trim(); page = 1; renderList(); }
+    const doSearch = () => {
+      const input = host.querySelector('.board-search');
+      search = input ? input.value.trim() : '';
+      page = 1;
+      renderList();
+    };
+    const searchBtn = host.querySelector('.board-search-btn');
+    if (searchBtn) searchBtn.addEventListener('click', doSearch);
+    const resetBtn = host.querySelector('.board-reset-btn');
+    if (resetBtn) resetBtn.addEventListener('click', () => {
+      status = ''; search = ''; searchType = 'both'; page = 1;
+      renderList();
     });
+    const statusSel = host.querySelector('.board-status');
+    if (statusSel) statusSel.addEventListener('change', () => { status = statusSel.value; page = 1; renderList(); });
+    const typeSel = host.querySelector('.board-search-type');
+    if (typeSel) typeSel.addEventListener('change', () => { searchType = typeSel.value; });
+    const input = host.querySelector('.board-search');
+    if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
     host.querySelectorAll('.page-btn').forEach(btn => btn.addEventListener('click', () => {
       if (btn.disabled) return;
       page = parseInt(btn.dataset.page, 10) || 1;
@@ -180,7 +194,7 @@ export function createBoard({ host, onMessage }) {
   function backBar(title) {
     return '<div class="flex items-center gap-2 mb-2">' +
       '<button type="button" class="filter-chip" data-action="back">← 목록</button>' +
-      '<span class="out-head">' + esc(title) + '</span></div>';
+      (title ? '<span class="out-head">' + esc(title) + '</span>' : '') + '</div>';
   }
   function bindBack() {
     const b = host.querySelector('[data-action="back"]');
@@ -295,22 +309,31 @@ export function createBoard({ host, onMessage }) {
   function renderDetail(data) {
     const p = data.post;
     const comments = Array.isArray(data.comments) ? data.comments : [];
-    host.innerHTML = backBar(STATUS_LABELS[p.status] || p.status || '글') +
-      '<div class="out-head text-[1.05em] mb-1">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) + '</div>' +
-      '<div class="out-muted mb-2">' + renderStatus(p) + ' · ' + renderName(p.name, p.is_admin) + ' · ' + fmtDate(p.created_at) + ' · 조회 ' + esc(p.views) + '</div>' +
-      '<div class="out-dim keep-all mb-3">' + nl2br(p.content) + '</div>' +
-      '<div class="flex gap-1.5 mb-3">' +
-        '<button type="button" class="filter-chip" data-action="edit">수정</button>' +
-        '<button type="button" class="filter-chip danger" data-action="delete">삭제</button>' +
+    host.innerHTML =
+      '<div class="post-head">' +
+        '<div class="flex items-center gap-2 min-w-0">' +
+          '<button type="button" class="filter-chip shrink-0" data-action="back">← 목록</button>' +
+          renderStatus(p) +
+          '<h3 id="modal-title" class="post-title">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) + '</h3></div>' +
+        '<div class="flex gap-1.5 shrink-0">' +
+          '<button type="button" class="filter-chip" data-action="edit">수정</button>' +
+          '<button type="button" class="filter-chip danger" data-action="delete">삭제</button>' +
+        '</div>' +
       '</div>' +
+      '<div class="post-meta">' + renderName(p.name, p.is_admin) + ' · <span class="post-date">' + fmtDate(p.created_at) + '</span> · 조회 ' + esc(p.views) + '</div>' +
+      '<div class="post-body keep-all">' + nl2br(p.content) + '</div>' +
       '<div class="board-section">댓글 ' + comments.length + '</div>' +
-      (comments.length ? renderCommentTree(comments) : '<div class="out-muted">댓글이 없습니다.</div>') +
-      '<form class="comment-form mt-2" autocomplete="off">' +
-        '<div class="flex gap-1.5"><input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
-        '<input class="board-input pw-mask" name="pw" type="text" autocomplete="new-password" placeholder="비밀번호" maxlength="12"></div>' +
-        '<textarea class="board-input mt-1.5" name="content" rows="3" maxlength="1500" placeholder="댓글 내용" required></textarea>' +
-        '<div class="cf-turnstile mt-1.5"></div>' +
-        '<button class="filter-chip mt-1.5" type="submit">댓글 등록</button>' +
+      '<div class="comment-list">' + (comments.length ? renderCommentTree(comments) : '<div class="out-muted">댓글이 없습니다.</div>') + '</div>' +
+      '<form class="comment-form" autocomplete="off">' +
+        '<div class="cf-ids">' +
+          '<input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
+          '<input class="board-input pw-mask" name="pw" type="text" autocomplete="new-password" placeholder="비밀번호" maxlength="12">' +
+        '</div>' +
+        '<textarea class="board-input" name="content" rows="2" maxlength="1500" placeholder="댓글 내용" required></textarea>' +
+        '<div class="cf-submit">' +
+          '<button class="filter-chip" type="submit">등록</button>' +
+          '<div class="cf-turnstile"></div>' +
+        '</div>' +
       '</form>';
     bindBack();
     host.querySelector('[data-action="edit"]').addEventListener('click', () => renderEdit(p));
@@ -439,7 +462,7 @@ export function createBoard({ host, onMessage }) {
     });
   }
 
-  function show() { page = 1; search = ''; status = ''; renderList(); }
+  function show() { page = 1; search = ''; searchType = 'both'; status = ''; renderList(); }
 
   return { show, refresh: renderList };
 }

@@ -243,13 +243,11 @@ export function initTerminal(ctx) {
       return;
     }
     if (verb === 'music') {
-      await typeLine('✓ 음악 플레이어를 열었습니다.', 'out-ok', token);
       musicInline.classList.remove('hidden');
       out.scrollTop = out.scrollHeight;
       return;
     }
     if (verb === 'contact') {
-      await typeLine('✓ 게시판을 열었습니다.', 'out-ok', token);
       try {
         const b = await ensureBoard();
         boardHost.classList.remove('hidden');
