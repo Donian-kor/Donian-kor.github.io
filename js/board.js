@@ -463,7 +463,7 @@ export function createBoard({ host, onMessage }) {
       scope.querySelectorAll('.cf-turnstile').forEach(el => {
         if (el.dataset.rendered) return;
         el.dataset.rendered = '1';
-        turnstileWidget = window.turnstile.render(el, { sitekey: TURNSTILE_SITE_KEY, theme: 'dark', size: 'compact' });
+        turnstileWidget = window.turnstile.render(el, { sitekey: TURNSTILE_SITE_KEY, theme: 'dark' });
       });
     });
   }
