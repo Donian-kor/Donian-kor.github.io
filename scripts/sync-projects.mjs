@@ -1,9 +1,11 @@
-// GitHub 계정의 공개 저장소를 projects.json에 자동으로 추가한다.
-// 이미 등록된 항목은 수정하지 않고, 없는 저장소만 분류를 추정해 추가한다.
-// 비공개 저장소는 절대 추가하지 않으며, 공개로 전환된 뒤 다음 실행 때 추가된다.
+// GitHub 계정의 공개 저장소와 projects.json을 동기화한다.
+// - 없는 공개 저장소는 추가한다 (언어로 분류 추정)
+// - 비공개 전환/삭제로 공개 목록에서 사라진 항목은 제거한다
+// 이미 등록된 항목의 설명·스크린샷 등은 건드리지 않는다.
 import fs from 'node:fs';
 
 const USER = 'Donian-kor';
+const USER_PREFIX = 'https://github.com/donian-kor/';
 // 포트폴리오 저장소 자체는 프로젝트 카드에 넣지 않는다.
 const EXCLUDE = new Set(['donian-kor.github.io']);
 
@@ -25,6 +27,10 @@ function categoryFor(repo) {
   if (ANDROID_LANGS.has(lang)) return 'android';
   if (WEB_LANGS.has(lang)) return 'web';
   return 'pc';
+}
+
+function normalizeUrl(value) {
+  return String(value || '').toLowerCase().replace(/\/+$/, '');
 }
 
 async function fetchRepos() {
@@ -50,15 +56,16 @@ async function fetchRepos() {
 }
 
 const repos = await fetchRepos();
-const existing = new Set(data.projects.map((p) => String(p.github || '').toLowerCase()));
+const publicRepos = repos.filter((r) => !r.private && r.visibility !== 'private');
+const publicUrls = new Set(publicRepos.map((r) => normalizeUrl(r.html_url)));
+
+const existing = new Set(data.projects.map((p) => normalizeUrl(p.github)));
 let added = 0;
 
-for (const repo of repos.reverse()) {
-  // 공개 저장소만 대상으로 한다 (비공개 유출 방지).
-  if (repo.private || repo.visibility === 'private') continue;
+for (const repo of publicRepos.reverse()) {
   if (EXCLUDE.has(repo.name.toLowerCase())) continue;
 
-  const url = String(repo.html_url || '').toLowerCase();
+  const url = normalizeUrl(repo.html_url);
   if (!url || existing.has(url)) continue;
 
   const original = repo.parent?.full_name || '';
@@ -90,7 +97,25 @@ for (const repo of repos.reverse()) {
   console.log(`추가: ${repo.name} (${categoryFor(repo)})`);
 }
 
-if (added > 0) {
+// 공개 목록에서 사라진 항목 제거 (비공개 전환 / 저장소 삭제 등)
+// 이 계정 소유 주소만 대상으로 하고, 응답이 비정상적으로 적으면 제거를 건너뛴다.
+const managed = data.projects.filter((p) => normalizeUrl(p.github).startsWith(USER_PREFIX));
+const matched = managed.filter((p) => publicUrls.has(normalizeUrl(p.github))).length;
+let removed = 0;
+
+if (publicUrls.size > 0 && (managed.length < 4 || matched >= Math.ceil(managed.length * 0.5))) {
+  data.projects = data.projects.filter((p) => {
+    const url = normalizeUrl(p.github);
+    if (!url.startsWith(USER_PREFIX) || publicUrls.has(url)) return true;
+    removed++;
+    console.log(`제거: ${p.name}`);
+    return false;
+  });
+} else {
+  console.warn('공개 저장소 응답이 적어 제거를 건너뜁니다.');
+}
+
+if (added > 0 || removed > 0) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n');
 }
-console.log(`새 프로젝트 ${added}개 반영`);
+console.log(`추가 ${added}개 / 제거 ${removed}개 반영`);
