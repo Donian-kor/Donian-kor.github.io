@@ -139,8 +139,8 @@ export function createBoard({ host, onMessage }) {
       const posts = Array.isArray(data.posts) ? data.posts : [];
       host.innerHTML = renderToolbar() +
         '<div class="board-list">' +
-          '<div class="board-head"><span>분류</span><span>제목</span><span>작성자</span><span>작성일</span><span class="cat">조회</span></div>' +
           '<div class="board-rows">' +
+          '<div class="board-head"><span>분류</span><span>제목</span><span>작성자</span><span>작성일</span><span class="cat">조회</span></div>' +
             (posts.length ? posts.map(p =>
               '<button type="button" class="board-row-t" data-id="' + esc(p.id) + '">' +
                 '<span class="st">' + renderStatus(p) + '</span>' +
