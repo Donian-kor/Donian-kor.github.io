@@ -89,8 +89,6 @@
     /* 터미널 박스 */
     .session-wrap{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
     .term-box{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--line-hi); border-radius:6px; overflow:hidden; }
-    .term-titlebar{ flex:0 0 auto; display:flex; align-items:center; gap:.4rem; padding:.35rem .6rem; background:var(--panel-2); border-bottom:1px solid var(--line-hi); font-size:.72em; color:var(--dim); }
-    .term-titlebar .dot{ width:.6em; height:.6em; border-radius:9999px; flex:0 0 auto; }
     #terminal-output{ flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; padding:.55rem .7rem; font-size:.84em; scrollbar-width:thin; scrollbar-color:var(--line-hi) transparent; }
     #terminal-output::-webkit-scrollbar{ width:5px; }
     #terminal-output::-webkit-scrollbar-thumb{ background:var(--line-hi); border-radius:5px; }
@@ -248,7 +246,6 @@
     #cmd-input{ font-size:16.12px; }
     #cmd-run{ font-size:15px; }
     .cmd-chip{ font-size:15.16px; }
-    .term-titlebar{ font-size:14.52px; }
     .proj-head{ font-size:14.52px; }
     .proj-row{ font-size:15.8px; }
     .proj-row .cat{ font-size:14.52px; }
@@ -282,11 +279,13 @@
   <div id="app-frame">
   <div class="app-bar">
     <div class="max-w-[1920px] mx-auto h-9 px-3 sm:px-5 flex items-center gap-1.5">
-      <span class="dot bg-red-500/80 rounded-full"></span>
-      <span class="dot bg-yellow-500/80 rounded-full"></span>
-      <span class="dot bg-emerald-500/80 rounded-full"></span>
+      <span class="hidden md:inline-flex items-center gap-1.5">
+        <span class="dot bg-red-500/80 rounded-full"></span>
+        <span class="dot bg-yellow-500/80 rounded-full"></span>
+        <span class="dot bg-emerald-500/80 rounded-full"></span>
+      </span>
       <span class="ml-2 font-mono text-xs">
-        <span class="md:hidden text-emerald-300">PS C:\&gt;</span>
+        <span class="md:hidden text-emerald-300">Donian Portfolio</span>
         <span class="hidden md:inline"><span class="text-emerald-300">PowerShell</span><span class="out-muted"> — DONIAN-PC</span><span class="text-zinc-500 ml-2 hidden lg:inline">C:\Donian\Portfolio&gt;</span></span>
       </span>
       <div class="ml-auto flex items-center gap-1 sm:gap-2 font-mono text-xs whitespace-nowrap">
@@ -328,11 +327,6 @@
   <main class="app-main max-w-[1920px] w-full mx-auto px-3 sm:px-5 flex flex-col">
     <section id="terminal" class="session-wrap py-2" aria-label="인터랙티브 터미널 세션">
       <div class="term-box">
-        <div class="term-titlebar">
-          <span class="dot bg-red-500/80"></span><span class="dot bg-yellow-500/80"></span><span class="dot bg-emerald-500/80"></span>
-          <span class="ml-1 truncate"># Donian Portfolio — interactive session. 명령을 입력하거나 버튼을 누르세요.</span>
-          <span class="ml-auto hidden lg:inline">UTF-8 | PowerShell</span>
-        </div>
         <div id="terminal-output" role="log" aria-live="polite" aria-label="터미널 출력">
           <div id="persistent-head">
             <div class="out-line my-1"><span class="donian-decode donian-name" aria-label="Donian">Donian</span></div>
