@@ -25,20 +25,28 @@
   </script>
   <style>
     :root {
-      --bg: #0a0a0a;
-      --panel: #0e0f11;
-      --panel-2: #141619;
-      --line: rgba(255,255,255,0.07);
-      --line-hi: rgba(255,255,255,0.12);
-      --fg: #e7e9ea;
-      --dim: #9aa1a9;
+      --bg: #0b100e;
+      --panel: #121a17;
+      --panel-2: #16211d;
+      --line: rgba(110,231,183,0.12);
+      --line-hi: rgba(110,231,183,0.26);
+      --fg: #eaf6ef;
+      --dim: #b9cec3;
+      --mute: #9fb5aa;
       --emerald: #34d399;
       --emerald-bright: #6ee7b7;
+      --amber: #ffb000;
       --rad: 8px;
       --mono: 'JetBrains Mono', 'Pretendard', monospace;
       --sans: 'Pretendard', system-ui, sans-serif;
     }
-    body { font-family: var(--sans); background: var(--bg); color: var(--fg); }
+    body { font-family: var(--mono); background: var(--bg); color: var(--fg); }
+    body.bg-\[\#0a0a0a\] { background-color: var(--bg); }
+    body.text-zinc-200 { color: var(--fg); }
+    body .text-zinc-500 { color: var(--mute); }
+    body .text-zinc-400 { color: var(--dim); }
+    body .text-zinc-600 { color: var(--mute); }
+    :focus-visible { outline: 2px solid rgba(52,211,153,0.7); outline-offset: 2px; }
     ::selection { background: rgba(52,211,153,0.25); color: #fff; }
     :focus-visible { outline: 1px solid var(--emerald); outline-offset: 2px; }
     .keep-all { word-break: keep-all; overflow-wrap: break-word; }
@@ -74,9 +82,10 @@
     @media (max-width: 640px) { #matrix-bg { opacity: 0.12; } }
 
     /* ---------- refined surfaces ---------- */
-    .app-bar { background: #0b0c0d; border-bottom: 1px solid var(--line); }
+    .app-bar { background: #111a16; border-bottom: 1px solid var(--line-hi); box-shadow: 0 1px 0 rgba(52,211,153,.08); }
     .app-bar .bar-link { border-radius: 6px; }
-    .app-bar .bar-link:hover { background: rgba(255,255,255,0.04); }
+    .app-bar .bar-link:hover { background: rgba(110,231,183,0.10); }
+    .site-footer { background: #111a16 !important; border-top: 1px solid var(--line-hi); color: var(--fg); }
     .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--rad); }
     .list-head { background: rgba(255,255,255,0.02); }
 
@@ -132,7 +141,7 @@
       <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
       <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
-      <span class="ml-3 text-xs font-mono"><span class="text-zinc-100">Terminal</span><span class="text-zinc-400 hidden sm:inline"> — Donian Board</span></span>
+      <span class="ml-3 text-xs font-mono"><span class="md:hidden text-emerald-300">PS C:\&gt;</span><span class="hidden md:inline"><span class="text-emerald-300">PowerShell</span><span class="text-zinc-500"> — DONIAN-PC</span><span class="text-zinc-500 ml-2 hidden lg:inline">C:\Users\donian\board&gt;</span></span></span>
       <div class="ml-auto flex items-center gap-0.5 sm:gap-2 text-xs text-zinc-400 font-mono whitespace-nowrap">
         <a href="index.html" class="bar-link inline-flex items-center h-11 px-2 sm:px-2.5 hover:text-zinc-100 transition whitespace-nowrap">← 메인</a>
         <button id="admin-btn" class="bar-link inline-flex items-center h-11 px-2 sm:px-2.5 hover:text-zinc-100 transition">관리자</button>

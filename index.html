@@ -6,1253 +6,617 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
   <title>Donian · 개인 포트폴리오</title>
-  <meta name="description" content="Python·Kotlin으로 프로그래밍을 공부하는 Donian의 개인 포트폴리오. 오픈소스 프로젝트를 소개합니다.">
+  <meta name="description" content="Python·Kotlin으로 프로그래밍을 공부하는 Donian의 인터랙티브 터미널 포트폴리오.">
   <meta property="og:title" content="Donian · 개인 포트폴리오">
-  <meta property="og:description" content="Python·Kotlin으로 프로그래밍을 공부하는 개발자의 포트폴리오.">
+  <meta property="og:description" content="Python·Kotlin으로 프로그래밍을 공부하는 개발자의 터미널 포트폴리오.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://donian-kor.github.io">
   <meta name="twitter:card" content="summary_large_image">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" integrity="sha384-ei/b2Mz3F5J8nqTvpKS89CkzDCuD7Cc+/F+OsaPUKItzHgLNKnGq3rjtYq/B7RnO" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" crossorigin="anonymous">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js" integrity="sha384-63H0EhkXL6M4HAjkA3bbnT+mkm0SbHKtxxj4Iv1hXtM6FDH+c6XqvuXgDKBJdJNG" crossorigin="anonymous"></script>
+  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js" crossorigin="anonymous"></script>
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Pretendard', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'Pretendard', 'monospace'] },
-          colors: { accent: '#2563EB' },
-        },
-      },
-    }
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans:['Pretendard','system-ui','sans-serif'], mono:['JetBrains Mono','Pretendard','monospace'] },
+      colors: { accent:'#34d399' }
+    } } };
   </script>
   <style>
-    :root {
-      --bg: #0a0a0a;
-      --panel: #0e0f11;
-      --panel-2: #141619;
-      --line: rgba(255,255,255,0.07);
-      --line-hi: rgba(255,255,255,0.14);
-      --fg: #e9e9e7;
-      --dim: #a8a8b0;
-      --mute: #8a8a92;
-      --emerald: #34d399;
-      --emerald-bright: #6ee7b7;
-      --emerald-soft: rgba(52,211,153,0.12);
-      --rad: 8px;
-      --mono: 'JetBrains Mono', 'Pretendard', monospace;
-      --sans: 'Pretendard', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    :root{
+      --bg:#0b100e; --panel:#121a17; --panel-2:#16211d;
+      --line:rgba(110,231,183,.14); --line-hi:rgba(110,231,183,.30);
+      --fg:#eaf6ef; --dim:#b9cec3; --mute:#9fb5aa;
+      --emerald:#34d399; --emerald-bright:#6ee7b7; --amber:#ffb000;
+      --mono:'JetBrains Mono','Pretendard',monospace;
+      /* UI 프레임이 1920x1080 고정이므로 글자 크기도 고정 */
+      --fs:19px;
     }
-    body {
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--fg);
-      letter-spacing: -0.011em;
-      line-height: 1.65;
+    html{ -webkit-text-size-adjust:100%; height:100%; }
+    body{
+      margin:0; height:100dvh; overflow:hidden; display:flex;
+      font-family:var(--mono); font-size:var(--fs);
+      background:var(--bg); color:var(--fg); line-height:1.55; letter-spacing:-.01em;
     }
-    ::selection { background: rgba(52,211,153,0.24); color: #fff; }
-    :focus-visible { outline: 2px solid rgba(52,211,153,0.65); outline-offset: 2px; }
-    a:focus-visible, button:focus-visible { border-radius: 4px; outline-offset: 3px; }
-    #matrix-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.22; }
-    @media (max-width: 640px) { #matrix-bg { opacity: 0.14; } }
-    .keep-all { word-break: keep-all; }
-    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-    .noise {
-      position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0.015;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    /* UI 프레임: 원본(max-w-5xl = 1024px) 폭으로 제한. 한 화면 안에 전부 표시, 스크롤 없음 */
+    #app-frame{
+      position:relative; z-index:10; margin:auto;
+      width:min(100%, 1024px); height:min(100dvh, 1080px);
+      flex:0 0 auto;
+      display:flex; flex-direction:column;
+      background:var(--bg);
+      box-shadow:0 0 0 1px var(--line-hi), 0 0 90px rgba(0,0,0,.75);
     }
-    .scanlines {
-      position: fixed; inset: 0; z-index: 59; pointer-events: none; opacity: 0.025;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px);
-    }
-    @keyframes fadeInUp { from { opacity:0; transform:translateY(1rem); } to { opacity:1; transform:translateY(0); } }
-    .reveal { opacity:0; transform:translateY(1rem); }
-    .reveal.visible { animation: fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
-    @keyframes blink { 0%,50% { opacity:1; } 51%,100% { opacity:0; } }
-    @keyframes newPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52,211,153,0.45); } 50% { transform: scale(1.04); box-shadow: 0 0 0 4px rgba(52,211,153,0.12); } }
-    @keyframes donianGlow { 0%,100% { transform: scale(1.15); text-shadow: 0 0 10px rgba(52,211,153,0.22); } 50% { transform: scale(1.15); text-shadow: 0 0 22px rgba(52,211,153,0.42); } }
-    .new-badge { animation: newPulse 2.4s ease-in-out infinite; }
-    .donian-name { display: inline-block; }
-    .donian-decode {
-      display: inline-block;
-      color: var(--emerald-bright);
-      font-family: var(--mono);
-      font-size: clamp(2.5rem, 13.5vw, 8.5rem);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: clamp(0.06rem, 0.5vw, 0.42rem);
-      line-height: 0.95;
-      white-space: nowrap;
-      max-width: 100%;
-      text-shadow: 0 0 26px rgba(52,211,153,0.16);
-      font-variant-numeric: tabular-nums;
-      transition: text-shadow 0.2s ease;
-    }
-    .donian-decode.is-glitch {
-      text-shadow: 1px 0 0 rgba(52,211,153,0.75), -1px 0 0 rgba(125,211,252,0.45);
-      transform: skewX(-5deg) translateX(1px);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .donian-decode { text-shadow: 0 0 20px rgba(52,211,153,0.14); }
-    }
-    .donian-cursor { display: inline-block; margin-left: 0.05em; animation: blink 0.8s step-end infinite; }
-    .cursor-blink { animation: blink 1s step-end infinite; }
-    .term-cursor { display: inline-block; width: 0.6ch; height: 1.1em; margin-left: 0.15rem; background: var(--emerald); vertical-align: text-bottom; animation: blink 1s step-end infinite; }
-    /* 터미널 출력 스크롤바를 어두운 테마에 맞게 얇게 */
-    #terminal-body { scrollbar-width: thin; scrollbar-color: rgba(52,211,153,0.3) transparent; }
-    #terminal-body::-webkit-scrollbar { width: 4px; }
-    #terminal-body::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.28); border-radius: 4px; }
-    #career .term-box, #about-body { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.16) transparent; }
-    #career .term-box::-webkit-scrollbar, #about-body::-webkit-scrollbar { width: 5px; height: 5px; }
-    #career .term-box::-webkit-scrollbar-thumb, #about-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.16); border-radius: 4px; }
-    #career .term-box::-webkit-scrollbar-track, #about-body::-webkit-scrollbar-track { background: transparent; }
-    .prompt::before { content: '$ '; color: var(--emerald); font-weight: 700; }
-    .section-cmd { color: var(--emerald); }
-    .section-cmd::before { content: '$ '; }
-    .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
-    .card-hover:hover { transform: translateY(-2px); border-color: var(--line-hi); box-shadow: 0 18px 36px -28px rgba(0,0,0,0.9); }
-    .project-card { transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease; position: relative; transform-origin: center center; }
-    .term-border { border: 1px solid var(--line); }
-    .music-track { transition: border-color 0.2s ease, background-color 0.2s ease; }
-    .music-track:hover { border-color: rgba(52,211,153,0.3); }
-    .music-track.is-open { border-color: rgba(52,211,153,0.42); }
-    .music-player iframe { width: 100%; height: 100%; border: 0; display: block; }
-    .music-play-btn { transition: transform 0.2s; }
-    .music-track:hover .music-play-btn { transform: scale(1.12); }
-    #music-list::-webkit-scrollbar { width: 6px; }
-#music-list::-webkit-scrollbar-track { background: transparent; }
-#music-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-#music-list::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
-#music-list { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
-.music-thumb { transition: transform 0.3s; }
-    .music-track:hover .music-thumb { transform: scale(1.05); }
-    .music-now { animation: blink 1.2s step-end infinite; }
-    @media (prefers-reduced-motion: reduce) {
-      .music-now { animation: none !important; opacity: 1 !important; }
-    }
-    /* 데스크톱: 플레이어 표시 시 목록 폭 축소 / 숨김 시 전체 폭 */
-    @media (min-width: 768px) {
-      #music-list { width: 100%; }
-      #music-dock:not(.hidden) ~ #music-list { width: 36%; }
-    }
-    button, a, [role="button"], [tabindex] { touch-action: manipulation; }
-    @media (prefers-reduced-motion: reduce) {
-      .reveal { animation: none !important; opacity:1 !important; transform:none !important; }
-      html { scroll-behavior: auto; }
-      .donian-cursor { animation: none !important; opacity: 1 !important; }
-    }
-    .lang-badge { font-size: 0.68rem; letter-spacing: 0.01em; }
+    body.text-zinc-200{ color:var(--fg); }
+    body.bg-\[\#0a0a0a\]{ background-color:var(--bg); }
+    ::selection{ background:rgba(52,211,153,.28); color:#fff; }
+    :focus-visible{ outline:2px solid rgba(52,211,153,.75); outline-offset:2px; }
+    a,button{ touch-action:manipulation; }
+    .keep-all{ word-break:keep-all; }
 
-    /* ---------- refined surfaces ---------- */
-    .app-bar { background: #0b0c0d; border-bottom: 1px solid var(--line); }
-    .app-bar .bar-link { border-radius: 6px; }
-    .app-bar .bar-link:hover { background: rgba(255,255,255,0.04); }
-    .term-box { background: var(--panel); border: 1px solid var(--line); border-radius: var(--rad); }
-    .term-box * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.14) transparent; }
-    .term-box *::-webkit-scrollbar { width: 5px; height: 5px; }
-    .term-box *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 4px; }
-    .term-box *::-webkit-scrollbar-track { background: transparent; }
-    .site-footer { background: #0b0c0d; border-top: 1px solid var(--line); }
-    #project-grid { gap: 0.875rem; }
-    #project-grid .project-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--rad); box-shadow: none; }
-    #project-grid .project-card:hover { transform: translateY(-2px); background: #101214; border-color: rgba(52,211,153,0.34); box-shadow: 0 28px 60px -40px rgba(0,0,0,0.95); }
-    #project-grid .project-card > div:first-child { background: var(--panel-2); border-bottom: 1px solid var(--line); }
-    /* 스크린샷: 레이아웃을 밀지 않도록 카드 위에 겹쳐서 표시 */
-    #project-grid .project-card .screenshot {
-      display: none;
-      position: absolute;
-      top: 2rem;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 20;
-      padding: 0.5rem;
-      background: #0b0c0d;
-      border-top: 1px solid var(--line);
-      pointer-events: none;
-      aspect-ratio: auto;
+    /* CRT */
+    #matrix-bg{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.18; }
+    .noise{ position:fixed; inset:0; z-index:60; pointer-events:none; opacity:.008; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    .scanlines{ position:fixed; inset:0; z-index:59; pointer-events:none; opacity:.28; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 3px); }
+    .crt-glow{ position:fixed; inset:0; z-index:57; pointer-events:none; opacity:.045; background:radial-gradient(ellipse at 50% 45%,rgba(110,231,183,.45),transparent 62%); }
+    .crt-vignette{ position:fixed; inset:0; z-index:58; pointer-events:none; background:radial-gradient(ellipse at 50% 45%,transparent 56%,rgba(0,0,0,.16) 80%,rgba(0,0,0,.42) 100%); box-shadow:inset 0 0 56px 10px rgba(0,0,0,.32); }
+    .crt-flicker{ position:fixed; inset:0; z-index:61; pointer-events:none; background:rgba(110,231,183,.012); animation:crtFlicker 8s steps(1,end) infinite; }
+    @keyframes crtFlicker{ 0%,97%{opacity:.15} 97.5%{opacity:.28} 98%{opacity:.12} 98.5%{opacity:.24} 99%,100%{opacity:.15} }
+    @media (prefers-reduced-motion:reduce){ .crt-flicker{ animation:none!important; opacity:0!important; } .term-cursor{ animation:none!important; opacity:1!important; } .donian-decode{ text-shadow:none!important; } }
+
+    /* 전체 프레임: 데스크톱/태블릿은 한 화면 헤더+푸터 고정 */
+    .app-bar{ flex:0 0 auto; background:#111a16; border-bottom:1px solid var(--line-hi); }
+    .app-bar .bar-link{ border-radius:5px; }
+    .app-bar .bar-link:hover{ background:rgba(110,231,183,.12); }
+    .app-main{ flex:1 1 auto; min-height:0; }
+    .site-footer{ flex:0 0 auto; background:#111a16; border-top:1px solid var(--line-hi); color:var(--fg); }
+    @media (min-width:640px){
+      .app-main{ display:flex; flex-direction:column; overflow:hidden; }
+      .site-footer{ position:relative; }
     }
-    #project-grid .project-card .screenshot img { border-radius: 4px; }
-    @media (min-width: 640px) {
-      #project-grid .project-card:hover .screenshot { display: block; }
+    @media (max-width:639px){
+      #app-frame{ width:100%; height:100dvh; margin:0; background:transparent; box-shadow:none; }
+      .app-bar{ position:fixed; top:0; left:0; right:0; z-index:40; }
+      .site-footer{ position:fixed; bottom:0; left:0; right:0; z-index:40; }
+      .app-main{ min-height:0; overflow-y:auto; padding-top:2.75rem; padding-bottom:2.5rem; }
+      .cmd-form{ display:none !important; }
+      .cmd-chip{ width:100%; padding-left:.25rem; padding-right:.25rem; }
+      #terminal-output{ font-size:.9em; min-height:0; }
     }
-    #project-grid .project-card .text-blue-400 { color: var(--emerald); }
-    #project-grid .project-card .text-green-400 { color: var(--emerald); }
-    #project-grid .lang-badge, #modal-content .lang-badge {
-      color: var(--dim);
-      font-family: var(--mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.02em;
-      padding: 0.05rem 0.375rem;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      background: rgba(255,255,255,0.03);
-      text-transform: uppercase;
+
+    /* 터미널 박스 */
+    .session-wrap{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
+    .term-box{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--line-hi); border-radius:6px; overflow:hidden; }
+    .term-titlebar{ flex:0 0 auto; display:flex; align-items:center; gap:.4rem; padding:.35rem .6rem; background:var(--panel-2); border-bottom:1px solid var(--line-hi); font-size:.72em; color:var(--dim); }
+    .term-titlebar .dot{ width:.6em; height:.6em; border-radius:9999px; flex:0 0 auto; }
+    #terminal-output{ flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; padding:.55rem .7rem; font-size:.84em; scrollbar-width:thin; scrollbar-color:var(--line-hi) transparent; }
+    #terminal-output::-webkit-scrollbar{ width:5px; }
+    #terminal-output::-webkit-scrollbar-thumb{ background:var(--line-hi); border-radius:5px; }
+    .out-line{ white-space:pre-wrap; word-break:keep-all; overflow-wrap:anywhere; }
+    .cmd-echo{ color:var(--fg); margin-top:.6rem; margin-bottom:.45rem; }
+    .help-line .help-cmd{ display:inline-block; width:260px; color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:top; }
+    .help-line .help-desc{ color:var(--mute); }
+    @media (max-width:639px){ .help-line .help-cmd{ width:180px; } }
+    .cmd-echo .pn{ color:var(--emerald); font-weight:700; }
+    .out-dim{ color:var(--dim); } .out-muted{ color:var(--mute); }
+    .out-ok{ color:var(--emerald-bright); } .out-amber{ color:var(--amber); } .out-white{ color:#fff; }
+    .out-head{ color:var(--emerald); font-weight:700; }
+    .term-cursor{ display:inline-block; width:.6ch; height:1.05em; margin-left:.1rem; background:var(--emerald); vertical-align:text-bottom; animation:blink .85s step-end infinite; }
+    @keyframes blink{ 0%,50%{opacity:1} 51%,100%{opacity:0} }
+    .donian-decode{ display:inline-block; color:var(--emerald-bright); font-family:var(--mono); font-weight:700; font-size:clamp(1.9rem,4.6vw,4.6rem); line-height:1; letter-spacing:.05em; text-shadow:0 0 20px rgba(52,211,153,.18); }
+    .donian-decode.is-glitch{ text-shadow:1px 0 0 rgba(52,211,153,.75),-1px 0 0 rgba(125,211,252,.45); transform:skewX(-4deg); }
+
+    .cmd-form{ flex:0 0 auto; display:flex; align-items:center; gap:.45rem; padding:.4rem .6rem; background:var(--panel-2); border-top:1px solid var(--line-hi); }
+    .cmd-prompt{ color:var(--emerald); font-weight:700; font-size:.8em; white-space:nowrap; }
+    #cmd-input{ flex:1; min-width:0; background:transparent; border:0; outline:0; color:var(--fg); font-family:var(--mono); font-size:.82em; }
+    #cmd-input::placeholder{ color:var(--mute); }
+    #cmd-run{ background:rgba(52,211,153,.14); border:1px solid rgba(52,211,153,.45); color:var(--emerald-bright); border-radius:5px; padding:.25rem .6rem; font-family:var(--mono); font-size:.75em; }
+    #cmd-run:hover{ background:rgba(52,211,153,.26); }
+
+    /* 버튼:pc/태블릿 1줄, 모바일 2열, 입력창에 바로 붙음 */
+    .cmd-buttons{ flex:0 0 auto; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.35rem; margin-top:0; }
+    @media (min-width:640px){ .cmd-buttons{ grid-template-columns:repeat(6,minmax(0,1fr)); } }
+    .cmd-chip{ min-height:44px; display:flex; align-items:center; justify-content:center; gap:.35rem; padding:.35rem .4rem; border:1px solid var(--line-hi); border-radius:5px; background:var(--panel); color:var(--fg); font-family:var(--mono); font-size:.76em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cmd-chip:hover{ background:rgba(52,211,153,.14); border-color:var(--emerald); }
+    @media (min-width:640px){ .cmd-chip{ min-height:36px; } }
+
+    /* 프로젝트 목록 - Windows dir 스타일, 컴팩트 */
+    .proj-head{ display:grid; grid-template-columns:6.2rem 1fr 5.5rem; gap:.4rem; padding:.2rem .4rem; border-bottom:1px solid var(--line-hi); color:var(--mute); font-size:.72em; }
+    .proj-row{ width:100%; display:grid; grid-template-columns:6.2rem 1fr 5.5rem; gap:.4rem; align-items:center; text-align:left; padding:.22rem .4rem; border:1px solid transparent; border-bottom-color:var(--line); background:transparent; color:var(--fg); font-family:var(--mono); font-size:.8em; }
+    .proj-row:hover{ background:rgba(52,211,153,.09); border-color:var(--line-hi); }
+    .proj-row .date{ color:var(--mute); }
+    .proj-row .lang-code{ color:var(--emerald); font-size:.85em; margin-right:.4rem; }
+    .proj-row .name{ color:var(--fg); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .proj-row .cat{ color:var(--dim); text-align:right; font-size:.9em; }
+    .filter-chip{ border:1px solid var(--line-hi); border-radius:9999px; padding:.1rem .55rem; font-size:.7em; color:var(--dim); background:transparent; }
+    .filter-chip:hover{ color:var(--fg); border-color:var(--emerald); }
+    .filter-chip.active{ color:#04241a; background:var(--emerald); border-color:var(--emerald); font-weight:700; }
+    @media (max-width:639px){
+      .proj-head,.proj-row{ grid-template-columns:5rem 1fr; }
+      .proj-head .cat,.proj-row .cat{ display:none; }
     }
-    #terminal-body .text-green-400 { color: var(--emerald); }
-    #platform-legend .legend-item.ring-green-500\/60 { --tw-ring-color: rgba(52,211,153,0.5); }
-    #project-grid .project-card a:hover { color: var(--emerald-bright); }
-    #music .music-track .text-zinc-200 { color: var(--fg); }
-    #music .music-track .text-blue-400 { color: var(--emerald); }
-    #music .music-track .text-green-400 { color: var(--emerald); }
-    #music .music-track { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
-    #music .music-track:hover { background: #111316; border-color: rgba(52,211,153,0.3); }
-    #music .music-track.is-open { background: rgba(52,211,153,0.07); border-color: rgba(52,211,153,0.42); }
-    #platform-legend .legend-item { border-radius: 9999px; color: var(--dim); }
-    #platform-legend .legend-item:hover { color: var(--fg); }
-    #category-tabs button { border-radius: 9999px; }
-    #project-modal > div { background: var(--panel); border-color: var(--line-hi); border-radius: 12px; }
-    @media (hover: hover) {
-      .donian-decode:hover { text-shadow: 0 0 34px rgba(52,211,153,0.24); }
-    }
+
+    /*音乐 인라인 패널 - cmd 창 안, Donian 라벨 아래 */
+    #music-inline{ margin-top:.4rem; border-top:1px solid var(--line-hi); padding-top:.45rem; }
+    .music-track{ border:1px solid var(--line); border-radius:5px; background:var(--panel-2); }
+    .music-track:hover{ border-color:rgba(52,211,153,.45); }
+    .music-track.is-open{ background:rgba(52,211,153,.09); border-color:var(--emerald); }
+    .music-thumb{ transition:transform .25s; }
+    .music-track:hover .music-thumb{ transform:scale(1.05); }
+    .music-play-btn{ transition:transform .2s; }
+    .music-track:hover .music-play-btn{ transform:scale(1.12); }
+    #music-list{ scrollbar-width:thin; scrollbar-color:var(--line-hi) transparent; }
+    #music-list::-webkit-scrollbar{ width:5px; }
+    #music-list::-webkit-scrollbar-thumb{ background:var(--line-hi); border-radius:5px; }
+
+    .lang-badge{ font-size:.68em; padding:.05rem .3rem; border:1px solid var(--line-hi); border-radius:4px; color:var(--dim); font-family:var(--mono); }
+    .badge-new{ animation:newPulse 2.4s ease-in-out infinite; }
+    @keyframes newPulse{ 0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,.4)} 50%{box-shadow:0 0 0 4px rgba(52,211,153,.10)} }
+
+    /* 프로젝트 모달 - 터미널 창 컨셉 */
+    .modal-window{ display:flex; flex-direction:column; max-height:88vh; background:var(--panel); border:1px solid var(--line-hi); border-radius:6px; box-shadow:0 24px 70px rgba(0,0,0,.85); overflow:hidden; }
+    .modal-titlebar{ flex:0 0 auto; display:flex; align-items:center; gap:.4rem; padding:.4rem .6rem; background:var(--panel-2); border-bottom:1px solid var(--line-hi); font-size:14.52px; color:var(--dim); }
+    .modal-titlebar .dot{ width:.6em; height:.6em; border-radius:9999px; flex:0 0 auto; }
+    .modal-content{ flex:1 1 auto; min-height:0; overflow-y:auto; padding:.7rem .85rem; font-size:16.44px; }
+    .modal-content .m-head{ color:#fff; font-weight:700; font-size:20px; }
+    .modal-content .m-label{ color:var(--mute); font-size:14.52px; }
+    .modal-content .m-shot{ margin:.6rem 0; border:1px solid var(--line-hi); border-radius:5px; overflow:hidden; background:var(--panel-2); }
+    .modal-content .m-shot-bar{ padding:.25rem .5rem; border-bottom:1px solid var(--line-hi); background:var(--panel-2); color:var(--dim); font-size:14.52px; }
+    .modal-content .m-shot img{ display:block; width:100%; aspect-ratio:16/10; object-fit:contain; }
+    .modal-content .m-chip{ display:inline-block; border:1px solid var(--line-hi); border-radius:4px; padding:.1rem .45rem; color:var(--dim); font-size:14.2px; }
+    .modal-content .m-open{ display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .8rem; border:1px solid var(--emerald); border-radius:5px; background:rgba(52,211,153,.10); color:var(--emerald-bright); font-size:15.16px; }
+    .modal-content .m-open:hover{ background:rgba(52,211,153,.22); }
+
+    /* 터미널 폰트 전부 3px씩 확대 (기존 측정값 + 3px) */
+    #terminal-output{ font-size:16.44px; }
+    .cmd-prompt{ font-size:15.8px; }
+    #cmd-input{ font-size:16.12px; }
+    #cmd-run{ font-size:15px; }
+    .cmd-chip{ font-size:15.16px; }
+    .term-titlebar{ font-size:14.52px; }
+    .proj-head{ font-size:14.52px; }
+    .proj-row{ font-size:15.8px; }
+    .proj-row .cat{ font-size:14.52px; }
+    .filter-chip{ font-size:14.2px; }
+    .lang-badge{ font-size:13.88px; }
+    .donian-decode{ font-size:calc(clamp(1.9rem,4.6vw,4.6rem) + 3px); }
+    .app-bar .text-xs, .site-footer .text-xs, .music-dock-title, #music-list .text-xs{ font-size:15px; }
+    @media (max-width:639px){ #terminal-output{ font-size:17.4px; } }
   </style>
 </head>
-<body class="bg-[#0a0a0a] text-zinc-200 antialiased">
+<body class="text-zinc-200 antialiased">
   <canvas id="matrix-bg" aria-hidden="true"></canvas>
-  <div class="noise"></div>
-  <div class="scanlines"></div>
+  <div class="noise"></div><div class="scanlines"></div>
+  <div class="crt-glow"></div><div class="crt-vignette"></div><div class="crt-flicker"></div>
 
-  <!-- Terminal window chrome (sticky) -->
-  <div class="app-bar fixed top-0 left-0 right-0 z-40">
-    <div class="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 h-11 flex items-center gap-1 sm:gap-2">
-      <span class="w-2.5 h-2.5 rounded-full bg-red-500/80 shrink-0"></span>
-      <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80 shrink-0"></span>
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 shrink-0"></span>
-      <span class="ml-2 sm:ml-3 text-xs font-mono hidden sm:inline"><span class="text-zinc-100">Terminal</span><span class="text-zinc-400 hidden sm:inline"> — Donian Portfolio</span><span class="text-zinc-600 hidden md:inline ml-2">~/portfolio</span></span>
-      <div class="ml-auto flex items-center gap-0.5 sm:gap-2 text-xs text-zinc-400 font-mono whitespace-nowrap">
-        <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" aria-label="깃헙" title="깃헙" class="bar-link inline-flex items-center justify-center min-w-[2.75rem] sm:min-w-[3.625rem] h-11 px-1 sm:px-2 text-emerald-400 hover:text-emerald-300 transition"><iconify-icon icon="mdi:github" aria-hidden="true" class="text-base"></iconify-icon></a>
-        <a href="board.html" class="bar-link inline-flex items-center gap-1 h-11 px-2 sm:px-2.5 text-emerald-400 hover:text-emerald-300 transition"><iconify-icon icon="solar:chat-round-line-bold" aria-hidden="true" class="text-sm"></iconify-icon>문의하기</a>
-        <a href="https://github.com/sponsors/Donian-kor" target="_blank" rel="noopener" aria-label="github 후원" title="github 후원" class="bar-link hidden sm:inline-flex items-center gap-1 h-11 px-2 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>github후원</a>
-        <a id="sponsor-kakao" href="https://qr.kakaopay.com/FL8dh56ra9c406950" target="_blank" rel="noopener" aria-label="kakao 후원" title="kakao 후원" class="bar-link inline-flex sm:hidden items-center gap-1 h-11 px-2 text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap"><iconify-icon icon="solar:heart-bold" aria-hidden="true" class="text-sm"></iconify-icon>kakao후원</a>
+  <div id="app-frame">
+  <div class="app-bar">
+    <div class="max-w-[1920px] mx-auto h-9 px-3 sm:px-5 flex items-center gap-1.5">
+      <span class="dot bg-red-500/80 rounded-full"></span>
+      <span class="dot bg-yellow-500/80 rounded-full"></span>
+      <span class="dot bg-emerald-500/80 rounded-full"></span>
+      <span class="ml-2 font-mono text-xs">
+        <span class="md:hidden text-emerald-300">PS C:\&gt;</span>
+        <span class="hidden md:inline"><span class="text-emerald-300">PowerShell</span><span class="out-muted"> — DONIAN-PC</span><span class="text-zinc-500 ml-2 hidden lg:inline">C:\Donian\Portfolio&gt;</span></span>
+      </span>
+      <div class="ml-auto flex items-center gap-1 sm:gap-2 font-mono text-xs whitespace-nowrap">
+        <a href="https://github.com/Donian-kor" target="_blank" rel="noopener" aria-label="깃헙" class="bar-link inline-flex items-center justify-center min-w-[2.5rem] h-9 px-1 text-emerald-300"><iconify-icon icon="mdi:github" class="text-sm"></iconify-icon></a>
+        <a href="https://github.com/sponsors/Donian-kor" target="_blank" rel="noopener" aria-label="github 후원" title="github 후원" class="bar-link hidden sm:inline-flex items-center gap-1 h-9 px-2 text-emerald-300"><iconify-icon icon="solar:heart-bold" class="text-xs"></iconify-icon>github후원</a>
+        <a id="sponsor-kakao" href="https://qr.kakaopay.com/FL8dh56ra9c406950" target="_blank" rel="noopener" aria-label="kakao 후원" title="kakao 후원" class="bar-link inline-flex sm:hidden items-center gap-1 h-9 px-2 text-emerald-300"><iconify-icon icon="solar:heart-bold" class="text-xs"></iconify-icon>kakao후원</a>
       </div>
     </div>
   </div>
 
   <script>
-    // 폴드 펼침·태블릿처럼 화면이 넓은 터치 기기에서는 카카오페이 후원 링크도 함께 표시
+    // 폴드·태블릿처럼 터치 입력이 있고 화면이 넓으면 카카오페이 후원 링크도 표시
     (function () {
       function updateSponsorLinks() {
-        var coarse = window.matchMedia('(any-pointer: coarse)').matches; // 터치 입력이 하나라도 있음 (마우스 병용 태블릿 포함)
-        var wide = window.matchMedia('(min-width: 640px)').matches;  // 화면 너비 640px 이상
+        var coarse = window.matchMedia('(any-pointer: coarse)').matches;
+        var wide = window.matchMedia('(min-width: 640px)').matches;
         var kakao = document.getElementById('sponsor-kakao');
         if (kakao) kakao.style.display = (coarse && wide) ? 'inline-flex' : '';
       }
       window.updateSponsorLinks = updateSponsorLinks;
-      window.addEventListener('resize', updateSponsorLinks); // 폴드 접었다 펼칠 때 대응
+      window.addEventListener('resize', updateSponsorLinks);
       updateSponsorLinks();
     })();
   </script>
 
-  <!-- Project modal (모바일 확대 보기) -->
-  <div id="project-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 backdrop-blur p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-zinc-900 border border-white/10 shadow-2xl">
-      <button id="modal-close" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-300 flex items-center justify-center transition" aria-label="닫기">
-        <iconify-icon icon="solar:close-circle-bold" class="text-xl"></iconify-icon>
-      </button>
-      <div id="modal-content"></div>
+  <div id="project-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 backdrop-blur p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-window w-full max-w-2xl">
+      <div class="modal-titlebar">
+        <span class="dot bg-red-500/80"></span>
+        <span class="dot bg-yellow-500/80"></span>
+        <span class="dot bg-emerald-500/80"></span>
+        <span class="ml-1 truncate">C:\Donian\Portfolio\projects\README.md — PowerShell</span>
+        <button id="modal-close" class="ml-auto shrink-0 w-7 h-7 rounded border border-white/15 hover:bg-white/10 text-zinc-300 flex items-center justify-center" aria-label="닫기"><iconify-icon icon="solar:close-circle-bold" class="text-base"></iconify-icon></button>
+      </div>
+      <div id="modal-content" class="modal-content"></div>
     </div>
   </div>
 
-  <main class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 sm:pb-8">
-
-    <!-- Hero / Terminal intro -->
-    <section id="top" class="pt-2 pb-10 sm:pb-12 border-b border-white/5">
-      <div class="text-sm leading-relaxed">
-        <div class="font-mono text-xs text-zinc-500 mb-4 tracking-wide"># Donian Portfolio — AI coding session</div>
-        <div class="mb-5 flex items-center justify-between gap-4 flex-wrap">
-          <div class="font-mono">
-            <span class="text-emerald-400/90 font-bold text-lg">C:\></span>
-            <span class="text-zinc-200 ml-2 text-lg">whoami</span>
+  <main class="app-main max-w-[1920px] w-full mx-auto px-3 sm:px-5 flex flex-col">
+    <section id="terminal" class="session-wrap py-2" aria-label="인터랙티브 터미널 세션">
+      <div class="term-box">
+        <div class="term-titlebar">
+          <span class="dot bg-red-500/80"></span><span class="dot bg-yellow-500/80"></span><span class="dot bg-emerald-500/80"></span>
+          <span class="ml-1 truncate"># Donian Portfolio — interactive session. 명령을 입력하거나 버튼을 누르세요.</span>
+          <span class="ml-auto hidden lg:inline">UTF-8 | PowerShell</span>
+        </div>
+        <div id="terminal-output" role="log" aria-live="polite" aria-label="터미널 출력">
+          <div id="persistent-head">
+            <div class="out-line my-1"><span class="donian-decode donian-name" aria-label="Donian">Donian</span></div>
+            <div class="out-line out-dim flex items-center justify-between gap-2 flex-wrap">
+              <span>AI Coder · AI Music Creator</span>
+              <span class="out-muted">AI 활용개발 <span id="career-duration" class="out-ok font-semibold">10개월차</span></span>
+            </div>
+            <div class="my-3 border-t" style="border-color:var(--line-hi)"></div>
+            <div class="out-line out-ok mt-1">✓ Ready. 'help' 로 명령을 확인하세요.</div>
           </div>
-        </div>
-        <div class="max-w-full overflow-hidden">
-          <div class="donian-decode donian-name" aria-label="Donian">Donian</div>
-          <div class="text-zinc-400 text-sm font-mono mt-4 tracking-wide">AI Coder · AI Music Creator</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- intro.txt / career.log 제목 행을 같은 행에 두고 그 아래에 각 카드 배치 (PC는 좌우, 모바일은 세로) -->
-    <div class="md:grid md:grid-cols-2 md:gap-6 md:items-start">
-    <section id="intro-card" class="py-8 sm:py-10">
-      <div class="text-sm leading-relaxed">
-        <div class="mb-2.5 flex items-center gap-3 flex-nowrap font-mono">
-          <span class="text-emerald-400/90 font-bold text-lg">C:\></span>
-          <span class="text-zinc-100 text-lg whitespace-nowrap">type intro.txt</span>
-          <a href="https://github.com/Donian-kor/Donian-kor.github.io/blob/main/AGENTS.md" target="_blank" rel="noopener" class="ml-auto text-emerald-400 text-[clamp(0.7rem,3.7vw,1.03125rem)] md:text-[1.03125rem] whitespace-nowrap hover:text-emerald-300 transition underline-offset-4 hover:underline">AGENTS.MD 읽어보기</a>
-        </div>
-        <div class="term-box p-3 md:p-4 mb-4 md:h-[360px] md:flex md:flex-col md:overflow-hidden font-mono">
-          <div id="terminal-body" class="text-zinc-300 leading-relaxed space-y-1 overflow-y-auto overflow-x-hidden break-words pr-0.5 md:pr-1"></div>
-          <div class="mt-1.5 pt-1.5 md:mt-2 md:pt-2 border-t border-white/5 flex flex-col h-[130px] md:h-auto md:flex-1 md:min-h-0 md:overflow-y-auto">
-            <div id="about-body" class="pl-1 md:pl-2 text-zinc-400 leading-relaxed space-y-1 break-words flex-1 min-h-0 overflow-y-auto md:overflow-visible"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Career -->
-    <section id="career" class="py-8 sm:py-10">
-      <div class="text-sm">
-        <div class="mb-2.5 flex items-center gap-1.5 md:gap-3 flex-nowrap font-mono">
-          <span class="text-emerald-400/90 font-bold text-[clamp(0.8rem,4.1vw,1.125rem)] md:text-lg">C:\></span>
-          <span class="text-zinc-100 text-[clamp(0.8rem,4.1vw,1.125rem)] md:text-lg whitespace-nowrap">type career.log</span>
-          <span class="ml-auto text-emerald-400 text-[clamp(0.7rem,3.7vw,1.03125rem)] md:text-[1.03125rem] whitespace-nowrap"><span id="career-duration" class="font-semibold"></span></span>
-        </div>
-        <div class="term-box py-6 px-4 font-mono text-xs leading-relaxed overflow-x-auto md:h-[360px] md:overflow-y-auto">
-          <div id="career-log" class="space-y-1.5">
-            <div><span class="text-emerald-400">2026.11.19</span>  <span class="text-zinc-200">YouTube-Ad-Blocker 공개</span>  <span class="text-zinc-500"># 크롬 광고차단 확장프로그램</span></div>
-            <div><span class="text-zinc-500">2026.11.12</span>  <span class="text-zinc-200">MyAITutor 개발 중</span>  <span class="text-zinc-500"># AI 튜터 프로젝트</span></div>
-            <div><span class="text-zinc-500">2026.11.06</span>  <span class="text-zinc-200">pdf_hwp_viewer 공개</span>  <span class="text-zinc-500"># PDF/HWP 문서 뷰어</span></div>
-            <div><span class="text-zinc-500">2026.10.21</span>  <span class="text-zinc-200">AI_GoStop 공개</span>  <span class="text-zinc-500"># AI 고스톱 프로젝트</span></div>
-            <div><span class="text-zinc-500">2026.10.20</span>  <span class="text-zinc-200">AI_jjangie 공개</span>  <span class="text-zinc-500"># AI 기반 웹앱</span></div>
-            <div><span class="text-zinc-500">2026.09.25</span>  <span class="text-zinc-200">gpu-cpu-status-monitor 공개</span>  <span class="text-zinc-500"># GPU/CPU 상태 모니터링</span></div>
-            <div><span class="text-zinc-500">2026.09.12</span>  <span class="text-zinc-200">Novel_Studio_Maker 공개</span>  <span class="text-zinc-500"># 소설/콘텐츠 제작 보조 도구</span></div>
-            <div><span class="text-zinc-500">2026.06.02</span>  <span class="text-zinc-200">split-text-file 공개</span>  <span class="text-zinc-500"># 대용량 텍스트 파일 분할 도구</span></div>
-            <div><span class="text-zinc-500">2026.01.07</span>  <span class="text-zinc-200">AI coding 개발 입문 시작</span></div>
-            <div><span class="text-zinc-500">2007.09.12</span>  <span class="text-zinc-200">만기제대</span></div>
-            <div><span class="text-zinc-500">2005.09.13</span>  <span class="text-zinc-200">육군입대</span></div>
-            <div><span class="text-zinc-500">2000.04.01</span>  <span class="text-zinc-200">유니텔 util 자료실에 "메모장 프로그램 출시"</span></div>
-            <div><span class="text-zinc-500">1999.04.15</span>  <span class="text-zinc-200">한글로 만든 언어 "창조98" 입문</span></div>
-            <div><span class="text-zinc-500">1998.02.01</span>  <span class="text-zinc-200">Visual Basic 입문</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-    </div><!-- /intro+career grid -->
-
-    <!-- Music -->
-    <section id="music" class="py-10 sm:py-12 border-t border-white/5">
-      <div class="text-sm">
-        <div class="mb-3 flex items-center gap-3 font-mono">
-          <span class="text-emerald-400/90 font-bold text-lg">C:\></span>
-          <span class="text-zinc-100 text-lg">dir Ai Music\</span>
-          <a href="https://www.youtube.com/@songmakernightmusic" target="_blank" rel="noopener" class="ml-auto inline-flex items-center gap-1.5 px-3 h-8 rounded-full border border-emerald-400/30 text-emerald-300 text-xs hover:bg-emerald-400/10 hover:border-emerald-400/50 transition">
-            <iconify-icon icon="solar:play-circle-bold"></iconify-icon> youtube
-          </a>
-        </div>
-        <div class="term-box p-3 sm:p-4 font-mono">
-          <div class="flex flex-col md:flex-row gap-3 md:h-[360px]">
-            <div id="music-dock" class="hidden order-1 md:order-2 md:flex-1 md:h-full">
-              <div class="w-full h-full md:flex md:flex-col rounded-md border border-white/10 bg-black overflow-hidden">
-                <div class="px-3 py-2 text-xs text-zinc-400 truncate music-dock-title shrink-0">재생할 곡을 선택하세요</div>
-                <div class="aspect-video md:aspect-auto md:flex-1 w-full bg-black md:min-h-0">
-                  <iframe class="w-full h-full" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          <div id="stream-host"></div>
+          <div id="music-inline" class="hidden">
+            <div class="out-line out-head mb-1">◆ Donian — AI Music</div>
+            <div class="flex flex-col md:flex-row gap-2">
+              <div id="music-dock" class="hidden md:block md:flex-1 md:min-h-0">
+                <div class="w-full h-full flex flex-col rounded border border-white/15 bg-black overflow-hidden">
+                  <div class="px-2 py-1 text-xs text-zinc-400 truncate music-dock-title shrink-0">재생할 곡을 선택하세요</div>
+                  <div class="flex-1 min-h-0 w-full bg-black"><iframe class="w-full h-full" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                 </div>
               </div>
-            </div>
-            <div id="music-list" class="order-2 md:order-1 md:h-full md:shrink-0 space-y-2 max-h-[360px] md:max-h-none overflow-y-auto pr-2">
-              <div class="text-zinc-500 text-xs">Loading tracks...</div>
+              <div id="music-list" class="md:w-[38%] md:max-h-[460px] space-y-1.5 overflow-y-auto pr-1">
+                <div class="text-zinc-500 text-xs">Loading tracks...</div>
+              </div>
             </div>
           </div>
         </div>
+        <form id="cmd-form" class="cmd-form" autocomplete="off">
+          <span class="cmd-prompt">PS C:\Donian\Portfolio&gt;</span>
+          <input id="cmd-input" type="text" aria-label="명령 입력" placeholder="명령 입력 (예: help)">
+          <button id="cmd-run" type="submit">실행 ↵</button>
+        </form>
+      </div>
+      <div id="cmd-buttons" class="cmd-buttons" aria-label="명령 버튼">
+        <button type="button" class="cmd-chip" data-cmd="whoami"><iconify-icon icon="solar:user-bold" class="ic text-emerald-400"></iconify-icon>whoami</button>
+        <button type="button" class="cmd-chip" data-cmd="Get-History"><iconify-icon icon="solar:history-bold" class="ic text-emerald-400"></iconify-icon>Get-History</button>
+        <button type="button" class="cmd-chip" data-cmd="Get-ChildItem .\projects"><iconify-icon icon="solar:folder-with-files-bold" class="ic text-emerald-400"></iconify-icon>projects</button>
+        <button type="button" class="cmd-chip" data-cmd="music"><iconify-icon icon="solar:music-note-bold" class="ic text-emerald-400"></iconify-icon>music</button>
+        <button type="button" class="cmd-chip" data-cmd="help"><iconify-icon icon="solar:question-circle-bold" class="ic text-emerald-400"></iconify-icon>help</button>
+        <button type="button" class="cmd-chip" data-cmd="contact"><iconify-icon icon="solar:chat-round-line-bold" class="ic text-emerald-400"></iconify-icon>contact</button>
       </div>
     </section>
-
-    <!-- Projects -->
-    <section id="projects" class="py-10 sm:py-12 border-t border-white/5">
-      <div class="text-sm">
-        <div class="mb-4 flex items-center gap-3 flex-wrap">
-          <div class="flex items-center gap-3 font-mono">
-            <span class="text-emerald-400/90 font-bold text-lg">C:\></span>
-            <span class="text-zinc-100 text-lg">dir projects\</span>
-          </div>
-          <div id="platform-legend" class="flex flex-wrap gap-2 text-[0.65rem] text-zinc-400 ml-auto justify-end">
-            <button type="button" data-cat="all" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="solar:widget-bold" class="text-base text-zinc-300"></iconify-icon> 전체</button>
-            <button type="button" data-cat="android" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="logos:android-icon" class="text-base"></iconify-icon> Android</button>
-            <button type="button" data-cat="pc" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="logos:microsoft-windows" class="text-base"></iconify-icon></button>
-            <button type="button" data-cat="web" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="material-symbols:language" class="text-base text-sky-400"></iconify-icon> Web</button>
-            <button type="button" data-cat="fork" class="legend-item inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition"><iconify-icon icon="solar:git-branch-bold" class="text-base text-amber-400"></iconify-icon> Fork</button>
-          </div>
-          <div id="category-tabs" class="hidden flex-wrap gap-1.5" role="tablist"></div>
-        </div>
-<div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-live="polite"></div>
-        <div id="empty-state" class="hidden mt-4 text-center text-zinc-400">해당 카테고리에 프로젝트가 없습니다.</div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="site-footer fixed bottom-0 left-0 right-0 z-40 sm:static py-2.5 sm:py-5 font-mono text-zinc-500" style="padding-bottom: max(0.625rem, env(safe-area-inset-bottom)); font-size: clamp(0.45rem, 2.3vw, 0.75rem);">
-      <div class="max-w-5xl mx-auto flex items-center justify-between flex-nowrap gap-1.5 sm:gap-3 px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center gap-1.5 sm:gap-3 whitespace-nowrap">
-          <span>© 2026 Donian. All rights reserved.</span>
-          <a href="https://sites.google.com/view/donian-privacy" target="_blank" rel="noopener" class="hover:text-zinc-200 transition underline-offset-4 hover:underline whitespace-nowrap">개인정보처리방침</a>
-        </div>
-        <div class="flex items-center gap-1.5 sm:gap-3 whitespace-nowrap">
-          <!-- 방문자 카운터 (Cloudflare Worker, IP당 하루 1회) : 오늘 / 총 -->
-          <span class="text-zinc-600">방문자:</span>
-          <span id="visitor-count" class="text-emerald-400 font-semibold" style="font-variant-numeric: tabular-nums;">—</span>
-        </div>
-      </div>
-    </footer>
   </main>
 
+  <div class="site-footer px-3 sm:px-5 py-1.5 sm:py-2 font-mono">
+    <div class="max-w-[1920px] mx-auto flex items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-3 whitespace-nowrap">
+        <span>© 2026 Donian. All rights reserved.</span>
+        <a href="https://sites.google.com/view/donian-privacy" target="_blank" rel="noopener" class="hover:text-white underline-offset-4 hover:underline">개인정보처리방침</a>
+      </div>
+      <div class="flex items-center gap-2 whitespace-nowrap">
+        <span class="out-muted">방문자:</span>
+        <span id="visitor-count" class="text-emerald-300 font-semibold" style="font-variant-numeric:tabular-nums;">—</span>
+      </div>
+    </div>
+  </div>
+  </div><!-- /#app-frame -->
+
   <script>
-    // ---------- 모바일 메뉴 (터미널 스타일이라 생략) ----------
-
-    // ---------- 프로젝트 렌더링 ----------
-    const grid = document.getElementById('project-grid');
-    const tabs = document.getElementById('category-tabs');
-    const empty = document.getElementById('empty-state');
-    let allProjects = [];
-function isNewProject(p) {
-  if (!p || !p.updated_at) return false;
-  const d = new Date(p.updated_at);
-  if (isNaN(d.getTime())) return false;
-  const now = new Date();
-  // 날짜만 비교 (시간 무시) - 7일 이내 업데이트
-  const dDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const sevenDaysAgo = new Date(nowDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-  return dDate >= sevenDaysAgo;
-}
-    let currentCategory = 'all';
-
-    const platformIcon = {
-      'android': 'logos:android-icon',
-      'pc': 'logos:microsoft-windows',
-      'web': 'material-symbols:language',
-      'fork': 'solar:git-branch-bold',
-    };
-    const platformLabel = {
-      'android': 'Android 앱',
-      'pc': 'PC 유틸',
-      'web': '웹 브라우저',
-      'fork': 'Fork 프로젝트',
-    };
-    const langColor = {
-      'Kotlin': 'text-purple-300',
-      'Python': 'text-yellow-300',
-      'JavaScript': 'text-amber-300',
-      'HTML': 'text-orange-300',
-      'C#': 'text-green-300',
-      'Rust': 'text-red-300',
-      'TypeScript': 'text-blue-300',
-    };
-    const langDesc = {
-      'Kotlin': 'JetBrains의 JVM 기반 언어, Android 공식 언어',
-      'Python': '범용 프로그래밍 언어, 스크립팅·자동화·AI',
-      'JavaScript': '웹 브라우저 스크립트 언어',
-      'HTML': '웹 페이지 구조 마크업 언어',
-      'C#': 'Microsoft의 객체지향 언어, 앱',
-      'Rust': '메모리 안전 시스템 프로그래밍 언어',
-      'TypeScript': 'JavaScript에 정적 타입을 추가한 언어',
-    };
-    const techDesc = {
-      'Jetpack Compose': 'Android 선언형 UI 프레임워크',
-      'PaddleOCR': '텍스트 인식(OCR) 라이브러리',
-      'Gemma 4 E4B': 'Google 온디바이스 LLM',
-      'Qwen3-4B': 'Alibaba 소형 LLM',
-      'Tkinter': 'Python 표준 GUI 라이브러리',
-      'PySide6': 'Qt 기반 Python GUI 프레임워크',
-      'ComfyUI': '노드 기반 AI 이미지 생성',
-      'LM Studio': '로컬 LLM 실행 도구',
-      'WebAssembly': '브라우저에서 네이티브 속도 실행',
-      'Room': 'Android SQLite ORM',
-      'FFmpeg': '오디오/비디오 처리 도구',
-      'faster-whisper': '음성 인식(STT) 라이브러리',
-      'PWA': 'Progressive Web App',
-      'VS Code API': 'VS Code 확장 API',
-      'SQLite': '경량 파일 기반 DB',
-      'AI API': 'AI 서비스 API 연동',
-      'LLM API': '대규모 언어 모델 API',
-      'Gemini API': 'Google Gemini API',
-      '.NET 10': 'Microsoft .NET 10 런타임',
-      'chardet': '문자 인코딩 감지 라이브러리',
-      'JSON': '데이터 교환 포맷',
-      'Node.js': 'JavaScript 서버 런타임',
-      'OpenCV': '컴퓨터 비전 라이브러리',
-    };
-
-    function renderTabs(categories) {
-      tabs.innerHTML = '';
-      const select = document.getElementById('category-select');
-      if (select) select.innerHTML = '';
-      categories.forEach((c) => {
-        const btn = document.createElement('button');
-        btn.className = 'px-2 py-0.5 rounded text-xs transition border ' +
-          (c.id === currentCategory ? 'bg-green-500/20 text-green-300 border-green-500/40' : 'bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10');
-        btn.textContent = c.label;
-        btn.setAttribute('role', 'tab');
-        btn.setAttribute('aria-selected', c.id === currentCategory);
-        btn.addEventListener('click', () => { currentCategory = c.id; renderTabs(categories); renderGrid(); if (select) select.value = currentCategory; });
-        tabs.appendChild(btn);
-        if (select) {
-          const opt = document.createElement('option');
-          opt.value = c.id;
-          opt.textContent = c.label;
-          if (c.id === currentCategory) opt.selected = true;
-          select.appendChild(opt);
-        }
-      });
-      if (select && !select._bound) {
-        select._bound = true;
-        select.addEventListener('change', () => { currentCategory = select.value; renderTabs(categories); renderGrid(); });
-      }
-      // 범례 active 상태 동기화
-      const legend = document.getElementById('platform-legend');
-      if (legend) {
-        legend.querySelectorAll('.legend-item').forEach((btn) => {
-          if (btn.dataset.cat === currentCategory) {
-            btn.classList.add('ring-2', 'ring-green-500/60', 'bg-green-500/10');
-          } else {
-            btn.classList.remove('ring-2', 'ring-green-500/60', 'bg-green-500/10');
-          }
-        });
-      }
-    }
-
-    function renderGrid() {
-      grid.innerHTML = '';
-      const filtered = currentCategory === 'all' ? allProjects : allProjects.filter(p => p.category === currentCategory);
-      if (filtered.length === 0) { empty.classList.remove('hidden'); return; }
-      empty.classList.add('hidden');
-      // Fork 는 항상 마지막, 나머지는 업데이트일(updated_at) 기준 내림차순 정렬
-      const isFork = (p) => p.category === 'fork' || /fork/i.test(p.id || '') || /fork/i.test(p.name || '');
-      const sorted = [...filtered].sort((a, b) => {
-        const aFork = isFork(a), bFork = isFork(b);
-        if (aFork && !bFork) return 1;
-        if (!aFork && bFork) return -1;
-        if (aFork && bFork) return 0;
-        return (b.updated_at || '').localeCompare(a.updated_at || '');
-      });
-      // 7일 이내 업데이트 여부는 isNewProject() (전역) 사용
-      sorted.forEach((p, i) => {
-        const card = document.createElement('article');
-        card.className = 'project-card group rounded-lg bg-zinc-900/95 border border-white/10 overflow-hidden';
-        const badgeClass = langColor[p.language] || 'text-zinc-300';
-        const demoLink = p.demo ? `<a href="${p.demo}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:underline">demo →</a>` : '';
-        const forkLabel = p.forked ? `<span class="text-xs text-zinc-600">forked${p.original ? ' from ' + p.original : ''}</span>` : '';
-        card.innerHTML = `
-          <div class="flex items-center gap-1.5 px-2 py-1.5 bg-zinc-800 border-b border-white/5">
-            <iconify-icon icon="solar:terminal-bold" class="text-sm text-green-400"></iconify-icon>
-            <span class="ml-1 text-sm text-zinc-200 font-mono truncate flex-1"><a href="${p.github}" target="_blank" rel="noopener" class="hover:text-blue-300 transition">${p.name}</a></span>
-            <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition text-xs" aria-label="${p.name} GitHub 저장소로 이동" title="GitHub 저장소 열기">
-              <iconify-icon icon="solar:arrow-right-up-bold" class="text-sm"></iconify-icon>
-              <span>open</span>
-            </a>
-          </div>
-          <div class="screenshot bg-zinc-800 overflow-hidden hidden sm:group-hover:block" style="aspect-ratio:16/10">
-            <img src="${p.screenshot}" alt="${p.name} 스크린샷" loading="lazy" decoding="async" class="w-full h-full object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center h-full text-zinc-600&quot;><iconify-icon icon=&quot;solar:code-square-bold&quot; class=&quot;text-2xl&quot;></iconify-icon></div>';">
-          </div>
-          <div class="p-3">
-            <div class="flex items-center justify-between gap-2 mb-1">
-              <div class="flex items-center gap-2 min-w-0 flex-1">
-                <iconify-icon icon="${platformIcon[p.category] || 'solar:code-square-bold'}" class="text-base ${p.category === 'web' ? 'text-sky-400' : p.category === 'fork' ? 'text-amber-400' : 'text-zinc-400'}" title="${platformLabel[p.category] || '프로그램'}"></iconify-icon>
-                <span class="lang-badge ${badgeClass}" title="${langDesc[p.language] || p.language}">${p.language}</span>
-                <span class="text-zinc-500 text-[0.65rem] truncate sm:hidden"># ${p.description.slice(0, 18)}${p.description.length > 18 ? '…' : ''}</span>
-              </div>
-              ${isNewProject(p) ? '<span class="new-badge px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">NEW</span>' : ''}
-            </div>
-            <p class="text-xs text-zinc-400 leading-relaxed keep-all mb-2 hidden sm:block">${p.description}</p>
-            <div class="text-[0.65rem] text-zinc-300 font-mono mb-2 hidden sm:block">생성일: ${p.created_at || '-'} · 업데이트: ${p.updated_at || '-'}</div>
-            <div class="flex flex-wrap gap-1 mb-2 hidden sm:flex">
-              ${p.tech.map(t => `<span class="text-[0.65rem] px-1.5 py-0.5 rounded bg-white/5 text-zinc-400" title="${techDesc[t] || t}">${t}</span>`).join('')}
-            </div>
-            <div class="flex items-center justify-between hidden sm:flex">
-              <div class="flex items-center gap-2">
-                ${demoLink}
-              </div>
-              ${forkLabel}
-            </div>
-          </div>
-        `;
-        // 카드 클릭 시 모달 열기 (링크 클릭은 제외)
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('a')) return;
-          openModal(p);
-        });
-        card.style.cursor = 'pointer';
-        grid.appendChild(card);
-      });
-    }
-
-    // ---------- IntersectionObserver ----------
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
-
-    // ---------- About 스트리밍 (무한 반복) ----------
-    (function () {
-      const body = document.getElementById('about-body');
-      if (!body) return;
-      const out = '◆ Android 앱 · PC 유틸리티 · 웹 게임 · AI 도구\n→ OCR · LLM · AI 이미지 생성(ComfyUI)을 엮은 실용 도구를 주로 만듭니다.\n$ type skills.txt\n◆ Kotlin · Jetpack Compose · Tkinter · PySide6\n◆ JavaScript · TypeScript · C#/.NET 10 · Rust · WebAssembly';
-      let started = false;
-      function runStream() {
-        body.innerHTML = '';
-        let currentLine = document.createElement('div');
-        body.appendChild(currentLine);
-        const cursor = document.createElement('span');
-        cursor.className = 'term-cursor';
-        currentLine.appendChild(cursor);
-        let oi = 0;
-        function streamChar() {
-          if (oi < out.length) {
-            if (out[oi] === '\n') {
-              currentLine.removeChild(cursor);
-              currentLine = document.createElement('div');
-              body.appendChild(currentLine);
-              currentLine.appendChild(cursor);
-            } else {
-              currentLine.insertBefore(document.createTextNode(out[oi]), cursor);
-            }
-            oi++;
-            let delay = 32 + Math.random() * 24;
-            // 중간에 잠시 멈췄다가 이어가기: 명령어 라인 진입 전 휴지
-            if (out[oi] === '$') delay = 900;
-            setTimeout(streamChar, delay);
-          } else {
-            // 다음 반복 전 잠시 유지 (높이는 콘텐츠에 맞춰 자연스럽게)
-            setTimeout(() => {
-              body.innerHTML = '';
-              setTimeout(runStream, 600);
-            }, 2600);
-          }
-        }
-        streamChar();
-      }
-      const obs = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !started) {
-            started = true;
-            obs.unobserve(entry.target);
-            setTimeout(runStream, 300);
-          }
-        });
-      }, { threshold: 0.3 });
-      obs.observe(body);
-    })();
-
-    // ---------- 프로젝트 모달 (모바일 확대) ----------
+    const out = document.getElementById('terminal-output');
+    const streamHost = document.getElementById('stream-host');
+    const musicInline = document.getElementById('music-inline');
     const modal = document.getElementById('project-modal');
     const modalContent = document.getElementById('modal-content');
     const modalClose = document.getElementById('modal-close');
-    function openModal(p) {
-      const badgeClass = langColor[p.language] || 'text-zinc-300';
-      const demoLink = p.demo ? `<a href="${p.demo}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline">demo →</a>` : '';
-      modalContent.innerHTML = `
-        <div class="screenshot bg-zinc-800 overflow-hidden" style="aspect-ratio:16/10">
-          <img src="${p.screenshot}" alt="${p.name} 스크린샷" loading="lazy" decoding="async" class="w-full h-full object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center h-full text-zinc-600&quot;><iconify-icon icon=&quot;solar:code-square-bold&quot; class=&quot;text-4xl&quot;></iconify-icon></div>';">
-        </div>
-        <div class="p-5">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <h3 id="modal-title" class="font-bold text-lg keep-all text-zinc-100">${p.name}</h3>
-            <span class="lang-badge ${badgeClass}">${p.language}</span>
-            ${isNewProject(p) ? '<span class="new-badge px-1.5 py-0.5 rounded text-[0.6rem] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">NEW</span>' : ''}
-          </div>
-          <p class="text-sm text-zinc-300 leading-relaxed keep-all mb-3">${p.description}</p>
-          <div class="text-sm text-zinc-300 font-mono mb-3">생성일: ${p.created_at || '-'} · 업데이트: ${p.updated_at || '-'}</div>
-          <div class="flex flex-wrap gap-1.5 mb-3">
-            ${p.tech.map(t => `<span class="text-xs px-2 py-0.5 rounded bg-white/5 text-zinc-400" title="${techDesc[t] || t}">${t}</span>`).join('')}
-          </div>
-          <div class="flex items-center gap-3">
-            <a href="${p.github}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 rounded bg-white/5 hover:bg-white/10 text-zinc-100 text-base font-medium transition">
-              <iconify-icon icon="solar:arrow-right-up-bold" class="text-2xl"></iconify-icon> open
-            </a>
-            ${demoLink}
-            ${p.forked ? `<span class="text-xs text-zinc-500">forked${p.original ? ' from ' + p.original : ''}</span>` : ''}
-          </div>
-        </div>
-      `;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal() {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      document.body.style.overflow = '';
-    }
-    if (modalClose) modalClose.addEventListener('click', closeModal);
-    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    let allProjects = [];
+    let currentCategory = 'all';
+    let typeToken = 0;
 
-    // ---------- 경력 기간(첫 GitHub 저장소 생성일 기준) ----------
-    (function () {
-      const el = document.getElementById('career-duration');
-      if (!el) return;
-      const start = new Date(2026, 0, 7); // dark-text-rpg 최초 공개일
-      const now = new Date();
-      let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-      if (now.getDate() < start.getDate()) months -= 1;
-      const text = months >= 1 ? `AI 활용개발 ${months}개월차` : `AI 활용개발 ${Math.max(1, Math.floor((now - start) / 86400000))}일째`;
-      // 모바일에서는 타이핑 애니메이션, PC는 즉시 표시
-      if (window.matchMedia('(max-width: 767px)').matches) {
-        el.textContent = '';
-        const cursor = document.createElement('span');
-        cursor.className = 'term-cursor';
-        el.appendChild(cursor);
-        let i = 0;
-        (function type() {
-          if (i < text.length) {
-            cursor.insertAdjacentText('beforebegin', text[i++]);
-            setTimeout(type, 65);
-          } else {
-            setTimeout(() => cursor.remove(), 700);
-          }
-        })();
-      } else {
-        el.textContent = text;
+    const platformLabel = { android:'Android 앱', pc:'PC 유틸', web:'웹 브라우저' };
+    const langColor = { Kotlin:'text-purple-300', Python:'text-yellow-300', JavaScript:'text-amber-300', HTML:'text-orange-300', 'C#':'text-green-300', Rust:'text-red-300', TypeScript:'text-blue-300' };
+    const langDesc = { Kotlin:'JetBrains의 JVM 기반 언어', Python:'범용 프로그래밍 언어', JavaScript:'웹 브라우저 스크립트 언어', HTML:'웹 페이지 구조 마크업', 'C#':'Microsoft 객체지향 언어', Rust:'메모리 안전 시스템 언어', TypeScript:'JavaScript에 정적 타입 추가' };
+    const techDesc = { 'Jetpack Compose':'Android 선언형 UI','PaddleOCR':'텍스트 인식(OCR)','Gemma 4 E4B':'Google 온디바이스 LLM','Qwen3-4B':'Alibaba 소형 LLM','Tkinter':'Python 표준 GUI','PySide6':'Qt 기반 Python GUI','ComfyUI':'노드 기반 AI 이미지 생성','LM Studio':'로컬 LLM 실행','WebAssembly':'브라우저 네이티브 실행','Room':'Android SQLite ORM','FFmpeg':'오디오/비디오 처리','faster-whisper':'음성 인식(STT)','PWA':'Progressive Web App','VS Code API':'VS Code 확장 API','SQLite':'경량 파일 DB','AI API':'AI 서비스 API','LLM API':'대규모 언어 모델 API','Gemini API':'Google Gemini API','.NET 10':'Microsoft .NET 10','chardet':'문자 인코딩 감지','JSON':'데이터 교환 포맷','Node.js':'JavaScript 서버 런타임','OpenCV':'컴퓨터 비전 라이브러리' };
+
+    function isNewProject(p){
+      if(!p||!p.updated_at) return false;
+      const d=new Date(p.updated_at); if(isNaN(d.getTime())) return false;
+      const n=new Date(), dd=new Date(d.getFullYear(),d.getMonth(),d.getDate()), nd=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+      return dd>=new Date(nd.getTime()-7*24*60*60*1000);
+    }
+    const wait = ms => new Promise(r=>setTimeout(r,ms));
+
+    // 빠른 스트리밍 타이핑 (깜빡이는 커서 동반)
+    async function typeLine(text, cls, token, speed){
+      speed = speed || 9;
+      const div=document.createElement('div');
+      div.className='out-line '+(cls||'out-dim');
+      streamHost.appendChild(div);
+      const cur=document.createElement('span'); cur.className='term-cursor';
+      div.appendChild(cur);
+      for(let i=0;i<text.length;i++){
+        if(token!==typeToken) return;
+        div.insertBefore(document.createTextNode(text[i]),cur);
+        out.scrollTop=out.scrollHeight;
+        if(i%3===0) await wait(speed);
       }
-    })();
-
-    // ---------- 업데이트 날짜 자동 갱신 (GitHub API, 커밋 기준) ----------
-    function fmtDateFromISO(iso) {
-      if (!iso) return null;
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return null;
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return y + '-' + m + '-' + day;
+      cur.remove();
+      out.scrollTop=out.scrollHeight;
+    }
+    async function typeHtmlEcho(cmd, token){
+      const div=document.createElement('div'); div.className='out-line cmd-echo';
+      div.innerHTML='<span class="pn">PS C:\\Donian\\Portfolio&gt;</span> <span class="echo-text"></span>';
+      streamHost.appendChild(div);
+      const target=div.querySelector('.echo-text');
+      for(let i=0;i<cmd.length;i++){
+        if(token!==typeToken) return;
+        target.textContent+=cmd[i]; out.scrollTop=out.scrollHeight; await wait(9);
+      }
+    }
+    async function typeHelpLine(cmd, desc, color, token){
+      const div=document.createElement('div');
+      div.className='out-line help-line';
+      div.innerHTML='<span class="help-mark">●</span> <span class="help-cmd"></span><span class="help-desc"></span>';
+      div.querySelector('.help-mark').style.color=color;
+      streamHost.appendChild(div);
+      const cmdEl=div.querySelector('.help-cmd');
+      for(let i=0;i<cmd.length;i++){
+        if(token!==typeToken) return;
+        cmdEl.textContent+=cmd[i]; out.scrollTop=out.scrollHeight; await wait(6);
+      }
+      div.querySelector('.help-desc').textContent='  '+desc;
+      out.scrollTop=out.scrollHeight;
+    }
+    function clearOutput(){
+      typeToken++;
+      streamHost.innerHTML='';
+      musicInline.classList.add('hidden');
+      const inp=document.getElementById('cmd-input'); if(inp) inp.value='';
+    }
+    function addStaticLine(text, cls){
+      const div=document.createElement('div'); div.className='out-line '+(cls||'out-dim'); div.textContent=text;
+      streamHost.appendChild(div); out.scrollTop=out.scrollHeight; return div;
     }
 
-    async function refreshUpdatedDates() {
-      const now = Date.now();
-      const CACHE_KEY = 'gh_pushed_dates_v1';
-      const TTL = 12 * 60 * 60 * 1000; // 12시간
-      let cache = {};
-      try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch (e) { cache = {}; }
+    const CAREER = [
+      ['2026.11.19','YouTube-Ad-Blocker 공개','크롬 광고차단 확장'],['2026.11.12','MyAITutor 개발 중','AI 튜터'],
+      ['2026.11.06','pdf_hwp_viewer 공개','PDF/HWP 뷰어'],['2026.10.21','AI_GoStop 공개','AI 고스톱'],
+      ['2026.10.20','AI_jjangie 공개','AI 웹앱'],['2026.09.25','gpu-cpu-status-monitor 공개','GPU/CPU 모니터링'],
+      ['2026.09.12','Novel_Studio_Maker 공개','소설 제작 보조'],['2026.06.02','split-text-file 공개','텍스트 분할 도구'],
+      ['2026.01.07','AI coding 개발 입문',''],['2007.09.12','만기제대',''],['2005.09.13','육군입대',''],
+      ['2000. 4월경','유니텔 자료실 "메모장 프로그램 출시"',''],['1999. 4월경','"창조98" 입문',''],['1998. 2월경','Visual Basic 입문','']
+    ];
 
-      let changed = false;
-      await Promise.all(allProjects.map(async (p) => {
-        const m = (p.github || '').match(/github\.com\/([^/]+)\/([^/#?]+)/);
-        if (!m) return;
-        const repo = m[1] + '/' + m[2];
-        const c = cache[repo];
-        if (c && c.date && (now - (c.ts || 0)) < TTL) {
-          p.updated_at = c.date;
-          changed = true;
-          return;
-        }
-        try {
-          const res = await fetch('https://api.github.com/repos/' + repo, {
-            headers: { 'Accept': 'application/vnd.github+json' }
-          });
-          if (res.ok) {
-            const j = await res.json();
-            const date = fmtDateFromISO(j.pushed_at);
-            if (date) {
-              cache[repo] = { ts: now, date };
-              p.updated_at = date;
-              changed = true;
-            }
-          }
-        } catch (e) { /* 무시: 정적 날짜 유지 */ }
-      }));
-
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
-      if (changed) renderGrid();
+    function renderProjectList(){
+      const host=document.getElementById('project-list-host'); if(!host) return;
+      if(!allProjects.length){ addStaticLine('프로젝트 데이터를 불러오는 중입니다...','out-muted'); return; }
+      const cats=[['all','전체'],['android','Android'],['pc','PC'],['web','Web']];
+      const sorted=[...allProjects]
+        .filter(p=>currentCategory==='all'||p.category===currentCategory)
+        .sort((a,b)=> (b.updated_at||'').localeCompare(a.updated_at||''));
+      host.innerHTML=
+        '<div class="flex flex-wrap gap-1 mb-1">'+cats.map(([id,l])=>'<button type="button" class="filter-chip'+(currentCategory===id?' active':'')+'" data-cat="'+id+'">'+l+'</button>').join('')+'</div>'+
+        '<div class="out-muted mb-1">총 '+sorted.length+'개 • 행 클릭 시 상세</div>'+
+        '<div class="proj-head"><span>수정일</span><span>이름</span><span class="cat">분류</span></div>'+
+        (sorted.map(p=>'<button type="button" class="proj-row" data-id="'+p.id+'">'+
+          '<span class="date">'+(p.updated_at||'-')+'</span>'+
+          '<span class="name"><span class="lang-code">['+String(p.language||'-').toLowerCase()+']</span>'+p.name+(isNewProject(p)?' <span class="out-ok badge-new px-1 text-[.6em] border border-emerald-400/40 rounded">NEW</span>':'')+'</span>'+
+          '<span class="cat">'+(platformLabel[p.category]||p.category)+'</span></button>').join('')||'<div class="out-muted">항목 없음</div>');
+      host.querySelectorAll('.filter-chip').forEach(b=>b.addEventListener('click',()=>{ currentCategory=b.dataset.cat; renderProjectList(); }));
+      host.querySelectorAll('.proj-row').forEach(b=>b.addEventListener('click',()=>{ const p=allProjects.find(x=>x.id===b.dataset.id); if(p) openModal(p); }));
+      out.scrollTop=out.scrollHeight;
     }
 
-    // ---------- 데이터 로드 ----------
-    fetch('projects.json')
-      .then(r => r.json())
-      .then(data => {
-        allProjects = data.projects;
-        renderTabs(data.categories);
-        renderGrid();
-        // 커밋 기준 업데이트 날짜 자동 갱신 (백그라운드)
-        refreshUpdatedDates();
-        // 범례 클릭으로 분류
-        const legend = document.getElementById('platform-legend');
-        if (legend) {
-          legend.querySelectorAll('.legend-item').forEach((btn) => {
-            btn.addEventListener('click', () => {
-              currentCategory = btn.dataset.cat;
-              renderTabs(data.categories);
-              renderGrid();
-            });
-          });
-        }
-      })
-      .catch(err => {
-        console.error('projects.json 로드 실패:', err);
-        grid.innerHTML = '<p class="text-zinc-400 col-span-full text-center text-xs">프로젝트 데이터를 불러올 수 없습니다. 로컬 서버로 실행해 주세요.</p>';
-      });
+    function openModal(p){
+      const demo=p.demo?'<a href="'+p.demo+'" target="_blank" rel="noopener" class="m-open">demo ↗</a>':'';
+      modalContent.innerHTML=
+        '<div class="m-shot"><img src="'+p.screenshot+'" alt="'+p.name+' 스크린샷" loading="lazy"></div>'+
+        '<div class="flex items-start justify-between gap-2"><h3 id="modal-title" class="m-head keep-all">◆ '+p.name+'</h3><span class="lang-badge '+(langColor[p.language]||'')+'">'+p.language+'</span></div>'+
+        (isNewProject(p)?'<div class="out-ok badge-new mt-1" style="display:inline-block">NEW</div>':'')+
+        '<p class="out-dim keep-all my-2">'+p.description+'</p>'+
+        '<div class="m-label">생성일: '+(p.created_at||'-')+' · 업데이트: '+(p.updated_at||'-')+'</div>'+
+        '<div class="flex flex-wrap gap-1 my-2">'+p.tech.map(t=>'<span class="m-chip" title="'+(techDesc[t]||t)+'">'+t+'</span>').join('')+'</div>'+
+        '<div class="flex items-center gap-2 mt-3"><a href="'+p.github+'" target="_blank" rel="noopener" class="m-open"><iconify-icon icon="solar:arrow-right-up-bold"></iconify-icon> open GitHub</a>'+demo+'</div>';
+      modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow='hidden';
+    }
+    function closeModal(){ modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow=''; }
+    modalClose.addEventListener('click',closeModal);
+    modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
-    // ---------- 터미널 스트리밍 ----------
-    (function () {
-      const body = document.getElementById('terminal-body');
-      if (!body) return;
-      const commands = [
-        { cmd: '', out: '◆ Initializing profile...\n▸ 안녕하세요, Donian 입니다.\n◆ AI 코딩 도구 5개(Cline·Copilot·Kilo·Codex·opencode)를 규칙 파일 하나로 묶어 씁니다.\n→ AI가 실행하지 않은 검증을 "했다"고 보고하지 못하게 하고,\n   같은 오류에 3번 실패하면 멈추고 보고하게 만들었습니다.\n✓ 1998년 Visual Basic으로 시작해, 지금은 이 규칙으로 AI와 함께 Python·Kotlin 앱을 만듭니다.\n♫ ACE-Step Studio로 AI 음악 생성도 공부하고 있습니다.\n⚡ Done.' },
-      ];
-      let ci = 0;
-      // 출력 영역은 5줄 높이로 고정, 6줄부터 스크롤 (줄 높이 실제 계산)
-      (function fixHeight() {
-        const lh = parseFloat(getComputedStyle(body).lineHeight) || 23;
-        const gap = 4; // space-y-1
-        body.style.minHeight = '0';
-        body.style.height = Math.round(lh * 5 + gap * 4) + 'px';
-        body.style.overflowY = 'auto';
-      })();
-      function runCommand() {
-        if (ci >= commands.length) {
-          ci = 0;
-          setTimeout(() => { body.innerHTML = ''; setTimeout(runCommand, 600); }, 3200);
-          return;
-        }
-        const { cmd, out } = commands[ci];
-        let typingText = null;
-        if (cmd) {
-          const line = document.createElement('div');
-          line.innerHTML = '<span class="text-green-400 font-bold">$</span> <span class="text-zinc-200 ml-2 typing-text"></span>';
-          body.appendChild(line);
-          typingText = line.querySelector('.typing-text');
-        }
-        let i = 0;
-        function typeChar() {
-          if (cmd && i < cmd.length) {
-            typingText.textContent += cmd[i++];
-            body.scrollTop = body.scrollHeight;
-            setTimeout(typeChar, 55 + Math.random() * 35);
-          } else {
-            setTimeout(() => {
-              let currentLine = document.createElement('div');
-              currentLine.className = 'text-zinc-400 pl-2 md:pl-4 break-words';
-              body.appendChild(currentLine);
-              const cursor = document.createElement('span');
-              cursor.className = 'term-cursor';
-              currentLine.appendChild(cursor);
-              let oi = 0;
-              function streamChar() {
-                if (oi < out.length) {
-                  if (out[oi] === '\n') {
-                    currentLine.removeChild(cursor);
-                    currentLine = document.createElement('div');
-                    currentLine.className = 'text-zinc-400 pl-2 md:pl-4 break-words';
-                    body.appendChild(currentLine);
-                    currentLine.appendChild(cursor);
-                  } else {
-                    currentLine.insertBefore(document.createTextNode(out[oi]), cursor);
-                  }
-                  oi++;
-                  body.scrollTop = body.scrollHeight;
-                  setTimeout(streamChar, 36 + Math.random() * 28);
-                } else {
-                  ci++;
-                  body.scrollTop = body.scrollHeight;
-                  setTimeout(runCommand, 2800);
-                }
-              }
-              streamChar();
-            }, 300);
-          }
-        }
-        setTimeout(typeChar, 200);
-      }
-      body.innerHTML = '';
-      setTimeout(runCommand, 500);
-    })();
-
-    // ---------- Music 섹션 (YouTube RSS · 최신 5곡) ----------
-    (function () {
-      const listEl = document.getElementById('music-list');
-      if (!listEl) return;
-      const CHANNEL_ID = 'UCbPy9nrvgDN7QoS4nCJrNJA';
-      const PROXY = 'https://api.allorigins.win/raw?url=';
-      const RSS = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID;
-      // 프록시 실패 시 폴백으로 보여줄 정적 트랙 목록
-      const FALLBACK_TRACKS = [
-        { idx: 1, title: "함께 웃는 이 순간", vid: 'LzhClqrnYoE', published: '2026-11-09', thumb: 'https://i.ytimg.com/vi/LzhClqrnYoE/hqdefault.jpg' },
-        { idx: 2, title: "let's go", vid: 'S9_XqayW-wk', published: '2026-11-09', thumb: 'https://i.ytimg.com/vi/S9_XqayW-wk/hqdefault.jpg' },
-        { idx: 3, title: "웃으며 안녕, 이 밤", vid: 'CwvHUImuW-I', published: '2026-11-06', thumb: 'https://i.ytimg.com/vi/CwvHUImuW-I/hqdefault.jpg' },
-        { idx: 4, title: "도시의밤 - City night", vid: 'GxnSbsM7TqU', published: '2026-10-30', thumb: 'https://i.ytimg.com/vi/GxnSbsM7TqU/hqdefault.jpg' },
-        { idx: 5, title: "이별의 눈물", vid: 'w7oymTDn8jo', published: '2026-10-28', thumb: 'https://i.ytimg.com/vi/w7oymTDn8jo/hqdefault.jpg' },
-        { idx: 6, title: "비오는 창가에서", vid: 'b5rrxOS70H0', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/b5rrxOS70H0/hqdefault.jpg' },
-        { idx: 7, title: "달빛 아래 너를 만나", vid: 'LdIkZ70JfYM', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/LdIkZ70JfYM/hqdefault.jpg' },
-        { idx: 8, title: "아침 햇살", vid: 'n1su-d__gUI', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/n1su-d__gUI/hqdefault.jpg' },
-        { idx: 9, title: "아직도..", vid: 'TqzrP7DJDZQ', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/TqzrP7DJDZQ/hqdefault.jpg' },
-        { idx: 10, title: "그리운 밤", vid: 'wqZg3hOBO_c', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/wqZg3hOBO_c/hqdefault.jpg' },
-        { idx: 11, title: "햇살 가득", vid: 'AA9Y2IT8dZo', published: '2026-10-27', thumb: 'https://i.ytimg.com/vi/AA9Y2IT8dZo/hqdefault.jpg' },
-      ];
-
-      function fmtDate(iso) {
-        if (!iso) return '-';
-        try {
-          const d = new Date(iso);
-          if (isNaN(d.getTime())) return '-';
-          const y = d.getFullYear();
-          const m = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          return y + '.' + m + '.' + day;
-        } catch (e) { return ''; }
-      }
-
-      function escapeHtml(s) {
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      }
-
-      async function load() {
-        let lastError = '알 수 없는 오류';
-        const proxies = [
-          (u) => 'https://cors-proxy.donian.workers.dev/?apiurl=' + encodeURIComponent(u),
-          (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-          (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+    async function runCommand(raw){
+      const cmd=(raw||'').trim(); if(!cmd) return;
+      const token=++typeToken;
+      streamHost.innerHTML='';
+      musicInline.classList.add('hidden');
+      document.getElementById('cmd-input').value='';
+      await typeHtmlEcho(cmd,token);
+      const lower=cmd.toLowerCase();
+      if(lower==='help'||lower==='?'){
+        await typeLine('◆ 사용 가능한 명령','out-head',token);
+        const EM='var(--emerald)', AM='var(--amber)', BLUE='#7dd3fc', GRAY='var(--mute)';
+        const rows=[
+          ['whoami','내 소개',EM],['Get-History','커리어 로그',EM],
+          ['Get-ChildItem .\\projects','프로젝트 목록',EM],['Get-Content .\\projects\\이름','상세 열기',EM],
+          ['music','음악 플레이어',AM],['clear','화면 지우기',AM],
+          ['contact','문의 게시판',BLUE],['help','이 도움말',GRAY],
         ];
-        for (const makeUrl of proxies) {
-          const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 6000);
-          try {
-            const res = await fetch(makeUrl(RSS), { signal: controller.signal });
-            clearTimeout(timer);
-            if (!res || !res.ok) { lastError = 'HTTP ' + (res ? res.status : 'no response'); continue; }
-            const text = await res.text();
-            const doc = new DOMParser().parseFromString(text, 'application/xml');
-            const entries = Array.from(doc.querySelectorAll('entry')).slice(0, 15);
-            if (!entries.length) { lastError = '피드에 항목 없음'; continue; }
-            const tracks = entries.map((e, i) => {
-              const title = e.querySelector('title')?.textContent || 'Untitled';
-              const vid = e.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015', 'videoId')[0]?.textContent
-                       || (e.querySelector('id')?.textContent || '').split(':').pop();
-              const published = e.querySelector('published')?.textContent || '';
-              const thumb = e.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'thumbnail')[0]?.getAttribute('url')
-                         || 'https://i.ytimg.com/vi/' + vid + '/hqdefault.jpg';
-              return { idx: i + 1, title, vid, published, thumb };
-            });
-            render(tracks);
-            try { localStorage.setItem('music_tracks_cache', JSON.stringify(tracks)); } catch (e) {}
-            return;
-          } catch (e) {
-            clearTimeout(timer);
-            lastError = (e && e.message) ? e.message : String(e);
-          }
-        }
-        let cachedTracks = null;
-        try { cachedTracks = JSON.parse(localStorage.getItem('music_tracks_cache') || 'null'); } catch (e) { cachedTracks = null; }
-        if (Array.isArray(cachedTracks) && cachedTracks.length) {
-          render(cachedTracks);
-        } else {
-          render(FALLBACK_TRACKS);
-        }
-        const note = document.createElement('div');
-        note.className = 'mt-2 px-3 py-2 rounded-md border border-amber-400/40 bg-amber-500/10 text-white text-xs font-semibold leading-relaxed';
-        note.textContent = '⚠️ 라이브 데이터 로드 실패 (' + lastError + ') — 저장된 목록을 불러왔습니다. (YouTube에서 직접 보기)';
-        note.style.cursor = 'pointer';
-        note.addEventListener('click', () => window.open('https://www.youtube.com/@songmakernightmusic', '_blank'));
-        listEl.appendChild(note);
+        for(const [c,d,color] of rows) await typeHelpLine(c, d, color, token);
+        return;
       }
+      if(lower==='whoami'){
+        await typeLine('◆ Donian  —  AI Coder · AI Music Creator','out-head',token);
+        await typeLine('안녕하세요. Python·Kotlin으로 실용 도구를 만드는 개발자입니다.','out-dim',token);
+        await typeLine('◆ 1998년 Visual Basic으로 시작해, 지금은 AI와 함께 앱을 만듭니다.','out-dim',token);
+        await typeLine('◆ Android 앱 · PC 유틸리티 · AI 도구 / OCR · LLM · ComfyUI','out-dim',token);
+        await typeLine('✓ '+allProjects.length+'개의 오픈소스 프로젝트를 공개 중입니다.','out-ok',token);
+        const agentLink=document.createElement('div');
+        agentLink.className='out-line mt-1';
+        agentLink.innerHTML='<a href="https://github.com/Donian-kor/Donian-kor.github.io/blob/main/AGENTS.md" target="_blank" rel="noopener" class="text-white hover:underline underline-offset-4">AGENTS.MD 읽어보기 ↗</a>';
+        streamHost.appendChild(agentLink);
+        out.scrollTop=out.scrollHeight;
+        return;
+      }
+      if(lower==='history'||lower==='get-history'||lower==='type career.log'){
+        await typeLine('◆ career.log — 최근 순','out-head',token);
+        for(const r of CAREER) await typeLine(r[0]+'  '+r[1]+(r[2]?'  # '+r[2]:''),r===CAREER[0]?'out-white':'out-muted',token);
+        return;
+      }
+      if(/^(ls|dir|get-childitem)/.test(lower)){
+        await typeLine('◆ Get-ChildItem .\\projects — '+allProjects.length+' items','out-head',token);
+        const h=document.createElement('div'); h.id='project-list-host'; h.className='out-line'; streamHost.appendChild(h);
+        renderProjectList(); out.scrollTop=out.scrollHeight; return;
+      }
+      if(/^(cat|type|get-content)\s/i.test(lower)){
+        const name=cmd.replace(/^\S+\s+/,'').replace(/^\.\/?(projects\/?)?/i,'').replace(/\/readme\.md$/i,'').replace(/\.txt$/i,'').trim().toLowerCase();
+        const p=allProjects.find(x=>x.name.toLowerCase()===name||x.id.toLowerCase()===name||x.name.toLowerCase().includes(name));
+        if(p){ openModal(p); await typeLine('✓ '+p.name+' 상세를 열었습니다.','out-ok',token); }
+        else await typeLine('파일을 찾을 수 없습니다: '+name,'out-amber',token);
+        return;
+      }
+      if(lower==='music'){
+        await typeLine('✓ 음악 플레이어를 열었습니다.','out-ok',token);
+        musicInline.classList.remove('hidden'); out.scrollTop=out.scrollHeight; return;
+      }
+      if(lower==='contact'){ await typeLine('✓ 게시판으로 이동합니다...','out-ok',token); setTimeout(()=>window.location.href='board.html',400); return; }
+      if(lower==='clear'||lower==='cls'){ return; }
+      await typeLine("'"+cmd+"' 는 인식할 수 없는 명령입니다. 'help' 를 입력해 보세요.",'out-amber',token);
+    }
+    document.getElementById('cmd-form').addEventListener('submit',e=>{ e.preventDefault(); runCommand(document.getElementById('cmd-input').value); });
+    document.getElementById('cmd-buttons').addEventListener('click',e=>{ const b=e.target.closest('.cmd-chip'); if(b) runCommand(b.dataset.cmd); });
 
-      function render(tracks) {
-        listEl.innerHTML = tracks.map(t => `
-          <div class="music-track rounded-lg border border-white/10 bg-zinc-900/95 overflow-hidden" data-vid="${t.vid}">
-            <button type="button" class="music-row w-full flex items-center gap-3 p-3 text-left" data-idx="${t.idx}">
-              <img src="${t.thumb}" alt="" class="music-thumb w-12 h-12 rounded object-cover bg-zinc-800" loading="lazy" onerror="this.style.display='none'">
-              <div class="flex-1 min-w-0">
-                <div class="text-zinc-200 text-sm truncate">${escapeHtml(t.title)}</div>
-                <div class="text-zinc-500 text-[0.65rem]">${fmtDate(t.published)}</div>
-              </div>
-              <span class="music-status text-emerald-400 text-[0.65rem] font-bold font-mono hidden px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30">재생 중</span>
-              <iconify-icon icon="solar:play-circle-bold" class="music-play-btn text-green-400 text-2xl shrink-0"></iconify-icon>
-            </button>
-          </div>
-        `).join('');
+    fetch('projects.json', { cache:'no-store' }).then(r=>r.json()).then(d=>{ allProjects=d.projects||[]; refreshUpdatedDates(); })
+      .catch(err=>{ console.error('projects.json 로드 실패:',err); addStaticLine('⚠ 프로젝트 데이터를 불러올 수 없습니다. 로컬 서버로 실행해 주세요.','out-amber'); });
 
-        listEl.querySelectorAll('.music-row').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const track = btn.closest('.music-track');
-            const vid = track.getAttribute('data-vid');
-            const dock = document.getElementById('music-dock');
-            const dockIframe = dock ? dock.querySelector('iframe') : null;
-            const dockTitle = dock ? dock.querySelector('.music-dock-title') : null;
-            const titleText = track.querySelector('.text-zinc-200')?.textContent || '';
-            const wasActive = track.classList.contains('is-open');
-            // reset all highlights
-            listEl.querySelectorAll('.music-track').forEach(t => {
-              t.classList.remove('is-open');
-              const st = t.querySelector('.music-status');
-              if (st) st.classList.add('hidden');
-              const ic = t.querySelector('.music-play-btn');
-              if (ic) ic.setAttribute('icon', 'solar:play-circle-bold');
-            });
-            if (wasActive) {
-              // stop
-              if (dockIframe) dockIframe.removeAttribute('src');
-              if (dock) dock.classList.add('hidden');
-              if (dockTitle) dockTitle.textContent = '재생할 곡을 선택하세요';
-            } else {
-              track.classList.add('is-open');
-              const st = track.querySelector('.music-status');
-              if (st) st.classList.remove('hidden');
-              const ic = track.querySelector('.music-play-btn');
-              if (ic) ic.setAttribute('icon', 'solar:pause-circle-bold');
-              if (dockIframe) dockIframe.setAttribute('src', 'https://www.youtube.com/embed/' + vid + '?autoplay=1&rel=0&loop=1&playlist=' + vid);
-              if (dockTitle) dockTitle.textContent = titleText;
-              if (dock) dock.classList.remove('hidden');
-            }
+    function fmtDateFromISO(iso){ if(!iso) return null; const d=new Date(iso); if(isNaN(d.getTime())) return null; return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    async function refreshUpdatedDates(){
+      const now=Date.now(), KEY='gh_pushed_dates_v1', TTL=12*60*60*1000;
+      let cache={}; try{ cache=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ cache={}; }
+      let changed=false;
+      await Promise.all(allProjects.map(async p=>{
+        const m=(p.github||'').match(/github\.com\/([^/]+)\/([^/#?]+)/); if(!m) return;
+        const repo=m[1]+'/'+m[2], c=cache[repo];
+        if(c&&c.date&&(now-(c.ts||0))<TTL){ p.updated_at=c.date; changed=true; return; }
+        try{ const res=await fetch('https://api.github.com/repos/'+repo,{headers:{'Accept':'application/vnd.github+json'}});
+          if(res.ok){ const j=await res.json(), date=fmtDateFromISO(j.pushed_at); if(date){ cache[repo]={ts:now,date}; p.updated_at=date; changed=true; } } }catch(e){}
+      }));
+      try{ localStorage.setItem(KEY,JSON.stringify(cache)); }catch(e){}
+      if(changed){ const h=document.getElementById('project-list-host'); if(h) renderProjectList(); }
+    }
+
+    // 음악 (인라인)
+    (function(){
+      const listEl=document.getElementById('music-list'); if(!listEl) return;
+      const RSS='https://www.youtube.com/feeds/videos.xml?channel_id=UCbPy9nrvgDN7QoS4nCJrNJA';
+      const FALLBACK=[
+        ["함께 웃는 이 순간","LzhClqrnYoE","2026-11-09"],["let's go","S9_XqayW-wk","2026-11-09"],["웃으며 안녕, 이 밤","CwvHUImuW-I","2026-11-06"],
+        ["도시의밤 - City night","GxnSbsM7TqU","2026-10-30"],["이별의 눈물","w7oymTDn8jo","2026-10-28"],["비오는 창가에서","b5rrxOS70H0","2026-10-27"],
+        ["달빛 아래 너를 만나","LdIkZ70JfYM","2026-10-27"],["아침 햇살","n1su-d__gUI","2026-10-27"],["아직도..","TqzrP7DJDZQ","2026-10-27"],
+        ["그리운 밤","wqZg3hOBO_c","2026-10-27"],["햇살 가득","AA9Y2IT8dZo","2026-10-27"]
+      ].map((t,i)=>({idx:i+1,title:t[0],vid:t[1],published:t[2],thumb:'https://i.ytimg.com/vi/'+t[1]+'/hqdefault.jpg'}));
+      const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const fmt=iso=>{ if(!iso) return '-'; const d=new Date(iso); return isNaN(d.getTime())?'-':d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'); };
+      function render(tracks){
+        listEl.innerHTML=tracks.map(t=>'<div class="music-track" data-vid="'+t.vid+'"><button type="button" class="w-full flex items-center gap-2 p-2 text-left">'+
+          '<img src="'+t.thumb+'" alt="" class="music-thumb w-10 h-10 rounded object-cover bg-zinc-800" loading="lazy" onerror="this.style.display=\'none\'">'+
+          '<span class="flex-1 min-w-0"><span class="block text-zinc-200 text-sm truncate">'+esc(t.title)+'</span><span class="block text-zinc-500 text-[.65rem]">'+fmt(t.published)+'</span></span>'+
+          '<span class="music-status text-emerald-400 text-[.65rem] hidden">재생 중</span><iconify-icon icon="solar:play-circle-bold" class="music-play-btn text-emerald-400 text-xl"></iconify-icon></button></div>').join('');
+        listEl.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{
+          const tr=btn.closest('.music-track'), vid=tr.dataset.vid, dock=document.getElementById('music-dock');
+          const iframe=dock?dock.querySelector('iframe'):null, dt=dock?dock.querySelector('.music-dock-title'):null;
+          const title=tr.querySelector('.text-zinc-200')?.textContent||'', was=tr.classList.contains('is-open');
+          listEl.querySelectorAll('.music-track').forEach(t=>{
+            t.classList.remove('is-open');
+            const s=t.querySelector('.music-status'); if(s) s.classList.add('hidden');
+            const ic=t.querySelector('.music-play-btn'); if(ic) ic.setAttribute('icon','solar:play-circle-bold');
           });
-        });
+          if(was){ if(iframe) iframe.removeAttribute('src'); if(dock) dock.classList.add('hidden'); if(dt) dt.textContent='재생할 곡을 선택하세요'; }
+          else { tr.classList.add('is-open'); const s=tr.querySelector('.music-status'); if(s) s.classList.remove('hidden');
+            const ic=tr.querySelector('.music-play-btn'); if(ic) ic.setAttribute('icon','solar:pause-circle-bold');
+            if(iframe) iframe.setAttribute('src','https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0&loop=1&playlist='+vid);
+            if(dt) dt.textContent=title; if(dock) dock.classList.remove('hidden'); }
+        }));
       }
-
+      async function load(){
+        for(const mk of [u=>'https://cors-proxy.donian.workers.dev/?apiurl='+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)]){
+          const ctl=new AbortController(), tm=setTimeout(()=>ctl.abort(),6000);
+          try{ const res=await fetch(mk(RSS),{signal:ctl.signal}); clearTimeout(tm); if(!res||!res.ok) continue;
+            const doc=new DOMParser().parseFromString(await res.text(),'application/xml');
+            const es=Array.from(doc.querySelectorAll('entry')).slice(0,15); if(!es.length) continue;
+            const tracks=es.map((e,i)=>{ const title=e.querySelector('title')?.textContent||'Untitled';
+              const vid=e.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015','videoId')[0]?.textContent||(e.querySelector('id')?.textContent||'').split(':').pop();
+              const thumb=e.getElementsByTagNameNS('http://search.yahoo.com/mrss/','thumbnail')[0]?.getAttribute('url')||'https://i.ytimg.com/vi/'+vid+'/hqdefault.jpg';
+              return {idx:i+1,title,vid,published:e.querySelector('published')?.textContent||'',thumb}; });
+            render(tracks); try{ localStorage.setItem('music_tracks_cache',JSON.stringify(tracks)); }catch(e){} return;
+          }catch(e){ clearTimeout(tm); }
+        }
+        let c=null; try{ c=JSON.parse(localStorage.getItem('music_tracks_cache')||'null'); }catch(e){}
+        render(Array.isArray(c)&&c.length?c:FALLBACK);
+      }
       load();
     })();
 
-    // ---------- Donian 이름 라벨: Matrix 디코드 (Decode) ----------
-    (function () {
-      const el = document.querySelector('.donian-decode');
-      if (!el) return;
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const FINAL = 'Donian';
-      const GLYPHS = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      if (reduceMotion) { el.textContent = FINAL; return; }
-
-      const SCRAMBLE = 1100;   // 디코드(스크램블) 구간 ms
-      const HOLD = 2200;       // 완성 후 유지 ms
-      const GLITCH = 260;      // 글리치 구간 ms
-      const LOOP = SCRAMBLE + HOLD + GLITCH;
-
-      let start = null;
-      function rndGlyph() { return GLYPHS[(Math.random() * GLYPHS.length) | 0]; }
-
-      function frame(now) {
-        if (start === null) start = now;
-        const t = (now - start) % LOOP;
-        if (t < SCRAMBLE) {
-          const p = t / SCRAMBLE;
-          const settled = Math.min(FINAL.length, Math.floor(p * (FINAL.length + 1)));
-          let out = '';
-          for (let i = 0; i < FINAL.length; i++) {
-            out += (i < settled) ? FINAL[i] : rndGlyph();
-          }
-          el.textContent = out;
-          el.classList.remove('is-glitch');
-          el.style.transform = '';
-        } else if (t < SCRAMBLE + HOLD) {
-          el.textContent = FINAL;
-          el.classList.remove('is-glitch');
-          el.style.transform = '';
-        } else {
-          el.textContent = FINAL;
-          el.classList.add('is-glitch');
-          // 랜덤 글리치 지터
-          const dx = (Math.random() * 4 - 2).toFixed(1);
-          const dy = (Math.random() * 2 - 1).toFixed(1);
-          el.style.transform = 'translate(' + dx + 'px,' + dy + 'px) skewX(' + (Math.random() * 6 - 3).toFixed(1) + 'deg)';
-        }
-        requestAnimationFrame(frame);
-      }
+    (function(){
+      const el=document.querySelector('.donian-decode'); if(!el) return;
+      const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, FINAL='Donian';
+      const G='ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      if(reduce){ el.textContent=FINAL; return; }
+      const S=1100,H=2200,GL=260,L=S+H+GL; let st=null;
+      function frame(now){ if(st===null) st=now; const t=(now-st)%L;
+        if(t<S){ const p=t/S, n=Math.min(FINAL.length,Math.floor(p*(FINAL.length+1))); let o=''; for(let i=0;i<FINAL.length;i++) o+=i<n?FINAL[i]:G[(Math.random()*G.length)|0]; el.textContent=o; el.classList.remove('is-glitch'); }
+        else if(t<S+H){ el.textContent=FINAL; el.classList.remove('is-glitch'); }
+        else { el.textContent=FINAL; el.classList.add('is-glitch'); }
+        requestAnimationFrame(frame); }
       requestAnimationFrame(frame);
     })();
 
-    // ---------- Matrix 배경 (스크롤 연동 · 영문/숫자/한글 자음) ----------
-    (function () {
-      const canvas = document.getElementById('matrix-bg');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d', { alpha: false });
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const consonants = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ';
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-      const digits = '0123456789';
-      const IDLE_DELAY = 700;      // 스크롤이 멈춘 뒤 자동 낙하 시작까지(ms)
-      // 모바일: 렉 방지를 위해 속도·FPS·글자수·해상도 완화 (데스크톱은 5배 유지)
-      const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && window.innerWidth < 1024);
-      const DRIFT_PER_SEC = isMobile ? 34 : 130;
-      const IDLE_FPS = isMobile ? 18 : 30;
-      let items = [];
-      let raf = 0;
-      let pending = 0;
-      let drift = 0;
-      let dpr = 1;
-      let lastScroll = window.scrollY;
-      let lastScrollAt = 0;
-      let lastDraw = 0;
-      let idleTimer = 0;
-
-      function pick(pool) {
-        return pool[(Math.random() * pool.length) | 0];
-      }
-
-      // 한글 자음 45% · 영문 30% · 숫자 25%
-      function randomGlyph() {
-        const r = Math.random();
-        if (r < 0.45) return pick(consonants);
-        if (r < 0.75) return pick(letters);
-        return pick(digits);
-      }
-
-      // 글자+글로우+블러를 미리 스프라이트로 구워 두어, 스크롤 중에는 drawImage만 한다.
-      function makeSprite(it) {
-        const pad = Math.ceil(it.size * 0.55 + (it.glow ? it.size * 0.5 : 0) + it.blur * 1.5) + 2;
-        const w = Math.ceil(it.size + pad * 2);
-        const h = w;
-        const c = document.createElement('canvas');
-        c.width = Math.ceil(w * dpr);
-        c.height = Math.ceil(h * dpr);
-        const g = c.getContext('2d');
-        g.scale(dpr, dpr);
-        g.font = it.size + "px 'JetBrains Mono', 'Pretendard', monospace";
-        g.textAlign = 'left';
-        g.textBaseline = 'top';
-        g.fillStyle = it.bright ? 'rgba(190,255,205,1)' : 'rgba(0,255,65,1)';
-        if (it.glow) {
-          g.shadowColor = 'rgba(0,255,65,0.9)';
-          g.shadowBlur = it.size * 0.5;
-        }
-        if (it.blur > 0) g.filter = 'blur(' + it.blur.toFixed(1) + 'px)';
-        g.fillText(it.char, pad, pad);
-        return { canvas: c, w: w, h: h, pad: pad };
-      }
-
-      function makeItem(w, h, initial) {
-        const size = 11 + Math.random() * 20;
-        const it = {
-          x: Math.random() * (w - size),
-          y: initial ? Math.random() * h : -size - Math.random() * h * 0.45,
-          size: size,
-          alpha: 0.12 + Math.random() * 0.72,
-          blur: Math.random() < 0.24 ? 1 + Math.random() * 6 : 0,
-          glow: Math.random() < 0.38,
-          bright: Math.random() < 0.12,
-          speed: 0.45 + Math.random() * 1.1,
-          char: randomGlyph(),
-        };
-        it.sprite = makeSprite(it);
-        return it;
-      }
-
-      function layout() {
-        // 모바일은 DPR 1로 제한 (실제 DPR 2~3의 픽셀 4~9배 그리기 방지)
-        dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
-        const w = window.innerWidth, h = window.innerHeight;
-        canvas.width = Math.floor(w * dpr);
-        canvas.height = Math.floor(h * dpr);
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const count = isMobile
-          ? Math.min(90, Math.max(50, Math.floor((w * h) / 4200)))  // 모바일은 글자 수 대폭 감소
-          : Math.min(2000, Math.max(140, Math.floor((w * h) / 2200)));
-        items = [];
-        for (let i = 0; i < count; i++) items.push(makeItem(w, h, true));
-        render();
-      }
-
-      function drawGlyph(it) {
-        ctx.globalAlpha = it.alpha;
-        ctx.drawImage(
-          it.sprite.canvas,
-          it.x - it.sprite.pad,
-          it.y - it.sprite.pad,
-          it.sprite.w,
-          it.sprite.h
-        );
-      }
-
-      function render() {
-        const w = window.innerWidth, h = window.innerHeight;
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(0, 0, w, h);
-        for (const it of items) {
-          if (it.y < -it.sprite.h || it.y > h + it.sprite.h) continue;
-          drawGlyph(it);
-        }
-        ctx.globalAlpha = 1;
-      }
-
-      function drawStatic() {
-        render();
-      }
-
-      function step(now) {
-        raf = 0;
-        if (!lastDraw) lastDraw = now;
-        const idle = now - lastScrollAt > IDLE_DELAY;
-        // 자동 낙하 중에는 프레임을 제한해 CPU 사용을 줄인다.
-        if (idle && now - lastDraw < 1000 / IDLE_FPS) {
-          raf = requestAnimationFrame(step);
-          return;
-        }
-        const dt = Math.min(now - lastDraw, 250);
-        lastDraw = now;
-
-        if (idle) drift += DRIFT_PER_SEC * dt / 1000;
-
-        const chunk = Math.min(pending, 120);
-        pending -= chunk;
-        const auto = Math.min(drift, 120);
-        drift -= auto;
-        if (chunk > 0 || auto > 0) {
-          const w = window.innerWidth, h = window.innerHeight;
-          for (const it of items) {
-            it.y += (chunk * 0.5 + auto) * it.speed;
-            if (it.y > h + it.sprite.h) {
-              Object.assign(it, makeItem(w, h, false));
-            }
-          }
-          render();
-        }
-        if (pending > 0.5 || now - lastScrollAt > IDLE_DELAY) {
-          raf = requestAnimationFrame(step);
-        } else {
-          lastDraw = 0;
-          // 스크롤이 멈춘 뒤 자동 낙하가 시작되도록 대기 후 루프를 다시 깨운다.
-          clearTimeout(idleTimer);
-          idleTimer = setTimeout(function () {
-            idleTimer = 0;
-            if (!raf) raf = requestAnimationFrame(step);
-          }, Math.max(IDLE_DELAY - (now - lastScrollAt), 0) + 30);
-        }
-      }
-
-      function onScroll() {
-        const y = window.scrollY;
-        pending = Math.min(pending + Math.min(Math.abs(y - lastScroll), 220), 900);
-        lastScroll = y;
-        lastScrollAt = performance.now();
-        clearTimeout(idleTimer);
-        idleTimer = 0;
-        if (!raf) raf = requestAnimationFrame(step);
-      }
-
-      layout();
-      lastScrollAt = performance.now();
-      if (reduceMotion) {
-        drawStatic();
-      } else {
-        window.addEventListener('resize', layout);
-        window.addEventListener('scroll', onScroll, { passive: true });
-        raf = requestAnimationFrame(step);
-      }
+    (function(){
+      const canvas=document.getElementById('matrix-bg'); if(!canvas) return;
+      const ctx=canvas.getContext('2d',{alpha:false}), reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const C='ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ', A='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', D='0123456789';
+      const mob=matchMedia('(max-width:768px)').matches||('ontouchstart' in window&&innerWidth<1024);
+      const DRIFT=mob?34:130, FPS=mob?18:30, IDLE=700;
+      let items=[],raf=0,pending=0,drift=0,dpr=1,lastY=scrollY,lastAt=0,lastDraw=0,timer=0;
+      const pick=p=>p[(Math.random()*p.length)|0];
+      const glyph=()=>{ const r=Math.random(); return r<.45?pick(C):r<.75?pick(A):pick(D); };
+      function sprite(it){ const pad=Math.ceil(it.size*.55+(it.glow?it.size*.5:0)+it.blur*1.5)+2,w=Math.ceil(it.size+pad*2);
+        const c=document.createElement('canvas'); c.width=Math.ceil(w*dpr); c.height=Math.ceil(w*dpr); const g=c.getContext('2d');
+        g.scale(dpr,dpr); g.font=it.size+"px 'JetBrains Mono','Pretendard',monospace"; g.textAlign='left'; g.textBaseline='top';
+        g.fillStyle=it.bright?'rgba(190,255,205,1)':'rgba(0,255,65,1)'; if(it.glow){ g.shadowColor='rgba(0,255,65,.9)'; g.shadowBlur=it.size*.5; }
+        if(it.blur>0) g.filter='blur('+it.blur.toFixed(1)+'px)'; g.fillText(it.char,pad,pad); return {c,w,h:w,pad}; }
+      function make(w,h,init){ const size=11+Math.random()*20; const it={x:Math.random()*(w-size),y:init?Math.random()*h:-size-Math.random()*h*.45,size,alpha:.12+Math.random()*.72,blur:Math.random()<.24?1+Math.random()*6:0,glow:Math.random()<.38,bright:Math.random()<.12,speed:.45+Math.random()*1.1,char:glyph()}; it.sp=sprite(it); return it; }
+      function layout(){ dpr=mob?1:Math.min(devicePixelRatio||1,2); const w=innerWidth,h=innerHeight;
+        canvas.width=Math.floor(w*dpr); canvas.height=Math.floor(h*dpr); canvas.style.width=w+'px'; canvas.style.height=h+'px'; ctx.setTransform(dpr,0,0,dpr,0,0);
+        const n=mob?Math.min(90,Math.max(50,Math.floor(w*h/4200))):Math.min(2000,Math.max(140,Math.floor(w*h/2200)));
+        items=[]; for(let i=0;i<n;i++) items.push(make(w,h,true)); draw(); }
+      function draw(){ const w=innerWidth,h=innerHeight; ctx.globalAlpha=1; ctx.fillStyle='#0b100e'; ctx.fillRect(0,0,w,h);
+        for(const it of items){ if(it.y<-it.sp.h||it.y>h+it.sp.h) continue; ctx.globalAlpha=it.alpha; ctx.drawImage(it.sp.c,it.x-it.sp.pad,it.y-it.sp.pad,it.sp.w,it.sp.h); } ctx.globalAlpha=1; }
+      function step(now){ raf=0; if(!lastDraw) lastDraw=now; const idle=now-lastAt>IDLE;
+        if(idle&&now-lastDraw<1000/FPS){ raf=requestAnimationFrame(step); return; }
+        const dt=Math.min(now-lastDraw,250); lastDraw=now; if(idle) drift+=DRIFT*dt/1000;
+        const ch=Math.min(pending,120); pending-=ch; const au=Math.min(drift,120); drift-=au;
+        if(ch>0||au>0){ const w=innerWidth,h=innerHeight; for(const it of items){ it.y+=(ch*.5+au)*it.speed; if(it.y>h+it.sp.h) Object.assign(it,make(w,h,false)); } draw(); }
+        if(pending>.5||now-lastAt>IDLE) raf=requestAnimationFrame(step);
+        else { lastDraw=0; clearTimeout(timer); timer=setTimeout(()=>{ timer=0; if(!raf) raf=requestAnimationFrame(step); },Math.max(IDLE-(now-lastAt),0)+30); } }
+      function onScroll(){ const y=scrollY; pending=Math.min(pending+Math.min(Math.abs(y-lastY),220),900); lastY=y; lastAt=performance.now(); clearTimeout(timer); timer=0; if(!raf) raf=requestAnimationFrame(step); }
+      layout(); lastAt=performance.now();
+      if(reduce) draw(); else { addEventListener('resize',layout); addEventListener('scroll',onScroll,{passive:true}); raf=requestAnimationFrame(step); }
     })();
-  </script>
 
-  <!-- 방문자 카운터: Cloudflare Worker (IP당 하루 1회, 봇 제외) -->
-  <script>
-    (function () {
-      // Cloudflare Worker 배포 후 URL 로 교체하세요.
-      // 예: 'https://visitor-counter.<your-subdomain>.workers.dev'
-      const VISITOR_COUNTER_URL = 'https://visitor-counter.donian.workers.dev';
-      const el = document.getElementById('visitor-count');
-      if (!el) return;
-      if (VISITOR_COUNTER_URL.indexOf('YOUR-SUBDOMAIN') !== -1) {
-        // 아직 Worker 미배포 → hits.sh 폴백 배지로 대체
-        const img = document.createElement('img');
-        img.src = 'https://hits.sh/donian-kor.github.io.svg?style=flat-square&label=visitors&color=22c55e&labelColor=18181b';
-        img.alt = '방문자 수';
-        img.loading = 'eager';
-        img.decoding = 'async';
-        img.style.height = '16px';
-        img.style.verticalAlign = 'middle';
-        el.replaceWith(img);
-        return;
-      }
-      fetch(VISITOR_COUNTER_URL, { cache: 'no-store' })
-        .then((r) => r.json())
-        .then((d) => {
-          if (d && typeof d.total === 'number') {
-            el.textContent = (d.today || 0).toLocaleString() + ' / ' + d.total.toLocaleString();
-          }
-        })
-        .catch(() => { el.textContent = 'n/a'; });
+    // AI 활용개발 개월차 (첫 GitHub 저장소 공개일 2026-01-07 기준)
+    (function(){
+      const el=document.getElementById('career-duration'); if(!el) return;
+      const start=new Date(2026,0,7), now=new Date();
+      let months=(now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth());
+      if(now.getDate()<start.getDate()) months--;
+      el.textContent=(months>=1?months:1)+'개월차';
+    })();
+
+    (function(){
+      const el=document.getElementById('visitor-count'); if(!el) return;
+      fetch('https://visitor-counter.donian.workers.dev',{cache:'no-store'}).then(r=>r.json()).then(d=>{
+        if(d&&typeof d.total==='number') el.textContent=(d.today||0).toLocaleString()+' / '+d.total.toLocaleString();
+      }).catch(()=>{ el.textContent='n/a'; });
     })();
   </script>
 </body>

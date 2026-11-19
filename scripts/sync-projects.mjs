@@ -1,5 +1,5 @@
 // GitHub 계정의 공개 저장소와 projects.json을 동기화한다.
-// - 없는 공개 저장소는 추가한다 (언어로 분류 추정)
+// - 없는 공개 저장소는 추가한다 (언어로 분류 추정, fork 저장소는 제외)
 // - 비공개 전환/삭제로 공개 목록에서 사라진 항목은 제거한다
 // 이미 등록된 항목의 설명·스크린샷 등은 건드리지 않는다.
 import fs from 'node:fs';
@@ -22,7 +22,6 @@ const WEB_LANGS = new Set(['JavaScript', 'TypeScript', 'HTML', 'CSS', 'Vue', 'Sv
 const ANDROID_LANGS = new Set(['Kotlin', 'Java', 'Swift', 'Dart']);
 
 function categoryFor(repo) {
-  if (repo.fork) return 'fork';
   const lang = repo.language || '';
   if (ANDROID_LANGS.has(lang)) return 'android';
   if (WEB_LANGS.has(lang)) return 'web';
@@ -56,7 +55,7 @@ async function fetchRepos() {
 }
 
 const repos = await fetchRepos();
-const publicRepos = repos.filter((r) => !r.private && r.visibility !== 'private');
+const publicRepos = repos.filter((r) => !r.private && r.visibility !== 'private' && !r.fork);
 const publicUrls = new Set(publicRepos.map((r) => normalizeUrl(r.html_url)));
 
 const existing = new Set(data.projects.map((p) => normalizeUrl(p.github)));
@@ -68,11 +67,8 @@ for (const repo of publicRepos.reverse()) {
   const url = normalizeUrl(repo.html_url);
   if (!url || existing.has(url)) continue;
 
-  const original = repo.parent?.full_name || '';
   const rawDescription = (repo.description || '').replace(/\s+/g, ' ').trim();
-  const description = repo.fork
-    ? `${rawDescription || '포크한 저장소'} (Fork from ${original})`
-    : rawDescription || 'GitHub 저장소';
+  const description = rawDescription || 'GitHub 저장소';
 
   const language = repo.language || '기타';
 
@@ -86,8 +82,6 @@ for (const repo of publicRepos.reverse()) {
     github: repo.html_url,
     demo: null,
     screenshot: null,
-    forked: !!repo.fork,
-    ...(repo.fork ? { original } : {}),
     created_at: String(repo.created_at || '').slice(0, 10),
     updated_at: String(repo.updated_at || '').slice(0, 10),
   });
@@ -102,6 +96,19 @@ for (const repo of publicRepos.reverse()) {
 const managed = data.projects.filter((p) => normalizeUrl(p.github).startsWith(USER_PREFIX));
 const matched = managed.filter((p) => publicUrls.has(normalizeUrl(p.github))).length;
 let removed = 0;
+
+// fork 프로젝트는 내 프로젝트가 아니므로 항상 제거
+const forkEntries = data.projects.filter((p) => p.category === 'fork' || p.forked === true);
+if (forkEntries.length) {
+  data.projects = data.projects.filter((p) => {
+    if (p.category === 'fork' || p.forked === true) {
+      console.log(`제거(fork): ${p.name}`);
+      return false;
+    }
+    return true;
+  });
+  removed += forkEntries.length;
+}
 
 if (publicUrls.size > 0 && (managed.length < 4 || matched >= Math.ceil(managed.length * 0.5))) {
   data.projects = data.projects.filter((p) => {
