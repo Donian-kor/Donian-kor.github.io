@@ -102,6 +102,7 @@
     .cmd-echo .pn{ color:var(--emerald); font-weight:700; }
     .out-dim{ color:var(--dim); } .out-muted{ color:var(--mute); }
     .out-ok{ color:var(--emerald-bright); } .out-amber{ color:var(--amber); } .out-white{ color:#fff; }
+    .out-danger{ color:#ef4444; font-weight:700; }
     .out-head{ color:var(--emerald); font-weight:700; }
     .term-cursor{ display:inline-block; width:.6ch; height:1.05em; margin-left:.1rem; background:var(--emerald); vertical-align:text-bottom; animation:blink .85s step-end infinite; }
     @keyframes blink{ 0%,50%{opacity:1} 51%,100%{opacity:0} }
@@ -398,31 +399,52 @@
         '<div class="flex flex-wrap gap-1 mb-1">'+cats.map(([id,l])=>'<button type="button" class="filter-chip'+(currentCategory===id?' active':'')+'" data-cat="'+id+'">'+l+'</button>').join('')+'</div>'+
         '<div class="out-muted mb-1">총 '+sorted.length+'개 • 행 클릭 시 상세</div>'+
         '<div class="proj-head"><span>수정일</span><span>이름</span><span class="cat">분류</span></div>'+
-        (sorted.map(p=>'<button type="button" class="proj-row" data-id="'+p.id+'">'+
-          '<span class="date">'+(p.updated_at||'-')+'</span>'+
-          '<span class="name"><span class="lang-code">['+String(p.language||'-').toLowerCase()+']</span>'+p.name+(isNewProject(p)?' <span class="out-ok badge-new px-1 text-[.6em] border border-emerald-400/40 rounded">NEW</span>':'')+'</span>'+
-          '<span class="cat">'+(platformLabel[p.category]||p.category)+'</span></button>').join('')||'<div class="out-muted">항목 없음</div>');
+        (sorted.map(p=>'<button type="button" class="proj-row" data-id="'+escHtml(p.id)+'">'+
+          '<span class="date">'+escHtml(p.updated_at||'-')+'</span>'+
+          '<span class="name"><span class="lang-code">['+escHtml(String(p.language||'-').toLowerCase())+']</span>'+escHtml(p.name)+(isNewProject(p)?' <span class="out-ok badge-new px-1 text-[.6em] border border-emerald-400/40 rounded">NEW</span>':'')+'</span>'+
+          '<span class="cat">'+escHtml(platformLabel[p.category]||p.category)+'</span></button>').join('')||'<div class="out-muted">항목 없음</div>');
       host.querySelectorAll('.filter-chip').forEach(b=>b.addEventListener('click',()=>{ currentCategory=b.dataset.cat; renderProjectList(); }));
       host.querySelectorAll('.proj-row').forEach(b=>b.addEventListener('click',()=>{ const p=allProjects.find(x=>x.id===b.dataset.id); if(p) openModal(p); }));
       out.scrollTop=out.scrollHeight;
     }
 
     function openModal(p){
-      const demo=p.demo?'<a href="'+p.demo+'" target="_blank" rel="noopener" class="m-open">demo ↗</a>':'';
+      const github=safeUrl(p.github), demoUrl=safeUrl(p.demo), shot=safeUrl(p.screenshot,true);
+      const demo=demoUrl?'<a href="'+demoUrl+'" target="_blank" rel="noopener" class="m-open">demo ↗</a>':'';
       modalContent.innerHTML=
-        '<div class="m-shot"><img src="'+p.screenshot+'" alt="'+p.name+' 스크린샷" loading="lazy"></div>'+
-        '<div class="flex items-start justify-between gap-2"><h3 id="modal-title" class="m-head keep-all">◆ '+p.name+'</h3><span class="lang-badge '+(langColor[p.language]||'')+'">'+p.language+'</span></div>'+
+        (shot?'<div class="m-shot"><img src="'+shot+'" alt="'+escHtml(p.name)+' 스크린샷" loading="lazy"></div>':'')+
+        '<div class="flex items-start justify-between gap-2"><h3 id="modal-title" class="m-head keep-all">◆ '+escHtml(p.name)+'</h3><span class="lang-badge '+(langColor[p.language]||'')+'">'+escHtml(p.language)+'</span></div>'+
         (isNewProject(p)?'<div class="out-ok badge-new mt-1" style="display:inline-block">NEW</div>':'')+
-        '<p class="out-dim keep-all my-2">'+p.description+'</p>'+
-        '<div class="m-label">생성일: '+(p.created_at||'-')+' · 업데이트: '+(p.updated_at||'-')+'</div>'+
-        '<div class="flex flex-wrap gap-1 my-2">'+p.tech.map(t=>'<span class="m-chip" title="'+(techDesc[t]||t)+'">'+t+'</span>').join('')+'</div>'+
-        '<div class="flex items-center gap-2 mt-3"><a href="'+p.github+'" target="_blank" rel="noopener" class="m-open"><iconify-icon icon="solar:arrow-right-up-bold"></iconify-icon> open GitHub</a>'+demo+'</div>';
+        '<p class="out-dim keep-all my-2">'+escHtml(p.description)+'</p>'+
+        '<div class="m-label">생성일: '+escHtml(p.created_at||'-')+' · 업데이트: '+escHtml(p.updated_at||'-')+'</div>'+
+        '<div class="flex flex-wrap gap-1 my-2">'+(Array.isArray(p.tech)?p.tech:[]).map(t=>'<span class="m-chip" title="'+escHtml(techDesc[t]||t)+'">'+escHtml(t)+'</span>').join('')+'</div>'+
+        '<div class="flex items-center gap-2 mt-3">'+(github?'<a href="'+github+'" target="_blank" rel="noopener" class="m-open"><iconify-icon icon="solar:arrow-right-up-bold"></iconify-icon> open GitHub</a>':'')+demo+'</div>';
       modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow='hidden';
     }
     function closeModal(){ modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow=''; }
     modalClose.addEventListener('click',closeModal);
     modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
     document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+    // 보안: 허용된 명령만 실행하고 나머지는 접근금지로 차단
+    const ALLOWED_VERBS = new Set(['whoami','get-history','history','help','?','get-childitem','ls','dir','get-content','cat','type','music','contact','clear','cls']);
+    const SAFE_ARG = /^[\w가-힣.\-\\]{1,80}$/u;
+    function parseCommand(raw){
+      const s=String(raw||'').trim().replace(/\s+/g,' ');
+      if(s.length>120) return null;
+      const m=s.match(/^(\S+)(?:\s+(.*))?$/);
+      if(!m) return null;
+      return { verb:m[1].toLowerCase(), arg:(m[2]||'').trim() };
+    }
+    function escHtml(s){
+      return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function safeUrl(u, allowRelative){
+      const s=String(u||'').trim();
+      if(/^https?:\/\/[^\s]+$/i.test(s)) return s;
+      if(allowRelative && /^assets\/[A-Za-z0-9._\-\/]+\.(webp|png|jpe?g|gif|svg)$/i.test(s)) return s;
+      return '';
+    }
 
     async function runCommand(raw){
       const cmd=(raw||'').trim(); if(!cmd) return;
@@ -431,8 +453,18 @@
       musicInline.classList.add('hidden');
       document.getElementById('cmd-input').value='';
       await typeHtmlEcho(cmd,token);
-      const lower=cmd.toLowerCase();
-      if(lower==='help'||lower==='?'){
+      const parsed=parseCommand(cmd);
+      const deny=async(reason)=>{
+        await typeLine('⛔ 접근금지: 허용되지 않은 명령입니다.','out-danger',token);
+        if(reason) await typeLine('   '+reason,'out-muted',token);
+      };
+      if(!parsed || !ALLOWED_VERBS.has(parsed.verb)){ await deny(); return; }
+      if(parsed.arg){
+        if(parsed.arg.includes('..')){ await deny('상위 경로 접근은 허용되지 않습니다.'); return; }
+        if(!SAFE_ARG.test(parsed.arg)){ await deny('인자 형식이 허용되지 않습니다.'); return; }
+      }
+      const verb=parsed.verb, arg=parsed.arg;
+      if(verb==='help'||verb==='?'){
         await typeLine('◆ 사용 가능한 명령','out-head',token);
         const EM='var(--emerald)', AM='var(--amber)', BLUE='#7dd3fc', GRAY='var(--mute)';
         const rows=[
@@ -444,7 +476,8 @@
         for(const [c,d,color] of rows) await typeHelpLine(c, d, color, token);
         return;
       }
-      if(lower==='whoami'){
+      if(verb==='whoami'){
+        if(arg){ await deny('이 명령은 인자를 받지 않습니다.'); return; }
         await typeLine('◆ Donian  —  AI Coder · AI Music Creator','out-head',token);
         await typeLine('안녕하세요. Python·Kotlin으로 실용 도구를 만드는 개발자입니다.','out-dim',token);
         await typeLine('◆ 1998년 Visual Basic으로 시작해, 지금은 AI와 함께 앱을 만듭니다.','out-dim',token);
@@ -457,30 +490,31 @@
         out.scrollTop=out.scrollHeight;
         return;
       }
-      if(lower==='history'||lower==='get-history'||lower==='type career.log'){
+      if((verb==='history'||verb==='get-history') && (!arg || arg.toLowerCase()==='career.log') || (verb==='type'&&arg&&arg.toLowerCase()==='career.log')){
         await typeLine('◆ career.log — 최근 순','out-head',token);
         for(const r of CAREER) await typeLine(r[0]+'  '+r[1]+(r[2]?'  # '+r[2]:''),r===CAREER[0]?'out-white':'out-muted',token);
         return;
       }
-      if(/^(ls|dir|get-childitem)/.test(lower)){
+      if(verb==='get-childitem'||verb==='ls'||verb==='dir'){
         await typeLine('◆ Get-ChildItem .\\projects — '+allProjects.length+' items','out-head',token);
         const h=document.createElement('div'); h.id='project-list-host'; h.className='out-line'; streamHost.appendChild(h);
         renderProjectList(); out.scrollTop=out.scrollHeight; return;
       }
-      if(/^(cat|type|get-content)\s/i.test(lower)){
-        const name=cmd.replace(/^\S+\s+/,'').replace(/^\.\/?(projects\/?)?/i,'').replace(/\/readme\.md$/i,'').replace(/\.txt$/i,'').trim().toLowerCase();
+      if(verb==='cat'||verb==='type'||verb==='get-content'){
+        if(!arg){ await deny('프로젝트 이름을 지정하세요.'); return; }
+        const name=arg.replace(/\\?\.?\\?projects\\?/i,'').replace(/\\readme\.md$/i,'').replace(/\.txt$/i,'').trim().toLowerCase();
         const p=allProjects.find(x=>x.name.toLowerCase()===name||x.id.toLowerCase()===name||x.name.toLowerCase().includes(name));
         if(p){ openModal(p); await typeLine('✓ '+p.name+' 상세를 열었습니다.','out-ok',token); }
-        else await typeLine('파일을 찾을 수 없습니다: '+name,'out-amber',token);
+        else await typeLine('파일을 찾을 수 없습니다: '+escHtml(name),'out-amber',token);
         return;
       }
-      if(lower==='music'){
+      if(verb==='music'){
         await typeLine('✓ 음악 플레이어를 열었습니다.','out-ok',token);
         musicInline.classList.remove('hidden'); out.scrollTop=out.scrollHeight; return;
       }
-      if(lower==='contact'){ await typeLine('✓ 게시판으로 이동합니다...','out-ok',token); setTimeout(()=>window.location.href='board.html',400); return; }
-      if(lower==='clear'||lower==='cls'){ return; }
-      await typeLine("'"+cmd+"' 는 인식할 수 없는 명령입니다. 'help' 를 입력해 보세요.",'out-amber',token);
+      if(verb==='contact'){ await typeLine('✓ 게시판으로 이동합니다...','out-ok',token); setTimeout(()=>window.location.href='board.html',400); return; }
+      if(verb==='clear'||verb==='cls'){ return; }
+      await deny();
     }
     document.getElementById('cmd-form').addEventListener('submit',e=>{ e.preventDefault(); runCommand(document.getElementById('cmd-input').value); });
     document.getElementById('cmd-buttons').addEventListener('click',e=>{ const b=e.target.closest('.cmd-chip'); if(b) runCommand(b.dataset.cmd); });
@@ -517,7 +551,9 @@
       const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       const fmt=iso=>{ if(!iso) return '-'; const d=new Date(iso); return isNaN(d.getTime())?'-':d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'); };
       function render(tracks){
-        listEl.innerHTML=tracks.map(t=>'<div class="music-track" data-vid="'+t.vid+'"><button type="button" class="w-full flex items-center gap-2 p-2 text-left">'+
+        const validVid=v=>/^[A-Za-z0-9_-]{11}$/.test(String(v||''));
+        const safe=(Array.isArray(tracks)?tracks:[]).filter(t=>validVid(t.vid)).map(t=>({...t,thumb:'https://i.ytimg.com/vi/'+t.vid+'/hqdefault.jpg'}));
+        listEl.innerHTML=safe.map(t=>'<div class="music-track" data-vid="'+t.vid+'"><button type="button" class="w-full flex items-center gap-2 p-2 text-left">'+
           '<img src="'+t.thumb+'" alt="" class="music-thumb w-10 h-10 rounded object-cover bg-zinc-800" loading="lazy" onerror="this.style.display=\'none\'">'+
           '<span class="flex-1 min-w-0"><span class="block text-zinc-200 text-sm truncate">'+esc(t.title)+'</span><span class="block text-zinc-500 text-[.65rem]">'+fmt(t.published)+'</span></span>'+
           '<span class="music-status text-emerald-400 text-[.65rem] hidden">재생 중</span><iconify-icon icon="solar:play-circle-bold" class="music-play-btn text-emerald-400 text-xl"></iconify-icon></button></div>').join('');
