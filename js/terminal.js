@@ -48,6 +48,8 @@ export function safeUrl(u, allowRelative) {
 
 export function initTerminal(ctx) {
   const { out, streamHost, musicInline, input } = ctx;
+  const termBox = out ? out.closest('.term-box') : null;
+  const setBoardOpen = on => { if (termBox) termBox.classList.toggle('board-open', on); };
   let typeToken = 0;
   let pendingAdminPw = false;
   let boardHost = null;
@@ -118,6 +120,7 @@ export function initTerminal(ctx) {
     streamHost.innerHTML = '';
     musicInline.classList.add('hidden');
     if (boardHost) { boardHost.innerHTML = ''; boardHost.classList.add('hidden'); }
+    setBoardOpen(false);
     if (input) input.value = '';
   }
 
@@ -191,6 +194,7 @@ export function initTerminal(ctx) {
     streamHost.innerHTML = '';
     musicInline.classList.add('hidden');
     if (boardHost) { boardHost.innerHTML = ''; boardHost.classList.add('hidden'); }
+    setBoardOpen(false);
     if (input) input.value = '';
     await typeHtmlEcho(cmd, token);
 
@@ -251,6 +255,7 @@ export function initTerminal(ctx) {
       try {
         const b = await ensureBoard();
         boardHost.classList.remove('hidden');
+        setBoardOpen(true);
         b.show();
         boardHost.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (e) {
