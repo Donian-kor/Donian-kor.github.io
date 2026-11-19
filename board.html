@@ -1205,7 +1205,7 @@
             </div>
             <div class="flex items-center justify-between">
               <span class="text-zinc-500 text-[0.65rem]">댓글</span>
-              <span id="comment-counter" class="text-xs text-zinc-400 font-mono font-medium">0 / 1500</span>
+              <span id="comment-counter" class="text-xs text-zinc-400 font-mono font-medium">0 / 100</span>
             </div>
             <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
               <div id="comment-highlight" aria-hidden="true" class="hl-layer absolute inset-0 overflow-hidden px-2.5 py-1.5 text-sm leading-snug text-zinc-200"></div>
@@ -1238,7 +1238,7 @@
         commentHl.scrollTop = commentContentEl.scrollTop;
       };
       const updateCommentCounter = () => {
-        if (commentCounter) commentCounter.textContent = charLen(commentContentEl.value) + ' / 1500';
+        if (commentCounter) commentCounter.textContent = charLen(commentContentEl.value) + ' / 100';
       };
       commentContentEl.addEventListener('input', updateCommentPreview);
       commentContentEl.addEventListener('scroll', () => { commentHl.scrollTop = commentContentEl.scrollTop; });
@@ -1257,7 +1257,7 @@
         if (v !== commentPwEl.value) commentPwEl.value = v;
       });
       commentContentEl.addEventListener('input', () => {
-        const t = truncateChars(commentContentEl.value, 1500);
+        const t = truncateChars(commentContentEl.value, 100);
         if (t !== commentContentEl.value) commentContentEl.value = t;
         updateCommentCounter();
       });
@@ -1505,7 +1505,7 @@
           </div>
           <div class="hl-wrap rounded bg-zinc-800 border border-white/10 focus-within:border-green-500/50">
             <div class="hl-layer absolute inset-0 overflow-hidden px-2 py-1 text-xs leading-snug text-zinc-200 reply-content-highlight" aria-hidden="true"></div>
-            <textarea name="content" required rows="2" maxlength="1500" placeholder="답글 (최대 1500글자)" class="hl-input relative w-full px-2 py-1 text-xs leading-snug bg-transparent focus:outline-none resize-y"></textarea>
+            <textarea name="content" required rows="2" maxlength="100" placeholder="답글 (최대 100글자)" class="hl-input relative w-full px-2 py-1 text-xs leading-snug bg-transparent focus:outline-none resize-y"></textarea>
           </div>
           <div class="cf-turnstile"></div>
           <div class="flex justify-end gap-1">

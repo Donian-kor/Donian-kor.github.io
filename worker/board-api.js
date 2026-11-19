@@ -578,7 +578,7 @@ export default {
       if (!password || !content || !name) return json({ error: '이름, 비밀번호, 내용은 필수 항목입니다.' }, 400);
       if (charLen(password) > 12) return json({ error: '비밀번호는 12글자 이하여야 합니다.' }, 400);
       if (name && charLen(name) > 27) return json({ error: '이름은 27글자 이하여야 합니다.' }, 400);
-      if (charLen(content) > 1500) return json({ error: '댓글은 1500글자 이하여야 합니다.' }, 400);
+      if (charLen(content) > 100) return json({ error: '댓글은 100글자 이하여야 합니다.' }, 400);
       if (content.trim().length < 1) return json({ error: '내용이 너무 짧습니다' }, 400);
       const spam = spamCheck(content);
       if (spam) return json({ error: spam }, 400);

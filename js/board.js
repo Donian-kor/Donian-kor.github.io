@@ -283,7 +283,7 @@ export function createBoard({ host, onMessage }) {
         '<input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
         '<input class="board-input pw-mask" name="pw" type="text" autocomplete="new-password" placeholder="비밀번호" maxlength="12">' +
       '</div>' +
-      '<textarea class="board-input" name="content" rows="2" maxlength="1500" placeholder="답글 내용" required></textarea>' +
+      '<textarea class="board-input" name="content" rows="2" maxlength="100" placeholder="답글 내용 (최대 100글자)" required></textarea>' +
       '<div class="cf-submit">' +
         '<button class="filter-chip" type="submit">답글 등록</button>' +
         '<div class="cf-turnstile"></div>' +
@@ -352,7 +352,7 @@ export function createBoard({ host, onMessage }) {
           '<input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
           '<input class="board-input pw-mask" name="pw" type="text" autocomplete="new-password" placeholder="비밀번호" maxlength="12">' +
         '</div>' +
-        '<textarea class="board-input" name="content" rows="2" maxlength="1500" placeholder="댓글 내용" required></textarea>' +
+        '<textarea class="board-input" name="content" rows="2" maxlength="100" placeholder="댓글 내용 (최대 100글자)" required></textarea>' +
         '<div class="cf-submit">' +
           '<button class="filter-chip" type="submit">등록</button>' +
           '<div class="cf-turnstile"></div>' +
