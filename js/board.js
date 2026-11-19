@@ -259,13 +259,25 @@ export function createBoard({ host, onMessage }) {
     return roots.map(r => node(r, 0)).join('');
   }
 
+  function setMainFormVisible(visible) {
+    const main = [...host.children].find(e => e.classList.contains('comment-form'));
+    if (main) main.classList.toggle('hidden', !visible);
+  }
+
   function showReplyForm(postId, commentId) {
     const node = host.querySelector('.comment-node[data-cid="' + commentId + '"]');
     if (!node) return;
-    const old = node.querySelector('.reply-form');
-    if (old) { old.remove(); return; }
+    const existing = host.querySelector('.reply-form');
+    if (existing && existing.dataset.cid === String(commentId)) {
+      existing.remove();
+      setMainFormVisible(true);
+      return;
+    }
+    if (existing) existing.remove();
+    setMainFormVisible(false);
     const form = document.createElement('form');
     form.className = 'comment-form reply-form mt-1.5';
+    form.dataset.cid = String(commentId);
     form.innerHTML =
       '<div class="cf-ids">' +
         '<input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
