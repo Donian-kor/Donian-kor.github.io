@@ -131,7 +131,7 @@
     .proj-row .lang-code{ color:var(--emerald); font-size:.85em; margin-right:.4rem; }
     .proj-row .name{ color:var(--fg); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .proj-row .cat{ color:var(--dim); text-align:center; font-size:.9em; }
-    .filter-chip{ border:1px solid var(--line-hi); border-radius:9999px; padding:.1rem .55rem; font-size:.7em; color:var(--dim); background:transparent; }
+    .filter-chip{ border:1px solid var(--line-hi); border-radius:9999px; padding:.1rem .55rem; font-size:.7em; color:var(--dim); background:transparent; display:inline-flex; align-items:center; justify-content:center; gap:.25rem; }
     /* 게시판 모듈 */
     .board-host{ flex:1 1 auto; min-height:0; overflow:hidden; border-top:1px solid var(--line-hi); margin-top:.6rem; padding-top:.6rem; }
     .board-input{ background:var(--panel-2); border:1px solid var(--line-hi); border-radius:5px; padding:.35rem .5rem; color:var(--fg); font-family:var(--mono); font-size:.8em; width:100%; }
@@ -216,6 +216,8 @@
       .board-foot-row{ flex:0 0 auto; flex-wrap:nowrap; gap:.35rem; }
       .board-write-btn{ width:2rem; height:2rem; min-height:2rem; padding:0; justify-content:center; }
       .write-label{ display:none; }
+      .icon-btn-label{ display:none; }
+      .post-head .filter-chip,.comment-actions .filter-chip{ width:2rem; height:2rem; min-height:2rem; padding:0; }
     }
     .filter-chip:hover{ color:var(--fg); border-color:var(--emerald); }
     .filter-chip.active{ color:#04241a; background:var(--emerald); border-color:var(--emerald); font-weight:700; }

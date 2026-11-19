@@ -247,8 +247,8 @@ export function createBoard({ host, onMessage }) {
           '<div class="flex items-center justify-between gap-2 mb-0.5">' +
             '<span>' + renderName(c.name, c.is_admin) + authorBadge + ' <span class="comment-date">· ' + fmtDate(c.created_at) + '</span></span>' +
             '<span class="comment-actions flex gap-2 shrink-0">' +
-              '<button type="button" class="reply-comment filter-chip" data-cid="' + c.id + '">답글</button>' +
-              '<button type="button" class="delete-comment filter-chip danger" data-cid="' + c.id + '"' + (children.length ? ' disabled title="답글이 달린 댓글은 삭제할 수 없습니다"' : '') + '>삭제</button>' +
+              '<button type="button" class="reply-comment filter-chip" data-cid="' + c.id + '" aria-label="답글" title="답글"><iconify-icon icon="solar:chat-round-dots-bold"></iconify-icon><span class="icon-btn-label">답글</span></button>' +
+              '<button type="button" class="delete-comment filter-chip danger" data-cid="' + c.id + '" aria-label="삭제" title="삭제"' + (children.length ? ' disabled title="답글이 달린 댓글은 삭제할 수 없습니다"' : '') + '><iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon><span class="icon-btn-label">삭제</span></button>' +
             '</span>' +
           '</div>' +
           '<div class="out-dim keep-all">' + replyTo + nl2br(c.content) + '</div>' +
@@ -337,12 +337,12 @@ export function createBoard({ host, onMessage }) {
     host.innerHTML =
       '<div class="post-head">' +
         '<div class="flex items-center gap-2 min-w-0">' +
-          '<button type="button" class="filter-chip shrink-0" data-action="back">← 목록</button>' +
+          '<button type="button" class="filter-chip shrink-0" data-action="back" aria-label="목록" title="목록"><iconify-icon icon="solar:arrow-left-bold"></iconify-icon><span class="icon-btn-label">목록</span></button>' +
           renderStatus(p) +
           '<h3 id="modal-title" class="post-title">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) + '</h3></div>' +
         '<div class="post-actions flex gap-1.5 shrink-0">' +
-          '<button type="button" class="filter-chip" data-action="edit">수정</button>' +
-          '<button type="button" class="filter-chip danger" data-action="delete">삭제</button>' +
+          '<button type="button" class="filter-chip" data-action="edit" aria-label="수정" title="수정"><iconify-icon icon="solar:pen-bold"></iconify-icon><span class="icon-btn-label">수정</span></button>' +
+          '<button type="button" class="filter-chip danger" data-action="delete" aria-label="삭제" title="삭제"><iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon><span class="icon-btn-label">삭제</span></button>' +
         '</div>' +
       '</div>' +
       '<div class="post-meta">' + renderName(p.name, p.is_admin) + '<span class="post-date-group"> · <span class="post-date">' + fmtDate(p.created_at) + '</span></span> · 조회 ' + esc(p.views) + '</div>' +
