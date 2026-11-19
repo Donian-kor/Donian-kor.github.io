@@ -107,8 +107,8 @@ export function createBoard({ host, onMessage }) {
         typeOpts.map(([v, l]) => '<option value="' + v + '"' + (searchType === v ? ' selected' : '') + '>' + l + '</option>').join('') +
       '</select>' +
       '<input class="board-search" type="text" placeholder="검색" value="' + esc(search) + '" aria-label="검색어">' +
-      '<button type="button" class="filter-chip board-search-btn">검색</button>' +
-      '<button type="button" class="filter-chip board-reset-btn">전체</button>' +
+      '<button type="button" class="filter-chip board-search-btn" aria-label="검색" title="검색"><iconify-icon icon="solar:magnifier-bold"></iconify-icon><span class="tool-btn-label">검색</span></button>' +
+      '<button type="button" class="filter-chip board-reset-btn" aria-label="전체" title="전체"><iconify-icon icon="solar:rotate-left-bold"></iconify-icon><span class="tool-btn-label">전체</span></button>' +
       (isAdmin() ? '<span class="out-ok text-[.72em] ml-1">● 관리자</span>' : '') +
     '</div>';
   }
