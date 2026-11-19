@@ -244,7 +244,7 @@ export function createBoard({ host, onMessage }) {
         '<div class="board-comment"' + indent + '>' +
           '<div class="flex items-center justify-between gap-2 mb-0.5">' +
             '<span>' + renderName(c.name, c.is_admin) + authorBadge + ' <span class="out-muted">· ' + fmtDate(c.created_at) + '</span></span>' +
-            '<span class="flex gap-2 shrink-0">' +
+            '<span class="comment-actions flex gap-2 shrink-0">' +
               '<button type="button" class="reply-comment filter-chip" data-cid="' + c.id + '">답글</button>' +
               '<button type="button" class="delete-comment filter-chip danger" data-cid="' + c.id + '"' + (children.length ? ' disabled title="답글이 달린 댓글은 삭제할 수 없습니다"' : '') + '>삭제</button>' +
             '</span>' +
@@ -315,12 +315,12 @@ export function createBoard({ host, onMessage }) {
           '<button type="button" class="filter-chip shrink-0" data-action="back">← 목록</button>' +
           renderStatus(p) +
           '<h3 id="modal-title" class="post-title">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) + '</h3></div>' +
-        '<div class="flex gap-1.5 shrink-0">' +
+        '<div class="post-actions flex gap-1.5 shrink-0">' +
           '<button type="button" class="filter-chip" data-action="edit">수정</button>' +
           '<button type="button" class="filter-chip danger" data-action="delete">삭제</button>' +
         '</div>' +
       '</div>' +
-      '<div class="post-meta">' + renderName(p.name, p.is_admin) + ' · <span class="post-date">' + fmtDate(p.created_at) + '</span> · 조회 ' + esc(p.views) + '</div>' +
+      '<div class="post-meta">' + renderName(p.name, p.is_admin) + '<span class="post-date-group"> · <span class="post-date">' + fmtDate(p.created_at) + '</span></span> · 조회 ' + esc(p.views) + '</div>' +
       '<div class="post-body keep-all">' + nl2br(p.content) + '</div>' +
       '<div class="board-section">댓글 ' + comments.length + '</div>' +
       '<div class="comment-list">' + (comments.length ? renderCommentTree(comments) : '<div class="out-muted">댓글이 없습니다.</div>') + '</div>' +
