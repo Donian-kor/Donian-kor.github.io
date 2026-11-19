@@ -294,6 +294,40 @@
       "updated_at": "2026-10-15"
     },
     {
+      "id": "2fa",
+      "name": "2fa",
+      "category": "fork",
+      "description": "브라우저에서 TOTP 2단계 인증 코드를 생성하는 Chrome 확장. 비밀키가 기기를 벗어나지 않고 호스트 권한도 필요 없습니다. (Fork from authenticator-sh/2fa)",
+      "tech": [
+        "TypeScript"
+      ],
+      "language": "TypeScript",
+      "github": "https://github.com/Donian-kor/2fa",
+      "demo": null,
+      "screenshot": null,
+      "forked": true,
+      "original": "authenticator-sh/2fa",
+      "created_at": "2026-11-19",
+      "updated_at": "2026-11-19"
+    },
+    {
+      "id": "authenticator",
+      "name": "Authenticator",
+      "category": "fork",
+      "description": "브라우저에서 2단계 인증 코드를 생성하는 Chrome 확장. (Fork from Authenticator-Extension/Authenticator)",
+      "tech": [
+        "TypeScript"
+      ],
+      "language": "TypeScript",
+      "github": "https://github.com/Donian-kor/Authenticator",
+      "demo": null,
+      "screenshot": null,
+      "forked": true,
+      "original": "Authenticator-Extension/Authenticator",
+      "created_at": "2026-11-19",
+      "updated_at": "2026-11-19"
+    },
+    {
       "id": "geuryeojwo",
       "name": "Geuryeojwo",
       "category": "pc",
