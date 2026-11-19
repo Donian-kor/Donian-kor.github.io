@@ -4,7 +4,27 @@
 const API_BASE = 'https://board-api.donian.workers.dev';
 const TURNSTILE_SITE_KEY = '0x4AAAAAAGEuj5z4bjUhFlrp';
 
-const STATUS_LABEL = { notice: '공지', question: '문의', bug: '버그', request: '요청', done: '완료' };
+const STATUS_LABELS = { notice: '알림', done: '완료', question: '문의', bug: '버그', request: '의뢰' };
+
+function genRandomPassword(len = 20) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const arr = new Uint8Array(len);
+  crypto.getRandomValues(arr);
+  let s = '';
+  for (let i = 0; i < len; i++) s += chars[arr[i] % chars.length];
+  return s;
+}
+function renderName(name, isAdmin) {
+  if (isAdmin) return '<span class="badge-admin">Donian</span>';
+  return esc(name || '익명');
+}
+function renderStatus(p) {
+  let key, cls;
+  if (p.is_admin || p.status === 'notice') { key = 'notice'; cls = 'st-notice'; }
+  else if ((p.admin_replies || 0) > 0) { key = 'done'; cls = 'st-done'; }
+  else { key = p.status || 'question'; cls = 'st-normal'; }
+  return '<span class="' + cls + '">' + (STATUS_LABELS[key] || '문의') + '</span>';
+}
 
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -16,7 +36,14 @@ function fmtDate(iso) {
   if (!iso) return '-';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '-';
-  return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+  const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const day = [kst.getUTCFullYear(), String(kst.getUTCMonth() + 1).padStart(2, '0'), String(kst.getUTCDate()).padStart(2, '0')];
+  const today = [now.getUTCFullYear(), String(now.getUTCMonth() + 1).padStart(2, '0'), String(now.getUTCDate()).padStart(2, '0')];
+  if (day.join('.') === today.join('.')) {
+    return String(kst.getUTCHours()).padStart(2, '0') + ':' + String(kst.getUTCMinutes()).padStart(2, '0');
+  }
+  return day.join('.');
 }
 function isAdmin() { return !!sessionStorage.getItem('board_admin_token'); }
 
@@ -70,10 +97,9 @@ export function createBoard({ host, onMessage }) {
 
   function renderToolbar() {
     return '<div class="flex flex-wrap items-center gap-1.5 mb-2">' +
-      '<button type="button" class="filter-chip" data-action="write">✎ 글쓰기</button>' +
       '<select class="board-select" aria-label="상태 필터">' +
         ['', 'notice', 'question', 'bug', 'request', 'done'].map(v =>
-          '<option value="' + v + '"' + (status === v ? ' selected' : '') + '>' + (v ? STATUS_LABEL[v] : '전체 상태') + '</option>').join('') +
+          '<option value="' + v + '"' + (status === v ? ' selected' : '') + '>' + (v ? STATUS_LABELS[v] : '전체 상태') + '</option>').join('') +
       '</select>' +
       '<input class="board-search" type="text" placeholder="검색어" value="' + esc(search) + '" aria-label="검색어">' +
       '<button type="button" class="filter-chip" data-action="search">검색</button>' +
@@ -85,7 +111,7 @@ export function createBoard({ host, onMessage }) {
     const totalPages = Math.max(1, Math.ceil((total || 0) / 10));
     if (totalPages <= 1) return '';
     const prev = Math.max(1, page - 1), next = Math.min(totalPages, page + 1);
-    let html = '<div class="flex flex-wrap items-center gap-1 mt-2">';
+    let html = '<div class="board-pagination flex flex-wrap items-center justify-center gap-1 mt-2">';
     html += '<button type="button" class="page-btn" data-page="' + prev + '"' + (page === 1 ? ' disabled' : '') + '>이전</button>';
     for (let i = 1; i <= totalPages; i++) {
       html += '<button type="button" class="page-btn' + (i === page ? ' active' : '') + '" data-page="' + i + '">' + i + '</button>';
@@ -103,15 +129,20 @@ export function createBoard({ host, onMessage }) {
       const data = await api('/posts?' + params.toString());
       const posts = Array.isArray(data.posts) ? data.posts : [];
       host.innerHTML = renderToolbar() +
-        '<div class="out-muted mb-1">총 ' + (data.total || 0) + '건 • ' + page + ' / ' + Math.max(1, Math.ceil((data.total || 0) / 10)) + ' 페이지 • 행 클릭 시 상세</div>' +
-        '<div class="proj-head"><span>작성일</span><span>제목</span><span class="cat">작성자 / 조회</span></div>' +
-        (posts.length ? posts.map(p =>
-          '<button type="button" class="proj-row" data-id="' + esc(p.id) + '">' +
-            '<span class="date">' + fmtDate(p.created_at) + '</span>' +
-            '<span class="name">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) +
-              (p.comment_count > 0 ? ' <span class="out-ok">+' + p.comment_count + '</span>' : '') + '</span>' +
-            '<span class="cat">' + esc(p.name) + (p.is_admin ? ' ★' : '') + ' / ' + esc(p.views) + '</span>' +
-          '</button>').join('') : '<div class="out-muted py-3">글이 없습니다.</div>') +
+        '<div class="board-list">' +
+          '<div class="board-head"><span>분류</span><span>작성일</span><span>제목</span><span>작성자</span><span class="cat">조회</span></div>' +
+          (posts.length ? posts.map(p =>
+            '<button type="button" class="board-row-t" data-id="' + esc(p.id) + '">' +
+              '<span class="st">' + renderStatus(p) + '</span>' +
+              '<span class="date">' + fmtDate(p.created_at) + '</span>' +
+              '<span class="name">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) +
+                (p.comment_count > 0 ? ' <span class="out-ok">+' + p.comment_count + '</span>' : '') + '</span>' +
+              '<span class="author">' + renderName(p.name, p.is_admin) + '</span>' +
+              '<span class="cat">' + esc(p.views) + '</span>' +
+            '</button>').join('') : '<div class="out-muted py-3">글이 없습니다.</div>') +
+        '</div>' +
+        '<div class="flex justify-end mt-2"><button type="button" class="board-write-btn" data-action="write">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>글쓰기</button></div>' +
         renderPagination(data.total);
       bindList();
     } catch (err) {
@@ -121,6 +152,7 @@ export function createBoard({ host, onMessage }) {
   }
 
   function bindList() {
+    host.querySelectorAll('.board-write-btn').forEach(btn => btn.addEventListener('click', () => renderWrite()));
     host.querySelectorAll('.filter-chip').forEach(btn => btn.addEventListener('click', () => {
       const a = btn.dataset.action;
       if (a === 'write') return renderWrite();
@@ -142,7 +174,7 @@ export function createBoard({ host, onMessage }) {
       page = parseInt(btn.dataset.page, 10) || 1;
       renderList();
     }));
-    host.querySelectorAll('.proj-row[data-id]').forEach(row => row.addEventListener('click', () => openDetail(row.dataset.id)));
+    host.querySelectorAll('.board-row-t[data-id]').forEach(row => row.addEventListener('click', () => openDetail(row.dataset.id)));
   }
 
   function backBar(title) {
@@ -167,7 +199,7 @@ export function createBoard({ host, onMessage }) {
         host.innerHTML = backBar('비공개 글') +
           '<div class="out-amber py-2">작성자 또는 관리자 비밀번호가 필요합니다.</div>' +
           (err.message === 'wrong_password' ? '<div class="out-danger py-1">비밀번호가 일치하지 않습니다.</div>' : '') +
-          '<form class="pw-form flex gap-1.5 mt-2"><input type="password" name="pw" class="board-input" placeholder="비밀번호"><button class="filter-chip" type="submit">확인</button></form>';
+          '<form class="pw-form flex gap-1.5 mt-2"><input type="text" autocomplete="new-password" name="pw" class="board-input pw-mask" placeholder="비밀번호"><button class="filter-chip" type="submit">확인</button></form>';
         bindBack();
         host.querySelector('.pw-form').addEventListener('submit', e => {
           e.preventDefault();
@@ -180,19 +212,92 @@ export function createBoard({ host, onMessage }) {
   }
 
   function renderCommentTree(comments) {
-    return comments.map(c =>
-      '<div class="board-comment" style="margin-left:' + Math.min(Number(c.depth || 0) * 12, 60) + 'px">' +
-        '<div class="text-zinc-200 text-sm">' + esc(c.name) + (c.is_admin ? ' ★' : '') + '</div>' +
-        '<div class="out-dim keep-all">' + nl2br(c.content) + '</div>' +
-      '</div>').join('');
+    const ids = new Set(comments.map(c => c.id));
+    const byId = new Map(comments.map(c => [c.id, c]));
+    const childrenMap = {};
+    const roots = [];
+    for (const c of comments) {
+      if (c.parent_id && ids.has(c.parent_id)) (childrenMap[c.parent_id] = childrenMap[c.parent_id] || []).push(c);
+      else roots.push(c);
+    }
+    function node(c, depth) {
+      const children = childrenMap[c.id] || [];
+      const parent = c.parent_id ? byId.get(c.parent_id) : null;
+      const replyTo = parent ? '<span class="reply-to">↳ @' + renderName(parent.name, parent.is_admin) + '</span>' : '';
+      const authorBadge = (!c.is_admin && c.is_author) ? '<span class="badge-author">작성자</span>' : '';
+      const indent = depth > 0 ? ' style="margin-left:1rem;border-left:1px solid var(--line-hi);padding-left:.5rem"' : '';
+      return '<div class="comment-node" data-cid="' + c.id + '">' +
+        '<div class="board-comment"' + indent + '>' +
+          '<div class="flex items-center justify-between gap-2 mb-0.5">' +
+            '<span>' + renderName(c.name, c.is_admin) + authorBadge + ' <span class="out-muted">· ' + fmtDate(c.created_at) + '</span></span>' +
+            '<span class="flex gap-2 shrink-0">' +
+              '<button type="button" class="reply-comment filter-chip" data-cid="' + c.id + '">답글</button>' +
+              '<button type="button" class="delete-comment filter-chip danger" data-cid="' + c.id + '"' + (children.length ? ' disabled title="답글이 달린 댓글은 삭제할 수 없습니다"' : '') + '>삭제</button>' +
+            '</span>' +
+          '</div>' +
+          '<div class="out-dim keep-all">' + replyTo + nl2br(c.content) + '</div>' +
+        '</div>' +
+        (children.length ? '<div class="mt-1.5">' + children.map(ch => node(ch, depth + 1)).join('') + '</div>' : '') +
+      '</div>';
+    }
+    return roots.map(r => node(r, 0)).join('');
+  }
+
+  function showReplyForm(postId, commentId) {
+    const node = host.querySelector('.comment-node[data-cid="' + commentId + '"]');
+    if (!node) return;
+    const old = node.querySelector('.reply-form');
+    if (old) { old.remove(); return; }
+    const form = document.createElement('form');
+    form.className = 'reply-form mt-1.5';
+    form.innerHTML =
+      '<div class="flex gap-1.5"><input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
+      '<input class="board-input pw-mask" name="pw" type="text" autocomplete="new-password" placeholder="비밀번호" maxlength="12"></div>' +
+      '<textarea class="board-input mt-1.5" name="content" rows="2" maxlength="1500" placeholder="답글 내용" required></textarea>' +
+      '<div class="cf-turnstile mt-1.5"></div>' +
+      '<button class="filter-chip mt-1.5" type="submit">답글 등록</button>';
+    node.appendChild(form);
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      try {
+        await api('/posts/' + encodeURIComponent(postId) + '/comments', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: fd.get('name') || '', password: fd.get('pw') || '', content: fd.get('content') || '',
+            parent_id: Number(commentId), botcheck: fd.get('botcheck') || '',
+            'cf-turnstile-response': fd.get('cf-turnstile-response') || '',
+          }),
+        });
+        notify('답글이 등록되었습니다.');
+        openDetail(postId);
+      } catch (err) { notify('답글 등록 실패: ' + err.message); }
+    });
+    mountTurnstile(form);
+  }
+
+  async function removeComment(postId, commentId) {
+    let body = {};
+    if (!isAdmin()) {
+      const pw = prompt('댓글 삭제 비밀번호를 입력하세요.');
+      if (pw === null) return;
+      body = { password: pw };
+    }
+    try {
+      await api('/comments/' + encodeURIComponent(commentId), {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      });
+      notify('댓글이 삭제되었습니다.');
+      openDetail(postId);
+    } catch (err) { notify('댓글 삭제 실패: ' + err.message); }
   }
 
   function renderDetail(data) {
     const p = data.post;
     const comments = Array.isArray(data.comments) ? data.comments : [];
-    host.innerHTML = backBar(STATUS_LABEL[p.status] || p.status || '글') +
+    host.innerHTML = backBar(STATUS_LABELS[p.status] || p.status || '글') +
       '<div class="out-head text-[1.05em] mb-1">' + (p.is_locked ? '🔒 ' : '') + esc(p.title) + '</div>' +
-      '<div class="out-muted mb-2">' + esc(p.name) + (p.is_admin ? ' ★' : '') + ' · ' + fmtDate(p.created_at) + ' · 조회 ' + esc(p.views) + '</div>' +
+      '<div class="out-muted mb-2">' + renderStatus(p) + ' · ' + renderName(p.name, p.is_admin) + ' · ' + fmtDate(p.created_at) + ' · 조회 ' + esc(p.views) + '</div>' +
       '<div class="out-dim keep-all mb-3">' + nl2br(p.content) + '</div>' +
       '<div class="flex gap-1.5 mb-3">' +
         '<button type="button" class="filter-chip" data-action="edit">수정</button>' +
@@ -201,8 +306,8 @@ export function createBoard({ host, onMessage }) {
       '<div class="board-section">댓글 ' + comments.length + '</div>' +
       (comments.length ? renderCommentTree(comments) : '<div class="out-muted">댓글이 없습니다.</div>') +
       '<form class="comment-form mt-2" autocomplete="off">' +
-        '<div class="flex gap-1.5"><input class="board-input" name="name" placeholder="이름" maxlength="27" required>' +
-        '<input class="board-input" name="pw" type="password" placeholder="비밀번호" maxlength="12"></div>' +
+        '<div class="flex gap-1.5"><input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
+        '<input class="board-input pw-mask" name="pw" type="text" autocomplete="new-password" placeholder="비밀번호" maxlength="12"></div>' +
         '<textarea class="board-input mt-1.5" name="content" rows="3" maxlength="1500" placeholder="댓글 내용" required></textarea>' +
         '<div class="cf-turnstile mt-1.5"></div>' +
         '<button class="filter-chip mt-1.5" type="submit">댓글 등록</button>' +
@@ -210,6 +315,10 @@ export function createBoard({ host, onMessage }) {
     bindBack();
     host.querySelector('[data-action="edit"]').addEventListener('click', () => renderEdit(p));
     host.querySelector('[data-action="delete"]').addEventListener('click', () => removePost(p.id));
+    host.querySelectorAll('.reply-comment').forEach(btn => btn.addEventListener('click', () => showReplyForm(p.id, btn.dataset.cid)));
+    host.querySelectorAll('.delete-comment').forEach(btn => btn.addEventListener('click', () => {
+      if (!btn.disabled) removeComment(p.id, btn.dataset.cid);
+    }));
     const form = host.querySelector('.comment-form');
     form.addEventListener('submit', async e => {
       e.preventDefault();
@@ -230,14 +339,22 @@ export function createBoard({ host, onMessage }) {
   }
 
   function formFields(p, isEdit) {
-    return '<div class="flex gap-1.5"><input class="board-input" name="name" placeholder="이름 (최대 27글자)" maxlength="27" value="' + esc(p && p.name || '') + '"' + (isAdmin() ? ' readonly' : '') + ' required>' +
-      '<input class="board-input" name="pw" type="password" placeholder="비밀번호" maxlength="12"' + (isAdmin() ? ' disabled' : '') + '></div>' +
+    const admin = isAdmin();
+    const nameVal = admin ? 'Donian' : (p && p.name || '');
+    const pwAttrs = admin
+      ? ' value="' + genRandomPassword(20) + '" readonly placeholder="관리자 (자동 생성)" class="board-input pw-mask admin-field"'
+      : ' placeholder="비밀번호 (최대 12글자, 한글 불가)" maxlength="12" class="board-input pw-mask"';
+    const statusField = admin
+      ? '<input type="hidden" name="status" value="notice">'
+      : '<select class="board-select" name="status">' +
+          ['question', 'bug', 'request', 'notice'].map(v =>
+            '<option value="' + v + '"' + ((p && p.status || 'question') === v ? ' selected' : '') + '>' + STATUS_LABELS[v] + '</option>').join('') +
+        '</select>';
+    return '<div class="flex gap-1.5"><input class="board-input' + (admin ? ' admin-field' : '') + '" name="name" placeholder="이름 (최대 27글자)" maxlength="27" value="' + esc(nameVal) + '" required>' +
+      '<input name="pw" type="text" autocomplete="new-password" required' + pwAttrs + '></div>' +
       '<input class="board-input mt-1.5" name="title" placeholder="제목 (최대 35글자)" maxlength="35" value="' + esc(p && p.title || '') + '" required>' +
       '<textarea class="board-input mt-1.5" name="content" rows="8" maxlength="1500" placeholder="내용 (최대 1500글자)" required>' + esc(p && p.content || '') + '</textarea>' +
-      '<div class="flex gap-1.5 mt-1.5"><select class="board-select" name="status">' +
-        ['question', 'bug', 'request', 'notice'].map(v =>
-          '<option value="' + v + '"' + ((p && p.status || 'question') === v ? ' selected' : '') + '>' + STATUS_LABEL[v] + '</option>').join('') +
-      '</select>' +
+      '<div class="flex gap-1.5 mt-1.5">' + statusField +
       '<label class="out-dim text-[.78em] flex items-center gap-1"><input type="checkbox" name="is_locked"' + (p && p.is_locked ? ' checked' : '') + '> 비공개</label></div>' +
       '<input type="hidden" name="botcheck" value="">' +
       '<div class="cf-turnstile mt-1.5"></div>';
