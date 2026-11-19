@@ -263,13 +263,17 @@ export function createBoard({ host, onMessage }) {
     const old = node.querySelector('.reply-form');
     if (old) { old.remove(); return; }
     const form = document.createElement('form');
-    form.className = 'reply-form mt-1.5';
+    form.className = 'comment-form reply-form mt-1.5';
     form.innerHTML =
-      '<div class="flex gap-1.5"><input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
-      '<input class="board-input pw-mask" name="pw" type="text" autocomplete="new-password" placeholder="비밀번호" maxlength="12"></div>' +
-      '<textarea class="board-input mt-1.5" name="content" rows="2" maxlength="1500" placeholder="답글 내용" required></textarea>' +
-      '<div class="cf-turnstile mt-1.5"></div>' +
-      '<button class="filter-chip mt-1.5" type="submit">답글 등록</button>';
+      '<div class="cf-ids">' +
+        '<input class="board-input' + (isAdmin() ? ' admin-field' : '') + '" name="name" placeholder="이름" maxlength="27" value="' + (isAdmin() ? 'Donian' : '') + '" required>' +
+        '<input class="board-input pw-mask" name="pw" type="text" autocomplete="new-password" placeholder="비밀번호" maxlength="12">' +
+      '</div>' +
+      '<textarea class="board-input" name="content" rows="2" maxlength="1500" placeholder="답글 내용" required></textarea>' +
+      '<div class="cf-submit">' +
+        '<button class="filter-chip" type="submit">답글 등록</button>' +
+        '<div class="cf-turnstile"></div>' +
+      '</div>';
     node.appendChild(form);
     form.addEventListener('submit', async e => {
       e.preventDefault();
