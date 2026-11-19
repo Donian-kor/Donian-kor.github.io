@@ -152,9 +152,11 @@ export function createBoard({ host, onMessage }) {
               '</button>').join('') : '<div class="out-muted py-3">글이 없습니다.</div>') +
           '</div>' +
         '</div>' +
-        '<div class="flex justify-end mt-2"><button type="button" class="board-write-btn" data-action="write">' +
-          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>글쓰기</button></div>' +
-        renderPagination(data.total);
+        '<div class="board-foot-row flex items-center justify-between gap-2 mt-2">' +
+          renderPagination(data.total) +
+          '<button type="button" class="board-write-btn shrink-0" data-action="write">' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>글쓰기</button>' +
+        '</div>';
       bindList();
     } catch (err) {
       host.innerHTML = '<div class="out-danger py-3">게시판 목록을 불러오지 못했습니다: ' + esc(err.message) + '</div>' +
