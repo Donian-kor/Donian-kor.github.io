@@ -1,6 +1,6 @@
-name: Fork 목록 자동 동기화
+name: 프로젝트 목록 자동 동기화
 
-# fork 생성은 이 저장소에 이벤트를 만들지 않으므로 매일 한 번 확인한다.
+# 새 저장소 생성·공개 전환은 이 저장소에 이벤트를 만들지 않으므로 매일 확인한다.
 on:
   schedule:
     - cron: '0 0 * * *' # 매일 00:00 UTC = 09:00 KST
@@ -19,10 +19,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: fork 동기화
+      - name: 프로젝트 동기화
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/sync-forks.mjs
+        run: node scripts/sync-projects.mjs
 
       - name: 변경사항 커밋
         run: |
@@ -30,6 +30,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -n "$(git status --porcelain)" ]; then
             git add projects.json
-            git commit -m "chore: fork 목록 자동 동기화"
+            git commit -m "chore: 프로젝트 목록 자동 동기화"
             git push
           fi
