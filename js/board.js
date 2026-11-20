@@ -250,7 +250,7 @@ export function createBoard({ host, onMessage }) {
       const parent = c.parent_id ? byId.get(c.parent_id) : null;
       const replyTo = parent ? '<span class="reply-to">↳ @' + renderName(parent.name, parent.is_admin) + '</span>' : '';
       const authorBadge = (!c.is_admin && c.is_author) ? '<span class="badge-author">작성자</span>' : '';
-      const indent = depth > 0 ? ' style="margin-left:' + (Math.min(depth, 3) * 0.4) + 'rem;border-left:2px solid rgba(110,231,183,.45);padding-left:.5rem"' : '';
+      const indent = depth > 0 ? ' style="margin-left:' + Math.min(depth, 3) + 'rem;border-left:2px solid rgba(110,231,183,.45);padding-left:.5rem"' : '';
       return '<div class="comment-node" data-cid="' + c.id + '">' +
         '<div class="board-comment"' + indent + '>' +
           '<div class="flex items-center justify-between gap-2 mb-0.5">' +
