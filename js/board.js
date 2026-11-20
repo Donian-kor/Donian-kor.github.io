@@ -97,12 +97,8 @@ export function createBoard({ host, onMessage }) {
   const notify = msg => { if (onMessage) onMessage(msg); };
 
   function renderToolbar() {
-    const statusOpts = [['', '기본'], ['notice', '알림'], ['question', '문의'], ['bug', '버그'], ['request', '의뢰'], ['done', '완료']];
     const typeOpts = [['both', '제목+내용'], ['title', '제목만'], ['content', '내용만'], ['author', '작성자만']];
-    return '<div class="board-toolbar flex flex-row flex-wrap gap-1.5 mb-2">' +
-      '<select class="board-select board-status" aria-label="상태 필터">' +
-        statusOpts.map(([v, l]) => '<option value="' + v + '"' + (status === v ? ' selected' : '') + '>' + l + '</option>').join('') +
-      '</select>' +
+    return '<div class="board-toolbar flex flex-row flex-wrap gap-1.5 mb-1.5">' +
       '<select class="board-select board-search-type" aria-label="검색 대상">' +
         typeOpts.map(([v, l]) => '<option value="' + v + '"' + (searchType === v ? ' selected' : '') + '>' + l + '</option>').join('') +
       '</select>' +
@@ -110,6 +106,13 @@ export function createBoard({ host, onMessage }) {
       '<button type="button" class="filter-chip board-search-btn" aria-label="검색" title="검색"><iconify-icon icon="solar:magnifier-bold"></iconify-icon><span class="tool-btn-label">검색</span></button>' +
       '<button type="button" class="filter-chip board-reset-btn" aria-label="전체" title="전체"><iconify-icon icon="solar:refresh-bold"></iconify-icon><span class="tool-btn-label">전체</span></button>' +
       (isAdmin() ? '<span class="out-ok text-[.72em] ml-1">● 관리자</span>' : '') +
+    '</div>';
+  }
+
+  function renderStatusTabs() {
+    const tabs = [['', '전체'], ['notice', '알림'], ['question', '문의'], ['bug', '버그'], ['request', '의뢰'], ['done', '완료']];
+    return '<div class="board-status-tabs" role="tablist">' +
+      tabs.map(([v, l]) => '<button type="button" role="tab" class="board-status-tab' + (status === v ? ' active' : '') + '" data-status="' + v + '" aria-selected="' + (status === v) + '">' + l + '</button>').join('') +
     '</div>';
   }
 
@@ -136,8 +139,11 @@ export function createBoard({ host, onMessage }) {
         params.set('search_type', searchType);
       }
       const data = await api('/posts?' + params.toString());
-      const posts = Array.isArray(data.posts) ? data.posts : [];
+      let posts = Array.isArray(data.posts) ? data.posts : [];
+      // 모바일은 공지+일반 글 합쳐서 10개까지만 표시
+      if (window.matchMedia('(max-width:639px)').matches) posts = posts.slice(0, 10);
       host.innerHTML = renderToolbar() +
+        renderStatusTabs() +
         '<div class="board-list">' +
           '<div class="board-rows">' +
           '<div class="board-head"><span>분류</span><span>제목</span><span>작성자</span><span>작성일</span><span class="cat">조회</span></div>' +
@@ -179,8 +185,11 @@ export function createBoard({ host, onMessage }) {
       status = ''; search = ''; searchType = 'both'; page = 1;
       renderList();
     });
-    const statusSel = host.querySelector('.board-status');
-    if (statusSel) statusSel.addEventListener('change', () => { status = statusSel.value; page = 1; renderList(); });
+    host.querySelectorAll('.board-status-tab').forEach(btn => btn.addEventListener('click', () => {
+      status = btn.dataset.status;
+      page = 1;
+      renderList();
+    }));
     const typeSel = host.querySelector('.board-search-type');
     if (typeSel) typeSel.addEventListener('change', () => { searchType = typeSel.value; });
     const input = host.querySelector('.board-search');

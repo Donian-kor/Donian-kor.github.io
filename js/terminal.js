@@ -157,7 +157,7 @@ export function initTerminal(ctx) {
       boardHost.className = 'board-host hidden';
       out.parentElement.insertBefore(boardHost, out.nextSibling);
     }
-    const mod = await import('./board.js');
+    const mod = await import('./board.js?_=' + Date.now());
     board = mod.createBoard({
       host: boardHost,
       onMessage: msg => addStaticLine('• ' + msg, 'out-ok'),
