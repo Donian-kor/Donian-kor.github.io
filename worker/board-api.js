@@ -362,22 +362,35 @@ export default {
       }
       const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
 
+      // 알림(관리자 글)은 최대 3개, 일반 글은 페이지당 최대 10개를 별도 조회
+      const noticeCond = "(p.is_admin = 1 OR p.status = 'notice')";
+      const normalCond = "(p.is_admin = 0 AND (p.status IS NULL OR p.status <> 'notice'))";
+      const noticeWhere = conditions.length ? `WHERE ${[...conditions, noticeCond].join(' AND ')}` : `WHERE ${noticeCond}`;
+      const normalWhere = conditions.length ? `WHERE ${[...conditions, normalCond].join(' AND ')}` : `WHERE ${normalCond}`;
+
       const totalRow = await env.donian_board
-        .prepare(`SELECT COUNT(*) as total FROM posts p ${where}`)
+        .prepare(`SELECT COUNT(*) as total FROM posts p ${normalWhere}`)
         .bind(...params)
         .first();
       const total = totalRow ? totalRow.total : 0;
 
-      // 알림(관리자 글)은 항상 목록 최상단에 고정
-      const rows = await env.donian_board
-        .prepare(`SELECT p.id, p.name, p.title, p.created_at, p.views, p.is_locked, p.is_admin, p.status,
+      const selectCols = `SELECT p.id, p.name, p.title, p.created_at, p.views, p.is_locked, p.is_admin, p.status,
           (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id AND comments.is_admin = 1) as admin_replies,
           (SELECT COUNT(*) FROM comments WHERE comments.post_id = p.id) as comment_count
-          FROM posts p ${where} ORDER BY p.is_admin DESC, p.created_at DESC LIMIT ? OFFSET ?`)
+          FROM posts p`;
+
+      const notices = page === 1
+        ? (await env.donian_board
+            .prepare(`${selectCols} ${noticeWhere} ORDER BY p.created_at DESC LIMIT 3`)
+            .bind(...params)
+            .all()).results || []
+        : [];
+      const rows = await env.donian_board
+        .prepare(`${selectCols} ${normalWhere} ORDER BY p.created_at DESC LIMIT ? OFFSET ?`)
         .bind(...params, pageSize, offset)
         .all();
 
-      return new Response(JSON.stringify({ total, page, pageSize, posts: rows.results || [] }), {
+      return new Response(JSON.stringify({ total, page, pageSize, posts: [...notices, ...(rows.results || [])] }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
