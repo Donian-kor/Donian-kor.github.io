@@ -293,20 +293,19 @@
       "updated_at": "2026-11-07"
     },
     {
-      "id": "youtube-ad-blocker",
-      "name": "YouTube-Ad-Blocker",
+      "id": "www_ad_blocker",
+      "name": "www_AD_Blocker",
       "category": "web",
       "description": "크롬 광고차단 확장프로그램",
       "tech": [
         "JavaScript"
       ],
       "language": "JavaScript",
-      "github": "https://github.com/Donian-kor/YouTube-Ad-Blocker",
+      "github": "https://github.com/Donian-kor/www_AD_Blocker",
       "demo": null,
-      "screenshot": "assets/images/projects/YouTube-Ad-Blocker.webp",
-      "forked": false,
+      "screenshot": null,
       "created_at": "2026-10-29",
-      "updated_at": "2026-11-19"
+      "updated_at": "2026-11-20"
     }
   ]
 }
