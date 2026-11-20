@@ -1489,8 +1489,13 @@
     function attachReplyForm(commentId) {
       const node = detailContent.querySelector(`.comment-node[data-cid="${commentId}"]`);
       if (!node) return;
-      const existing = node.querySelector('.reply-form');
-      if (existing) { existing.querySelector('textarea').focus(); return; }
+      // 직계 자식 폼만 확인 (중첩된 자식 댓글의 폼까지 찾지 않도록)
+      const existing = node.querySelector(':scope > .reply-form');
+      if (existing) {
+        existing.querySelector('textarea').focus({ preventScroll: true });
+        existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
       const wrap = document.createElement('div');
       wrap.className = 'reply-form mt-2 ml-4 sm:ml-6';
       wrap.innerHTML = `
@@ -1514,7 +1519,9 @@
           </div>
         </form>
       `;
-      node.appendChild(wrap);
+      // 댓글 본문 바로 아래에 폼을 넣는다. 중첩 자식 댓글들 뒤에 붙이면
+      // 자식이 많을 때 폼이 서브트리 최하단으로 밀려 스크롤이 끝까지 내려간다.
+      node.insertBefore(wrap, node.children[1] || null);
       const formEl = wrap.querySelector('form');
       const textarea = wrap.querySelector('textarea');
       const replyNameEl = formEl.querySelector('[name="name"]');
@@ -1532,7 +1539,8 @@
       updateReplyPreview();
       applyPwFallback();
       setupTurnstile();
-      textarea.focus();
+      textarea.focus({ preventScroll: true });
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
       wrap.querySelector('.cancel-reply').addEventListener('click', () => wrap.remove());
       formEl.addEventListener('submit', async (e) => {
         e.preventDefault();
